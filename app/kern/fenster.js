@@ -150,7 +150,16 @@ function regieLageMerken() {
   }, 5000);
 }
 
+/* Monitore direkt beim Klick abfragen: bei Dateien vom eigenen Rechner merkt sich Chrome die Erlaubnis
+   „Fensterverwaltung“ nicht immer, dann fragt der Browser hier noch einmal nach. */
+async function monitoreSicherstellen() {
+  if (BILDSCHIRME || !("getScreenDetails" in window)) return;
+  if (!Object.keys(geraet().monitor || {}).length && !geraet().regieMonitor) return;
+  await bildschirmeLaden(true);
+}
+
 async function fensterOeffnen(name) {
+  await monitoreSicherstellen();
   if (ANZEIGE_STATUS[name] && ANZEIGE_STATUS[name].haupt && fensterOffen(name)) { anHauptfenster(name, "vollbild"); return true; }
   if (fensterOffen(name)) { fensterPlatzieren(name); FENSTER[name].focus(); return true; }
   if (name === alleAnzeigen()[0] && vollbildMoeglich(name)) return anzeigeImVollbildStarten(name);
@@ -185,6 +194,7 @@ function fensterSchliessen(name) {
   setTimeout(neuZeichnen, 200);
 }
 async function alleFensterOeffnen() {
+  await monitoreSicherstellen();
   let blockiert = 0;
   const namen = alleAnzeigen();
   // zuerst die weiteren Fenster (solange dieses Fenster noch die Regie ist), das Board zuletzt im Vollbild
@@ -223,7 +233,11 @@ function fensterKarte() {
       el("option", { value: "" }, fp && !BILDSCHIRME ? "festgelegt: " + (fp.label || fp.width + "×" + fp.height) : "Monitor: nicht festgelegt"),
       (BILDSCHIRME || []).map((s, i) => el("option", { value: i, selected: gefunden === s }, bildschirmName(s, i))));
     const st = ANZEIGE_STATUS[name] || {};
-    const art = offen ? (st.haupt ? (st.vollbild ? "Vollbild" : "kein Vollbild") : "Fenster") : (name === alleAnzeigen()[0] && vollbildMoeglich(name) ? "öffnet im Vollbild" : "");
+    const art = offen ? (st.haupt ? (st.vollbild ? "Vollbild" : "kein Vollbild") : "Fenster")
+      : name === alleAnzeigen()[0] && vollbildMoeglich(name) ? "öffnet im Vollbild auf " + (gefunden.label || "dem Monitor")
+      : fp && !BILDSCHIRME ? "Monitore beim Öffnen abfragen"
+      : fp && !gefunden ? "festgelegter Monitor nicht angeschlossen"
+      : "";
     return el("div", { class: "fenster-zeile" },
       el("span", { class: "fenster-status" + (offen ? " offen" : ""), title: offen ? "offen" : "zu" }, offen ? "●" : "○"),
       el("span", { class: "fenster-name" }, name, el("span", { class: "naechster" }, (zusatz ? " · " + zusatz.ansicht : "") + (art ? " · " + art : ""))),
