@@ -10,6 +10,7 @@ Regie für die Lehrkraft und Schüler-Interaktion per QR-Code, für jede Stunde 
 | Datei | Inhalt |
 |---|---|
 | [`docs/konzept.md`](docs/konzept.md) | Konzept (Teil A) und Steckbrief-Vorlage für weitere Fächer (Teil B) |
+| [`docs/stand.md`](docs/stand.md) | aktueller Stand und Stundenformat `tafelstunde/0` für Fach-Chats |
 | [`docs/anforderungen.md`](docs/anforderungen.md) | alle Anforderungen mit ID, Quelle, Priorität und Stufe |
 | [`docs/steckbriefe/`](docs/steckbriefe/) | Steckbriefe je Fach |
 | [`docs/konzept_tafelsteuerung_v0.md`](docs/konzept_tafelsteuerung_v0.md) | erster Entwurf zur Tafelsteuerung (Prototyp ES 06) |
