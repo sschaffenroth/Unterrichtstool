@@ -22,6 +22,17 @@ def bauen_beispiel(ziel: Path) -> None:
     assert bauen.main([str(BEISPIEL), "-o", str(ziel), "--server", ""]) == 0
 
 
+def test_trenner_werden_umbrueche() -> None:
+    """„·“ und „—“ in Texten werden zu Zeilenumbrüchen, Code und Links bleiben unverändert."""
+    roh = {"titel": "Den Halter finden — bei jedem Licht?", "optionen": ["plus 60: gleich · mal 2: doppelt"],
+           "frage": "Findet euer Programm den Halter —", "quelltext": "a = 1 · 2", "url": "https://x.org/a—b"}
+    aus = bauen.umbrechen(roh)
+    assert aus["titel"] == "Den Halter finden\nbei jedem Licht?"
+    assert aus["optionen"] == ["plus 60: gleich\nmal 2: doppelt"]
+    assert aus["frage"] == "Findet euer Programm den Halter"
+    assert aus["quelltext"] == roh["quelltext"] and aus["url"] == roh["url"]
+
+
 def test_pruefung_findet_fehler(tmp_path: Path) -> None:
     kaputt = tmp_path / "Tafel.yaml"
     kaputt.write_text(
@@ -60,7 +71,7 @@ def test_abspieler(tmp_path: Path) -> None:
         assert board.locator(".b-bild .z1").text_content() == "Was ist das?"
         assert board.locator(".auftrag .material-eintrag .qr svg").count() == 1   # nur mit qr: true
         assert board.locator(".auftrag .m-datei").first.text_content() == "02_Arbeitsblatt.md"
-        assert "Repository klasse › 06_Stunde" in board.locator(".auftrag .m-ort").first.text_content()
+        assert "Repository klasse\nOrdner 06_Stunde" in board.locator(".auftrag .m-ort").first.inner_text()
         board.wait_for_function("document.querySelector('.auftrag .countdown').textContent.startsWith('0:5')")
 
         # Handzeichen in der Regie zählen

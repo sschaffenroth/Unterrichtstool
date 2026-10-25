@@ -98,8 +98,27 @@ def inline(text: str) -> str:
     return t
 
 
+# Trennpunkte und Gedankenstriche in Texten der Stunde werden zu Zeilenumbrüchen (Wunsch der Lehrkraft:
+# „·“ und „—“ irritieren an der Tafel). Code, Links, Dateinamen und Kennungen bleiben unberührt.
+NICHT_UMBRECHEN = {"quelltext", "url", "datei", "id", "baustein", "sozialform", "von", "aufloesen_in", "kennung", "sprache", "format", "datum"}
+TRENNER = re.compile(r"\s+[·—–]\s+")
+TRENNER_ENDE = re.compile(r"\s+[·—–]\s*$")
+
+
+def umbrechen(wert, schluessel=None):
+    if schluessel in NICHT_UMBRECHEN:
+        return wert
+    if isinstance(wert, str):
+        return TRENNER_ENDE.sub("", TRENNER.sub("\n", wert))
+    if isinstance(wert, list):
+        return [umbrechen(v) for v in wert]
+    if isinstance(wert, dict):
+        return {k: umbrechen(v, k) for k, v in wert.items()}
+    return wert
+
+
 def ort_und_datei(url: str) -> tuple[str, str]:
-    """Aus einem GitHub-Link Ort und Dateiname machen: Repository › Ordner, Datei."""
+    """Aus einem GitHub-Link Ort und Dateiname machen: Repository und Ordner (je eine Zeile), Datei."""
     from urllib.parse import unquote, urlparse
     if not url:
         return "", ""
@@ -109,8 +128,8 @@ def ort_und_datei(url: str) -> tuple[str, str]:
         repo = teile[1]
         rest = teile[4:] if len(teile) > 4 and teile[2] in ("blob", "tree") else []
         if teile[2:3] == ["blob"] and rest:
-            return " › ".join(["Repository " + repo] + rest[:-1]), rest[-1]
-        return " › ".join(["Repository " + repo] + rest), ""
+            return "\n".join(["Repository " + repo] + ["Ordner " + o for o in rest[:-1]]), rest[-1]
+        return "\n".join(["Repository " + repo] + ["Ordner " + o for o in rest]), ""
     return u.netloc, unquote(teile[-1]) if teile else ""
 
 
@@ -360,7 +379,7 @@ def html_bauen(daten: dict, bilder: dict) -> str:
     def json_sicher(obj) -> str:
         return json.dumps(obj, ensure_ascii=False, default=str).replace("</", "<\\/")
 
-    titel = f"{daten['stunde'].get('fach', '')} {daten['stunde'].get('nr', '')} · {daten['stunde'].get('titel', '')}"
+    titel = f"{daten['stunde'].get('fach', '')} {daten['stunde'].get('nr', '')}: {daten['stunde'].get('titel', '')}".replace("\n", " ")
     return (vorlage.replace("__TITEL__", html.escape(titel))
             .replace("/*__CSS__*/", css)
             .replace("__DATEN__", json_sicher(daten))
@@ -377,7 +396,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--server", default=STANDARD_SERVER, help="Adresse des Workers für die Handys ('' = ohne)")
     a = ap.parse_args(argv)
 
-    roh = yaml.safe_load(a.yaml.read_text(encoding="utf-8"))
+    roh = umbrechen(yaml.safe_load(a.yaml.read_text(encoding="utf-8")))
     bericht = Bericht()
     daten, bilder = stunde_aufbereiten(roh, a.yaml.parent.resolve(), bericht, a.bildbreite, a.server)
 

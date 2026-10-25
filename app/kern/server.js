@@ -162,5 +162,5 @@ function mitmachenKasten(s, gross) {
       el("div", { class: "mm-titel" }, gross ? "Mitmachen mit dem Handy" : "Mitmachen"),
       el("div", { class: "mm-adresse" }, anmeldeKurz()),
       el("div", { class: "mm-code" }, "Code ", el("b", null, Z.raum.code)),
-      offen ? el("div", { class: "mm-status" }, "Frage ist offen · " + antworten + (antworten === 1 ? " Antwort" : " Antworten")) : null));
+      offen ? el("div", { class: "mm-status" }, "Frage ist offen: " + antworten + (antworten === 1 ? " Antwort" : " Antworten")) : null));
 }

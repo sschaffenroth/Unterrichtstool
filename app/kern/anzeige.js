@@ -9,7 +9,7 @@ function ansichtVon(name, s = schritt()) {
 
 function stundenkarte(s) {
   return el("div", { class: "stundenkarte" },
-    el("div", { class: "fach" }, STUNDE.stunde.fach + " · " + (STUNDE.stunde.klasse || "")),
+    el("div", { class: "fach" }, STUNDE.stunde.fach + ", " + (STUNDE.stunde.klasse || "")),
     el("h1", null, STUNDE.stunde.titel),
     s && s.titel ? el("p", null, s.titel) : null);
 }
@@ -25,7 +25,7 @@ function tafelTeil(s, rolle) {
   catch (e) { console.error(e); inhalt = platzhalter(b, "Fehler beim Zeichnen: " + e.message); }
   return el("div", { class: "teil" },
     reiter.length > 1 ? el("div", { class: "reiterleiste" }, reiter.map((r, i) =>
-      el("button", { class: i === index ? "aktiv" : "", onclick: () => tun("reiter", { id: s.id, index: i }) }, r.titel || "Teil " + (i + 1)))) : null,
+      el("button", { class: i === index ? "aktiv" : "", onclick: () => tun("reiter", { id: s.id, index: i }) }, ein(r.titel || "Teil " + (i + 1))))) : null,
     el("div", { class: "reiterinhalt" }, inhalt));
 }
 
@@ -37,8 +37,8 @@ function ablaufleiste(s) {
   }
   const iAkt = abschnitte.indexOf(s.abschnitt);
   return el("div", { class: "ablaufleiste" },
-    abschnitte.map((a, i) => el("span", { class: "abschnitt" + (i === iAkt ? " aktiv" : i < iAkt ? " erledigt" : "") }, a)),
-    el("span", { class: "titel-klein" }, STUNDE.stunde.fach + " · " + STUNDE.stunde.titel));
+    abschnitte.map((a, i) => el("span", { class: "abschnitt" + (i === iAkt ? " aktiv" : i < iAkt ? " erledigt" : "") }, ein(a))),
+    el("span", { class: "titel-klein" }, STUNDE.stunde.fach + ": " + ein(STUNDE.stunde.titel)));
 }
 
 function anzeigeInhalt(name, rolle) {
@@ -48,7 +48,7 @@ function anzeigeInhalt(name, rolle) {
   if (ansicht === "schwarz") { buehne.classList.add("schwarz"); return buehne; }
   if (ansicht === "extern") {
     buehne.classList.add("extern");
-    buehne.append(el("div", { class: "extern-hinweis" }, el("b", null, "Fremder Eingang"), "Eingang am Board umschalten · " + s.titel));
+    buehne.append(el("div", { class: "extern-hinweis" }, el("b", null, "Fremder Eingang"), "Eingang am Board umschalten", el("br"), ein(s.titel)));
     return buehne;
   }
   if (STUNDE.ablaufleiste) buehne.append(ablaufleiste(s));
@@ -96,7 +96,7 @@ let anzeigeRahmen = null, anzeigeBuehne = null, anzeigeLetzter = "", anzeigeEing
 function anzeigeStarten(name) {
   ROLLE = "anzeige";
   ANZEIGE_NAME = name;
-  document.title = name + " · " + STUNDE.stunde.titel;
+  document.title = name + ": " + ein(STUNDE.stunde.titel);
   document.body.classList.remove("regie-seite");
   anzeigeRahmen = el("div", { class: "rahmen" });
   anzeigeLetzter = "";

@@ -237,9 +237,16 @@ function el(tag, attrs, ...kinder) {
     else if (k === "style") e.setAttribute("style", v);
     else e.setAttribute(k, v === true ? "" : v);
   }
-  for (const k of kinder.flat()) if (k != null && k !== false) e.append(k.nodeType ? k : document.createTextNode(String(k)));
+  for (const k of kinder.flat()) {
+    if (k == null || k === false) continue;
+    if (k.nodeType) { e.append(k); continue; }
+    String(k).split("\n").forEach((teil, i) => { if (i) e.append(document.createElement("br")); e.append(document.createTextNode(teil)); });
+  }
   return e;
 }
+/* einzeilig: Zeilenumbrüche aus der Stunde werden zu Leerzeichen (für Knöpfe, Chips, Listen) */
+function ein(t) { return String(t == null ? "" : t).replace(/\s*\n\s*/g, " "); }
+
 function herunterladen(name, inhalt, typ) {
   const a = el("a", { href: typeof inhalt === "string" && inhalt.startsWith("data:") ? inhalt : URL.createObjectURL(new Blob([inhalt], { type: typ })), download: name });
   document.body.append(a); a.click(); a.remove();

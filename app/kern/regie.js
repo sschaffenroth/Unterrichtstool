@@ -36,7 +36,7 @@ function regieInhalt(modus) {
   const ablauf = el("ul", { class: "ablauf" });
   let letzterAbschnitt = null;
   SCHRITTE.forEach((x, i) => {
-    if (x.abschnitt && x.abschnitt !== letzterAbschnitt) { letzterAbschnitt = x.abschnitt; ablauf.append(el("li", { class: "abschnitt-kopf" }, x.abschnitt)); }
+    if (x.abschnitt && x.abschnitt !== letzterAbschnitt) { letzterAbschnitt = x.abschnitt; ablauf.append(el("li", { class: "abschnitt-kopf" }, ein(x.abschnitt))); }
     const aktiv = istAktiv(x);
     const ist = schrittzeit(x.id);
     const ueber = ist > x.soll_min * 60000;
@@ -44,7 +44,7 @@ function regieInhalt(modus) {
       class: "eintrag" + (i === Z.schritt ? " aktiv" : "") + (i < Z.schritt ? " erledigt" : "") + (aktiv ? "" : " aus"),
       onclick: () => aktiv && tun("gehe", { index: i }),
     },
-      el("span", { class: "name" }, x.titel),
+      el("span", { class: "name" }, ein(x.titel)),
       el("span", { class: "zeiten" }, ist ? el("span", { class: ueber ? "ueber" : "", "data-ist": x.id }, formatMinSek(ist)) : el("span", { "data-ist": x.id }, ""), " / " + x.soll_min + "′"),
       el("div", { class: "merkmale" },
         x.pruefpunkt ? el("span", { class: "pp" }, "Prüfpunkt") : null,
@@ -58,14 +58,14 @@ function regieInhalt(modus) {
   const naechster = SCHRITTE[naechsterIndex(1)];
   const mitte = el("div", { class: "spalte" },
     el("div", { class: "karte", "data-schrittkarte": "" },
-      el("h2", null, s.abschnitt || "Schritt"),
+      el("h2", null, ein(s.abschnitt || "Schritt")),
       el("p", { class: "schritt-titel" }, s.titel),
       el("div", { class: "schritt-zeit" },
         el("span", { class: "gross", "data-schrittzeit": "" }, ""), el("span", null, "von " + s.soll_min + " min"),
         Z.countdown ? el("span", null, "Countdown ", el("b", { "data-countdown": s.id }, "")) : null)),
     el("div", { class: "schritt-steuerung" },
       el("button", { class: "knopf", onclick: () => tun("zurueck") }, "‹ Zurück"),
-      el("button", { class: "knopf haupt weiter", onclick: () => tun("weiter") }, naechster ? "Weiter: " + naechster.titel + " ›" : "Ende der Stunde")),
+      el("button", { class: "knopf haupt weiter", onclick: () => tun("weiter") }, naechster ? "Weiter: " + ein(naechster.titel) + " ›" : "Ende der Stunde")),
     ueberwachenKarte(),
     steuerKarte(s),
     modus !== "schublade" ? fensterKarte() : null,
@@ -82,7 +82,7 @@ function regieInhalt(modus) {
     !r.notiz && !r.erwartet && !r.wenn_es_stockt && !(r.einwaende || []).length && !(r.kontrollfragen || []).length ? el("p", { class: "naechster" }, "Keine Notizen zu diesem Schritt.") : null);
 
   const rechts = el("div", { class: "spalte" }, notizen, handzeichenKarte(s), zaehlerKarte(s),
-    naechster ? el("div", { class: "karte naechster" }, "Als Nächstes: ", el("b", null, naechster.titel), " · " + naechster.soll_min + " min",
+    naechster ? el("div", { class: "karte naechster" }, "Als Nächstes: ", el("b", null, ein(naechster.titel)), " (" + naechster.soll_min + " min)",
       naechster.regie && naechster.regie.notiz ? el("div", { style: "margin-top:6px" }, naechster.regie.notiz) : null) : null);
 
   return el("div", { class: "regie" }, kopf,
@@ -100,7 +100,7 @@ function ueberwachenKarte() {
   let inhalt;
   if (ueberwachenTab === "alle") {
     inhalt = el("div", { class: "ueberwachen-raster" },
-      namen.map((n) => el("div", null, el("div", { class: "ueberwachen-titel" }, n + " · " + ansichtName(ansichtVon(n)) + (fensterOffen(n) ? "" : " · Fenster zu")), vorschau(n))),
+      namen.map((n) => el("div", null, el("div", { class: "ueberwachen-titel" }, n + ": " + ansichtName(ansichtVon(n)) + (fensterOffen(n) ? "" : ", Fenster zu")), vorschau(n))),
       el("div", null, el("div", { class: "ueberwachen-titel" }, "Handys"), handyVorschau(false)));
   } else if (ueberwachenTab === "handys") {
     inhalt = handyVorschau(true);
@@ -130,7 +130,7 @@ function handyTafel(t) {
   else if (t.art === "folie") inhalt = el("div", { style: "white-space:pre-wrap" }, t.text || "");
   else if (t.art === "link") inhalt = el("div", { style: "font-weight:600" }, (t.text || t.url) + " ↗");
   else if (t.art === "code") inhalt = [el("pre", { class: "handy-code" }, (t.zeilen || []).join("\n")),
-    (t.erklaerungen || []).map((e) => el("div", { class: "handy-klein", style: "color:var(--gruen)" }, "Zeile " + e.zeile + " · " + e.label + ": " + e.text))];
+    (t.erklaerungen || []).map((e) => el("div", { class: "handy-klein", style: "color:var(--gruen)" }, "Zeile " + e.zeile + " (" + ein(e.label) + "): " + e.text))];
   else if (t.art === "ergebnis") inhalt = (t.bloecke || []).map((b) => {
     const max = Math.max(1, ...b.optionen.map((o) => o.n));
     return el("div", null, el("div", { style: "font-weight:700;margin-bottom:3px" }, b.frage),
@@ -138,7 +138,7 @@ function handyTafel(t) {
         el("span", null, o.name), el("div", { class: "bahn" }, el("div", { style: "width:" + (o.n / max * 100) + "%" })), el("b", null, o.n))));
   });
   else inhalt = el("div", { class: "handy-klein" }, t.text || "");
-  return el("div", { class: "handy-tafel" }, el("div", { class: "handy-klein", style: "text-transform:uppercase;margin:0 0 2px" }, "An der Tafel" + (t.reiter ? " · " + t.reiter : "")), inhalt);
+  return el("div", { class: "handy-tafel" }, el("div", { class: "handy-klein", style: "text-transform:uppercase;margin:0 0 2px" }, "An der Tafel" + (t.reiter ? ": " + ein(t.reiter) : "")), inhalt);
 }
 
 /* Was die Schüler am Handy sehen, nachgebaut aus dem Zustand (wie public/schueler.html) */
@@ -178,7 +178,7 @@ function handyVorschau(gross) {
     bildschirm = el("div", null, frage, begleitung);
   }
   const handy = el("div", { class: "handy" + (gross ? " gross" : "") },
-    el("div", { class: "handy-kopf" }, el("span", null, el("b", null, "Mitmachen"), " · ohne Namen"), el("span", null, Z.raum ? "Raum " + Z.raum.code : "")),
+    el("div", { class: "handy-kopf" }, el("span", null, el("b", null, "Mitmachen")), el("span", null, Z.raum ? "Raum " + Z.raum.code : "")),
     el("div", { class: "handy-inhalt" }, bildschirm));
   const anmeldung = Z.raum ? el("div", { class: "handy-anmeldung" },
     el("div", { class: "qr", html: qrFuer(anmeldeAdresse()) }),
@@ -209,7 +209,7 @@ function steuerKarte(s) {
   if (s.tafel && s.tafel.reiter.length > 1) {
     const idx = Z.reiter[s.id] || 0;
     teile.push(el("div", { class: "zeile" }, el("span", { class: "etikett" }, "Reiter"),
-      s.tafel.reiter.map((r, i) => el("button", { class: "knopf klein" + (i === idx ? " aktiv" : ""), onclick: () => tun("reiter", { id: s.id, index: i }) }, r.titel || "Teil " + (i + 1)))));
+      s.tafel.reiter.map((r, i) => el("button", { class: "knopf klein" + (i === idx ? " aktiv" : ""), onclick: () => tun("reiter", { id: s.id, index: i }) }, ein(r.titel || "Teil " + (i + 1))))));
   }
   if (s.tafel) {
     const idx = Math.min(Z.reiter[s.id] || 0, s.tafel.reiter.length - 1);
@@ -238,7 +238,7 @@ function steuerKarte(s) {
       quellen.map((x) => {
         const an = Z.overlay && Z.overlay.von.includes(x.id);
         const mitLoesung = vorhersageAufgeloest(x.id, schritt());
-        return el("button", { class: "knopf klein" + (an ? " aktiv" : ""), onclick: () => tun("overlay", { wert: an ? null : { von: [x.id], loesung: mitLoesung } }) }, x.titel + (x.schueler.baustein === "vorhersage" && mitLoesung ? " (mit Lösung)" : ""));
+        return el("button", { class: "knopf klein" + (an ? " aktiv" : ""), onclick: () => tun("overlay", { wert: an ? null : { von: [x.id], loesung: mitLoesung } }) }, ein(x.titel) + (x.schueler.baustein === "vorhersage" && mitLoesung ? " (mit Lösung)" : ""));
       })));
   }
   if (!teile.length) return null;
@@ -265,9 +265,9 @@ function handzeichenKarte(s) {
   const offen = Z.freigabe === s.id;
   const freigabeZeile = SERVER ? el("div", { class: "zeile", style: "margin-bottom:10px" },
     el("button", { class: "knopf" + (offen ? " aktiv" : " haupt"), onclick: () => (offen ? freigabeBeenden() : freigeben(s)) }, offen ? "Handys schließen" : "Für Handys freigeben"),
-    el("span", { class: "naechster" }, Z.raum ? antworten + (sch.kennung === "team" ? " Teams" : " Handys") + " geantwortet" + (Z.verbindung === "fehler" ? " · Server nicht erreichbar" : "") : "noch kein Raum")) : null;
+    el("span", { class: "naechster" }, Z.raum ? antworten + (sch.kennung === "team" ? " Teams" : " Handys") + " geantwortet" + (Z.verbindung === "fehler" ? ", Server nicht erreichbar" : "") : "noch kein Raum")) : null;
   return el("div", { class: "karte" },
-    el("h2", null, (sch.baustein === "vorhersage" ? "Vorhersage" : "Abstimmung") + (sch.kennung === "team" ? " · je Team" : "") + " · Handy und Handzeichen"),
+    el("h2", null, (sch.baustein === "vorhersage" ? "Vorhersage" : "Abstimmung") + (sch.kennung === "team" ? " je Team" : "") + ": Handy und Handzeichen"),
     el("p", { style: "margin:0 0 8px;font-weight:600" }, sch.frage || ""),
     freigabeZeile,
     (sch.optionen || []).map((o) => el("div", { class: "zaehler-zeile" + (o === sch.loesung ? " loesung" : "") },
@@ -330,7 +330,7 @@ let regieEingerichtet = false;
 function regieStarten(modus) {
   ROLLE = "regie";
   REGIE_MODUS = modus;
-  document.title = "Regie · " + STUNDE.stunde.titel;
+  document.title = "Regie: " + ein(STUNDE.stunde.titel);
   document.body.classList.add("regie-seite");
   const ziel = document.getElementById("app");
   ziel.replaceChildren();

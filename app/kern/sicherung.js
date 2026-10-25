@@ -112,7 +112,7 @@ function folienListe(name) {
     reiter.forEach((r, j) => liste.push({
       index: i, reiter: s.tafel ? j : null,
       datei: String(nr).padStart(2, "0") + "_" + dateiname(s.titel) + (reiter.length > 1 ? "_" + (j + 1) + "_" + dateiname(r.titel || "") : "") + ".png",
-      titel: s.titel + (reiter.length > 1 ? " · " + (r.titel || j + 1) : ""),
+      titel: ein(s.titel) + (reiter.length > 1 ? ", " + ein(r.titel || j + 1) : ""),
     }));
   }
   return liste;

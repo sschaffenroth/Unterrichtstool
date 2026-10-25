@@ -190,6 +190,7 @@ Und in die Meldung (Teil 3) eintragen.
 - Keine Lösung auf Schüler-Anzeigen, nur in `loesung`/`erwartet`/`begruendung`.
 - Keine Namen von Schülern. Kein Ergebnis aus dem Werkzeug führt zu einer Note.
 - Texte so, wie sie im Unterricht stehen sollen. Die Datei ist die Quelle, auch fürs Heft.
+- **Keine Trennpunkte „·“ und keine Gedankenstriche „—“.** Mehrere Teile einer Antwort oder Zeile mit Zeilenumbruch trennen (in YAML `|` oder `\n`). Das Bauskript wandelt „ · “ und „ — “ sonst selbst in Zeilenumbrüche um.
 
 ---
 

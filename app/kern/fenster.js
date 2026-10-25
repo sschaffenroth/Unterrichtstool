@@ -51,7 +51,7 @@ function bildschirmFinden(fp) {
     || BILDSCHIRME.find((s) => s.left === fp.left && s.top === fp.top && s.width === fp.width);
 }
 function bildschirmName(s, i) {
-  return (s.label || "Bildschirm " + (i + 1)) + " · " + s.width + "×" + s.height + (s.isPrimary ? " · Haupt" : "");
+  return (s.label || "Bildschirm " + (i + 1)) + " (" + s.width + "×" + s.height + (s.isPrimary ? ", Hauptbildschirm" : "") + ")";
 }
 async function bildschirmeLaden(fragen) {
   if (!("getScreenDetails" in window)) { bildschirmHinweis = "Monitore zuordnen geht nur in Chrome oder Edge."; return; }
@@ -67,7 +67,7 @@ async function bildschirmeLaden(fragen) {
     const d = await window.getScreenDetails();
     BILDSCHIRME = d.screens;
     bildschirmHinweis = null;
-    prot("Monitore: " + d.screens.map((x, i) => bildschirmName(x, i) + " @" + x.left + "," + x.top).join(" | ") + " · dieses Fenster auf: " + (d.currentScreen && d.currentScreen.label));
+    prot("Monitore: " + d.screens.map((x, i) => bildschirmName(x, i) + " @" + x.left + "," + x.top).join(" | ") + ", dieses Fenster auf: " + (d.currentScreen && d.currentScreen.label));
     d.addEventListener("screenschange", () => { BILDSCHIRME = d.screens; neuZeichnen(); });
   } catch (e) {
     prot("getScreenDetails Fehler: " + e.name + " " + e.message);
@@ -103,7 +103,7 @@ function anzeigeImVollbildStarten(name) {
     : rp ? { left: rp.x, top: rp.y, width: rp.w, height: rp.h }
     : { left: screenX, top: screenY, width: outerWidth, height: outerHeight };
   navigator.permissions.query({ name: "window-management" }).then((r) => prot("Erlaubnis beim Klick: " + r.state)).catch(() => {});
-  prot("Vollbild-Start " + name + " auf " + (ziel.label || "?") + " @" + ziel.left + "," + ziel.top + " · Klick noch gültig: " + (navigator.userActivation ? navigator.userActivation.isActive : "?"));
+  prot("Vollbild-Start " + name + " auf " + (ziel.label || "?") + " @" + ziel.left + "," + ziel.top + ", Klick noch gültig: " + (navigator.userActivation ? navigator.userActivation.isActive : "?"));
   // Reihenfolge ist wichtig: erst Vollbild auf dem anderen Monitor anfordern, dann das Regie-Fenster öffnen (ein Klick reicht für beides)
   const fs = document.documentElement.requestFullscreen({ screen: ziel });
   const w = window.open(location.href.split("#")[0] + "#regie", "tafel-regie",
@@ -113,7 +113,7 @@ function anzeigeImVollbildStarten(name) {
   // Dieses Fenster wird erst Board, wenn das Vollbild auf dem Tafel-Monitor wirklich geklappt hat
   fs.then(async () => {
     await new Promise((r) => setTimeout(r, 300));
-    prot("Vollbild angenommen, Fenster jetzt bei " + screenX + "," + screenY + " " + innerWidth + "×" + innerHeight + " · Ziel " + ziel.left + "," + ziel.top + " " + ziel.width + "×" + ziel.height);
+    prot("Vollbild angenommen, Fenster jetzt bei " + screenX + "," + screenY + " " + innerWidth + "×" + innerHeight + ", Ziel " + ziel.left + "," + ziel.top + " " + ziel.width + "×" + ziel.height);
     const mitte = screenX + outerWidth / 2;
     if (!(mitte >= ziel.left && mitte < ziel.left + ziel.width)) {
       // Browser hat das Vollbild auf dem eigenen Monitor gemacht (z. B. ohne Erlaubnis „Fensterverwaltung“)
@@ -284,7 +284,7 @@ function fensterKarte() {
       : "";
     return el("div", { class: "fenster-zeile" },
       el("span", { class: "fenster-status" + (offen ? " offen" : ""), title: offen ? "offen" : "zu" }, offen ? "●" : "○"),
-      el("span", { class: "fenster-name" }, name, el("span", { class: "naechster" }, (zusatz ? " · " + zusatz.ansicht : "") + (art ? " · " + art : ""))),
+      el("span", { class: "fenster-name" }, name, el("span", { class: "naechster" }, [zusatz ? zusatz.ansicht : "", art].filter(Boolean).length ? " (" + [zusatz ? zusatz.ansicht : "", art].filter(Boolean).join(", ") + ")" : "")),
       auswahl,
       offen ? el("button", { class: "knopf klein", onclick: () => fensterSchliessen(name) }, st.haupt ? "Beenden" : "Schließen")
         : el("button", { class: "knopf klein haupt", onclick: async () => { if (!(await fensterOeffnen(name))) alert("Fenster blockiert: Pop-ups für diese Datei erlauben."); } }, "Öffnen"),
@@ -295,7 +295,7 @@ function fensterKarte() {
   const regieFp = g.regieMonitor;
   const regieZeile = BILDSCHIRME && BILDSCHIRME.length > 1 ? el("div", { class: "fenster-zeile" },
     el("span", { class: "fenster-status offen" }, "●"),
-    el("span", { class: "fenster-name" }, "Regie", el("span", { class: "naechster" }, " · dieses Fenster")),
+    el("span", { class: "fenster-name" }, "Regie", el("span", { class: "naechster" }, " (dieses Fenster)")),
     el("select", { class: "knopf klein", onchange: (e) => { const i = e.target.value; geraetAendern((gg) => { if (i === "") delete gg.regieMonitor; else gg.regieMonitor = fingerabdruck(BILDSCHIRME[+i]); }); neuZeichnen(); } },
       el("option", { value: "" }, "Monitor: wo das Fenster gerade ist"),
       BILDSCHIRME.map((s, i) => el("option", { value: i, selected: bildschirmFinden(regieFp) === s }, bildschirmName(s, i))))) : null;
@@ -330,11 +330,11 @@ async function diagnoseZeigen() {
   for (const n of ["window-management", "window-placement"]) { try { erlaubnis = (await navigator.permissions.query({ name: n })).state; break; } catch (e) { /* anderer Name */ } }
   const text = [
     "Browser: " + navigator.userAgent,
-    "Adresse: " + location.protocol + " · Rolle: " + ROLLE + " / " + REGIE_MODUS,
-    "Fensterverwaltung: " + ("getScreenDetails" in window ? "vorhanden" : "fehlt") + " · Erlaubnis: " + erlaubnis,
-    "Bildschirm dieses Fensters: " + screen.width + "×" + screen.height + " · Fenster bei " + screenX + "," + screenY,
+    "Adresse: " + location.protocol + ", Rolle: " + ROLLE + " / " + REGIE_MODUS,
+    "Fensterverwaltung: " + ("getScreenDetails" in window ? "vorhanden" : "fehlt") + ", Erlaubnis: " + erlaubnis,
+    "Bildschirm dieses Fensters: " + screen.width + "×" + screen.height + ", Fenster bei " + screenX + "," + screenY,
     "Monitore: " + (BILDSCHIRME ? BILDSCHIRME.map((x, i) => bildschirmName(x, i) + " @" + x.left + "," + x.top).join(" | ") : "nicht geladen"),
-    "Zuordnung: " + JSON.stringify(geraet().monitor || {}) + " · Regie: " + JSON.stringify(geraet().regieMonitor || null),
+    "Zuordnung: " + JSON.stringify(geraet().monitor || {}) + ", Regie: " + JSON.stringify(geraet().regieMonitor || null),
     "Board-Weg: " + (vollbildMoeglich(alleAnzeigen()[0]) ? "Vollbild im Hauptfenster" : "eigenes Fenster"),
     "Fenster: " + JSON.stringify(Object.fromEntries(alleAnzeigen().map((n) => [n, { offen: fensterOffen(n), ...(ANZEIGE_STATUS[n] || {}) }]))),
     "",

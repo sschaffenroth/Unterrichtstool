@@ -29,6 +29,6 @@ BAUSTEINE.code = (b, ctx) => {
   }
   return el("div", { class: "baustein b-code" },
     teile.length > 1 ? el("div", { class: "teile" }, teile.map((t, i) =>
-      el("button", { class: i === teil ? "aktiv" : "", onclick: () => tun("codeteil", { schluessel, teil: i }) }, "Zeilen " + t[0] + "–" + t[1]))) : null,
+      el("button", { class: i === teil ? "aktiv" : "", onclick: () => tun("codeteil", { schluessel, teil: i }) }, "Zeilen " + t[0] + " bis " + t[1]))) : null,
     raster);
 };

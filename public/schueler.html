@@ -62,7 +62,7 @@
 </style>
 </head>
 <body>
-<header><span><b>Mitmachen</b> · ohne Namen</span><span id="code"></span></header>
+<header><span><b>Mitmachen</b></span><span id="code"></span></header>
 <main><div class="karte frage-karte" id="inhalt" hidden></div>
 <div class="karte" id="begleitung"><div class="warten">Verbinde …</div></div>
 <p class="hinweis">Gespeichert wird nur deine Antwort mit einer zufälligen Kennung dieses Geräts, keine Namen. Schreib bitte auch nirgends deinen Namen hinein.</p></main>
@@ -88,7 +88,11 @@ function el(tag, attrs, ...kinder) {
   for (const [k, v] of Object.entries(attrs || {})) {
     if (k.startsWith("on")) e.addEventListener(k.slice(2), v); else if (k === "class") e.className = v; else if (v !== false && v != null) e.setAttribute(k, v);
   }
-  for (const k of kinder.flat(Infinity)) if (k != null && k !== false) e.append(k.nodeType ? k : document.createTextNode(k));
+  for (const k of kinder.flat(Infinity)) {
+    if (k == null || k === false) continue;
+    if (k.nodeType) { e.append(k); continue; }
+    String(k).split("\n").forEach((teil, i) => { if (i) e.append(document.createElement("br")); e.append(document.createTextNode(teil)); });
+  }
   return e;
 }
 
@@ -132,14 +136,14 @@ function begleiten(st, jetzt) {
 /* Was gerade an der Tafel steht, als Text */
 function tafelText(t) {
   if (!t) return null;
-  const kopf = el("div", { class: "tafel-kopf" }, "An der Tafel" + (t.reiter ? " · " + t.reiter : ""));
+  const kopf = el("div", { class: "tafel-kopf" }, "An der Tafel" + (t.reiter ? ": " + t.reiter.replace(/\s*\n\s*/g, " ") : ""));
   let inhalt = null;
   if (t.art === "titel" || t.art === "bild") inhalt = [el("div", { class: "tafel-gross" }, t.text || ""), t.untertitel ? el("div", { class: "tafel-unter" }, t.untertitel) : null];
   else if (t.art === "folie") inhalt = el("div", { class: "tafel-folie" }, t.text || "");
   else if (t.art === "link" && t.url) inhalt = el("a", { href: t.url, target: "_blank", rel: "noopener", class: "tafel-link" }, (t.text || t.url) + " ↗");
   else if (t.art === "code") inhalt = [
     el("pre", { class: "tafel-code" }, (t.zeilen || []).map((z, i) => (String(i + 1).padStart(2, " ") + "  " + z)).join("\n")),
-    (t.erklaerungen || []).map((e) => el("div", { class: "tafel-erkl" }, el("b", null, "Zeile " + e.zeile + " · " + e.label + ": "), e.text))];
+    (t.erklaerungen || []).map((e) => el("div", { class: "tafel-erkl" }, el("b", null, "Zeile " + e.zeile + " (" + e.label + "): "), e.text))];
   else if (t.art === "ergebnis") inhalt = (t.bloecke || []).map((b) => {
     const max = Math.max(1, ...b.optionen.map((o) => o.n));
     return el("div", { class: "tafel-ergebnis" }, el("div", { style: "font-weight:700;margin-bottom:6px" }, b.frage),

@@ -60,7 +60,7 @@ function Startseite {
   $titel = Html-Text (Split-Path -Leaf $Wurzel)
   return @"
 <!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Tafel · $titel</title><style>
+<title>Tafel: $titel</title><style>
 body{margin:0;font-family:"Segoe UI",system-ui,sans-serif;background:#f4f3ef;color:#1d1d1f}
 main{max-width:760px;margin:0 auto;padding:24px 16px}
 h1{margin:0 0 4px;border-bottom:4px solid #e8730c;padding-bottom:6px;display:inline-block}
@@ -69,7 +69,7 @@ li{background:#fff;border:1px solid #dcd9d2;border-radius:10px;margin:8px 0;disp
 li a{flex:1;padding:14px 16px;color:#1d1d1f;text-decoration:none;font-weight:600}
 li span{color:#6b6b70;font-size:13px;padding-right:16px}
 li.naechste{border:2px solid #e8730c;background:#fdf0e4}
-li.naechste a::after{content:"  · nächste Stunde";color:#e8730c;font-weight:400}
+li.naechste a::after{content:"  (nächste Stunde)";color:#e8730c;font-weight:400}
 </style></head><body><main><h1>$titel</h1>
 <p>Stunde wählen. Der Server läuft, solange das kleine PowerShell-Fenster offen ist.</p>
 <ul>$($zeilen -join "`n")</ul></main></body></html>
