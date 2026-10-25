@@ -33,6 +33,17 @@ def test_trenner_werden_umbrueche() -> None:
     assert aus["quelltext"] == roh["quelltext"] and aus["url"] == roh["url"]
 
 
+def test_fachordner(tmp_path: Path) -> None:
+    """Fachordner ist der Ordner mit „Tafel starten.bat“, auch wenn die Stunden tiefer liegen (GP: Stunden/NN_…)."""
+    fach = tmp_path / "KI_GrundlagenProgrammierung"
+    stunde = fach / "Stunden" / "07_2026-10-28_Anmeldung"
+    stunde.mkdir(parents=True)
+    (fach / "Tafel starten.bat").write_text("")
+    assert bauen.fachordner_finden({}, stunde) == fach.resolve()
+    assert bauen.fachordner_finden({"fachordner": ".."}, stunde) == (fach / "Stunden").resolve()
+    assert bauen.ort_und_datei("https://bycs.link/gdpgit") == ("", "")
+
+
 def test_pruefung_findet_fehler(tmp_path: Path) -> None:
     kaputt = tmp_path / "Tafel.yaml"
     kaputt.write_text(
@@ -105,10 +116,32 @@ def test_abspieler(tmp_path: Path) -> None:
         board.get_by_title("Rückgängig").click()
         regie.wait_for_function("Z.striche['code:1'].length === 0")
 
+        # GP-Bausteine: Docstring als Codezeile, Folie aufdecken, eingebettete App behält ihren Zustand
+        regie.locator(".schritt-steuerung .weiter").click()
+        board.wait_for_selector(".code-raster")
+        board.get_by_role("button", name="D", exact=True).click()
+        board.wait_for_selector(".codezeile.eingeblendet")
+        eingeblendet = board.locator(".codezeile.eingeblendet").first.inner_text()
+        assert eingeblendet.startswith('    """Gibt die Wertung') and "· bleibt" in eingeblendet, eingeblendet
+        board.locator(".reiterleiste button", has_text="Kontrollfragen").click()
+        board.wait_for_selector(".b-folie.aufdecken")
+        assert board.locator(".b-folie .verdeckt").count() == 2
+        board.locator(".b-folie").click()
+        board.wait_for_function("document.querySelectorAll('.b-folie .verdeckt').length === 1")
+        groesse = board.evaluate("parseFloat(getComputedStyle(document.querySelector('.b-folie .inhalt')).fontSize)")
+        assert groesse > 1400 / 100 * 1.9, groesse   # Schrift größer als die Grundgröße
+        board.locator(".reiterleiste button", has_text="Alte App").click()
+        rahmen = board.frame_locator("iframe.einbettung")
+        rahmen.locator("#b").click()
+        rahmen.locator("#b").click()
+        regie.evaluate("tun('stimme', { id: 'tipp', option: 'orange', delta: 1 })")   # Zustand ändert sich, Board zeichnet neu
+        board.wait_for_timeout(300)
+        assert rahmen.locator("#z").text_content() == "2"   # App wurde nicht neu geladen
+
         # Ergebnis der Vorhersage mit Lösung (aufgelöst in „code“, also danach sichtbar)
         regie.locator(".schritt-steuerung .weiter").click()
         board.wait_for_selector(".balken-zeile.loesung")
-        assert board.locator(".balken-zeile.loesung .zahl").text_content() == "2"
+        assert board.locator(".balken-zeile.loesung .zahl").text_content() == "3"
 
         # Platzhalter für nicht umgesetzte Bausteine
         board.locator(".reiterleiste button", has_text="Neu").click()
@@ -139,7 +172,7 @@ def test_abspieler(tmp_path: Path) -> None:
         regie.get_by_role("button", name="Alle Folien als PNG").click()
         regie.wait_for_function("document.querySelector('[data-sicherung]').textContent.includes('Folien gesichert')", timeout=60000)
         regie.wait_for_timeout(500)
-        assert len(dateien) == 8, dateien
+        assert len(dateien) == 11, dateien
         assert dateien[0] == "01_Start.png", dateien
 
         # Fenster schließen aus der Regie

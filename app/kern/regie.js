@@ -215,6 +215,13 @@ function steuerKarte(s) {
     const idx = Math.min(Z.reiter[s.id] || 0, s.tafel.reiter.length - 1);
     const b = s.tafel.reiter[idx];
     const schluessel = s.id + ":" + idx;
+    if (b.baustein === "folie" && b.aufdecken) {
+      const n = Math.max(1, Z.marken[schluessel] || 1);
+      teile.push(el("div", { class: "zeile" }, el("span", { class: "etikett" }, "Aufdecken " + n),
+        el("button", { class: "knopf klein haupt", onclick: () => tun("marke", { schluessel, anzahl: n + 1 }) }, "Nächster Absatz"),
+        el("button", { class: "knopf klein", onclick: () => tun("marke", { schluessel, anzahl: Math.max(1, n - 1) }) }, "einen zurück"),
+        el("button", { class: "knopf klein", onclick: () => tun("marke", { schluessel, anzahl: 1 }) }, "alle zu")));
+    }
     if (b.baustein === "code" && (b.marken || []).length) {
       const n = Z.marken[schluessel] || 0;
       teile.push(el("div", { class: "zeile" }, el("span", { class: "etikett" }, "Marken " + n + "/" + b.marken.length),

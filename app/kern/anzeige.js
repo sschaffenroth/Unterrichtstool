@@ -115,6 +115,7 @@ function anzeigeZeichnen(erzwingen) {
   const k = anzeigeSchluessel(name) + innerWidth + "x" + innerHeight;
   if (k !== anzeigeLetzter || erzwingen || !anzeigeBuehne) {
     anzeigeLetzter = k;
+    const alt = anzeigeBuehne;
     anzeigeBuehne = anzeigeInhalt(name, "anzeige");
     anzeigeBuehne.append(el("div", { class: "eckknoepfe" },
       el("button", { title: "Zurück (←)", onclick: () => tun("zurueck") }, "‹"),
@@ -122,11 +123,50 @@ function anzeigeZeichnen(erzwingen) {
       el("button", { title: "Vollbild (F)", onclick: vollbild }, "⛶"),
       el("button", { title: "Diese Ansicht als PNG sichern (S)", onclick: () => ansichtSichern(name) }, "📷"),
       el("button", { title: "Regie (R)", onclick: () => regieSchublade(name) }, "☰")));
-    anzeigeRahmen.replaceChildren(anzeigeBuehne);
+    // nur die Bühne tauschen: die Ebene mit eingebetteten Seiten bleibt im Dokument (sonst laden sie neu)
+    if (alt && alt.parentNode === anzeigeRahmen) alt.replaceWith(anzeigeBuehne);
+    else anzeigeRahmen.prepend(anzeigeBuehne);
+    if (einbettEbene.parentNode !== anzeigeRahmen) anzeigeRahmen.append(einbettEbene);
   }
   einpassen(anzeigeBuehne, innerWidth, innerHeight);
   countdownsAktualisieren(anzeigeRahmen);
+  requestAnimationFrame(einbettungenLegen);
 }
+
+/* Eingebettete Seiten liegen in einer eigenen Ebene über der Bühne und bleiben erhalten,
+   solange die Stunde läuft. Sie werden über ihren Platzhalter gelegt oder versteckt. */
+const einbettEbene = el("div", { class: "einbett-ebene" });
+const EINBETTUNGEN = {};
+function einbettBaustein(schluessel) {
+  const [id, i] = schluessel.split(":");
+  const s = schrittNachId(id);
+  return s && s.tafel ? s.tafel.reiter[+i] : null;
+}
+function einbettungenLegen() {
+  if (ROLLE !== "anzeige" || !anzeigeBuehne) return;
+  const platz = Z.overlay ? null : anzeigeBuehne.querySelector("[data-einbetten]");   // Ergebnis oder QR liegen obendrauf
+  const ziel = platz ? platz.getAttribute("data-einbetten") : null;
+  if (ziel && !EINBETTUNGEN[ziel]) {
+    const b = einbettBaustein(ziel);
+    if (b) {
+      const f = el("iframe", { class: "einbettung", title: b.name || "Eingebettete Seite", allow: "fullscreen; clipboard-write" });
+      const basis = b.basis ? '<base href="' + new URL(b.basis, location.href).href + '">' : "";
+      f.srcdoc = basis + (b.html_einbettung || "");
+      EINBETTUNGEN[ziel] = f;
+      einbettEbene.append(f);
+    }
+  }
+  const r = platz ? platz.getBoundingClientRect() : null;
+  const rr = anzeigeRahmen.getBoundingClientRect();
+  for (const [k, f] of Object.entries(EINBETTUNGEN)) {
+    if (k === ziel && r) {
+      Object.assign(f.style, { display: "block", left: r.left - rr.left + "px", top: r.top - rr.top + "px", width: r.width + "px", height: r.height + "px" });
+    } else {
+      f.style.display = "none";
+    }
+  }
+}
+addEventListener("resize", () => requestAnimationFrame(einbettungenLegen));
 
 function vollbild() {
   if (document.fullscreenElement) { document.exitFullscreen(); return; }

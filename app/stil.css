@@ -344,3 +344,14 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .handy-balken .bahn div { height: 100%; background: var(--blau); }
 .handy-balken.loesung span { color: var(--gruen); font-weight: 700; }
 .handy-balken.loesung .bahn div { background: var(--gruen); }
+
+/* eingeblendete Codezeilen, Folien zum Aufdecken, eingebettete Seiten */
+.code-raster .codezeile.eingeblendet { color: var(--gruen); background: var(--gruen-hell); border-radius: .15em; font-style: italic; }
+.b-folie.aufdecken { cursor: pointer; }
+.b-folie .verdeckt { visibility: hidden; }
+.b-einbetten { background: #fff; }
+.einbett-ebene { position: absolute; inset: 0; pointer-events: none; }
+.einbett-ebene .einbettung { position: absolute; border: 0; background: #fff; pointer-events: auto; display: none; }
+.einbett-ebene { z-index: 1; }
+.eckknoepfe { position: fixed; z-index: 10; }
+.vorschau-rahmen .eckknoepfe { display: none; }

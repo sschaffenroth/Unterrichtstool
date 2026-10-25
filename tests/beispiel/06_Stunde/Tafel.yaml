@@ -57,6 +57,35 @@ schritte:
         - titel: "Nachbar"
           baustein: bild
           datei: ../05_Vorher/nachbar.png
+  - id: gp
+    titel: GP-Bausteine
+    abschnitt: "Ende"
+    soll_min: 0
+    tafel:
+      reiter:
+        - titel: "Docstring"
+          baustein: code
+          sprache: python
+          quelltext: |
+            def wertung(alter):
+                if alter < 18:
+                    return "Jugend"
+                return "Erwachsene"
+          marken:
+            - { zeile: 1, label: "D", als: zeile, einblenden: '"""Gibt die Wertung zum Alter zurück. · bleibt"""' }
+            - { zeile: 2, label: "K", als: zeile, einblenden: "# unter 18 ist Jugend" }
+        - titel: "Kontrollfragen"
+          baustein: folie
+          aufdecken: true
+          markdown: |
+            **Frage 1:** Was ist ein Docstring?
+
+            Antwort: der Text direkt unter def.
+
+            **Frage 2:** Wozu ein Kommentar?
+        - titel: "Alte App"
+          baustein: einbetten
+          datei: ../Lernhilfen/demo.html
   - id: ende
     titel: Ende
     abschnitt: "Ende"

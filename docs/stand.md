@@ -1,6 +1,6 @@
 # Tafelsystem: Stand und Auftrag „Stunde schreiben“
 
-Stand 25.10.2026, Änderung 1 (Meldung SYS), Abspieler 0.1 · Stundenformat `tafelstunde/0` (Entwurf) · Repo `sschaffenroth/Unterrichtstool`
+Stand 25.10.2026, Änderung 2 (Meldung GP), Abspieler 0.2 · Stundenformat `tafelstunde/0` (Entwurf) · Repo `sschaffenroth/Unterrichtstool`
 Was sich geändert hat und die Antworten auf Meldungen: **Teil 4**.
 Konzept: `claude/Tafelsystem_Konzept_und_Steckbrief_Vorlage.md` im Projekt
 
@@ -22,7 +22,7 @@ Konzept: `claude/Tafelsystem_Konzept_und_Steckbrief_Vorlage.md` im Projekt
 | Anzeigen | `geteilt`, `tafel`, `auftrag`, `extern`, `schwarz`, Ablaufleiste. Zweites Fenster auf zweitem Bildschirm, abgeglichen ohne Netz |
 | Fenster und Monitore | Regie zeigt, welche Fenster offen sind, öffnet/schließt/verschiebt sie. Monitor fest zuordnen (Chrome/Edge, gilt je Laptop für alle Stunden). Board geht ohne Antippen ins Vollbild auf seinem Monitor (Hauptfenster), Regie dann als eigenes Fenster. Karte „Überwachen“ mit allen Ansichten und der Handy-Sicht |
 | Sicherung | aktuelle Ansicht als PNG (Regie, 📷 am Board), alle Folien als PNG oder PDF, lokal in einem gewählten Ordner oder im Download-Ordner |
-| Bausteine **fertig** | `titel`, `bild`, `folie`, `qr`, `uhr`, `schwarz`, `auftrag` (Countdown, Material mit QR), `code` (Marken, Teile), `zeichnen` (Raster/Bild, Stift, Rückgängig, PNG), `ergebnis` |
+| Bausteine **fertig** | `titel`, `bild`, `folie`, `qr`, `uhr`, `schwarz`, `auftrag` (Countdown, Material mit QR), `code` (Marken neben der Zeile oder als Codezeile, Teile, Schrift füllt die Fläche), `folie` (aufdecken, Schrift passt sich an), `zeichnen` (Raster/Bild, Stift, Rückgängig, PNG), `ergebnis`, `einbetten` (alte Tafel-Apps als Reiter) |
 | Bausteine **Platzhalter** | `zuordnen`, `beschriften`, `urteilen`, `codestreifen`, `testfaelle`, `partner`, `kette`, `grafik`, `brett`, `sql`, `neu`. `code`: `fehler`, `probelauf`, `nebeneinander` fehlen |
 | Schüler-Handys | Worker im Repo (`worker/`): Raum mit 4-stelligem Code, Anmelde-QR und Link auf der Tafel (Auftragsleiste und groß), Schüler-Seite am Handy oder PC. `abstimmung` und `vorhersage` mit Freigabe aus der Regie, `mehrfach`, `kennung: team`. Handy-Stimmen und Handzeichen werden zusammengezählt. Raum löscht sich nach 4 Wochen. `formular`, `feedback`, `fragen` noch nicht |
 | Handy-Begleitseite | zeigt immer den aktuellen Schritt: Abschnitt, Titel, Auftrag mit Countdown, Material mit Ort, Dateiname und Link. Freigegebene Frage erscheint obendrüber. Nie Notizen oder Lösungen |
@@ -125,6 +125,10 @@ schritte:
 Alles, was Lösung ist, steht in Feldern namens `loesung`, `erwartet` oder `begruendung`. Das
 Bauskript entfernt sie später aus der Schülerfassung. **Keine Schülernamen in die Datei.**
 
+**Fachordner** ist der nächste Ordner nach oben mit `Tafel starten.bat` oder `stundenplan.json`
+(GP: `KI_GrundlagenProgrammierung`, auch wenn die Stunden in `Stunden/` liegen), oder das Feld
+`fachordner` im Kopf (relativ zum Stundenordner).
+
 **Pfade** (`datei`) sind relativ zum Stundenordner. `../` ist erlaubt, solange der Pfad im Ordner des
 Fachs bleibt, z. B. `../05_2026-10-20_…/grafiken/kanten.png`. Das Bauskript bettet die Datei ein.
 
@@ -138,7 +142,8 @@ Fachs bleibt, z. B. `../05_2026-10-20_…/grafiken/kanten.png`. Das Bauskript be
 | `qr` | `url`, `text` |
 | `bild` | `datei`, `frage` (Band, Zeile 1), `untertitel` (Band, Zeile 2), `schleier` (dunkler Schleier für Lesbarkeit, Standard `true`, wenn `frage` gesetzt), `alt` |
 | `ergebnis` | `von` (Schritt-ID oder Liste von Schritt-IDs → nebeneinander). Zeigt das Ergebnis eines früheren Schüler-Schritts (Balken, Antworten) auf der Tafel |
-| `folie` | `markdown` (kurzer Text, selten nötig) |
+| `folie` | `markdown`. Schrift passt sich der Textmenge an (`groesse: normal` schaltet das ab). `aufdecken: true`: Absätze und Listenpunkte nacheinander, Tipp auf die Folie oder Regie „Nächster Absatz“ (z. B. Kontrollfrage, dann Antwort) |
+| `einbetten` | `datei` (eine vorhandene .html-Datei im Fachordner, z. B. eine alte Tafel-App). Läuft als Reiter auf der Anzeige und behält ihren Zustand, solange die Stunde läuft. In der Vorschau und in der PNG-Sicherung nur ein Platzhalter. Übergang, bis die Bausteine fertig sind |
 
 **Auftrag**
 
@@ -150,7 +155,7 @@ Fachs bleibt, z. B. `../05_2026-10-20_…/grafiken/kanten.png`. Das Bauskript be
 
 | Baustein | Felder |
 |---|---|
-| `code` | `datei` oder `quelltext`, `sprache`, `ansichten` (Zeilenbereiche, z. B. `[[1,17],[18,34]]`), `marken` (Liste `{zeile, label, einblenden}`: `einblenden` ist der Erklärtext. Er erscheint **erst auf Tipp**, neben der Zeile, Marken in Listenreihenfolge nacheinander), `fehler` (`{zeile, ersetzen_durch, einfuegen_nach}`), `probelauf` (`{eingaben: [{id, eingabe, erwartet}], variable}`), `nebeneinander` (zweite Datei) |
+| `code` | `datei` oder `quelltext`, `sprache`, `ansichten` (Zeilenbereiche, z. B. `[[1,17],[18,34]]`), `marken` (Liste `{zeile, label, einblenden, als, position}`: `einblenden` erscheint **erst auf Tipp**, Marken der Reihe nach. `als: notiz` (Standard) neben der Zeile, `als: zeile` als grüne Codezeile im Programm mit Einrückung, `position: vor | nach`, Standard „nach“ bei Docstrings, sonst „vor“. `einblenden` gilt als Lösungsfeld). Die Schrift wächst, bis der Code die Fläche füllt, `fehler` (`{zeile, ersetzen_durch, einfuegen_nach}`), `probelauf` (`{eingaben: [{id, eingabe, erwartet}], variable}`), `nebeneinander` (zweite Datei) |
 | `zuordnen` | `begriffe`, `ziele`, `loesung` (`{begriff: ziel}`) |
 | `beschriften` | `datei`/`quelltext`, `stellen` (`{nr, zeile, text}` oder `{nr, zeilen: [von, bis]}`), `begriffe` (Überzählige erlaubt), `loesung` (`{nr: begriff}`), `begruendung` |
 | `urteilen` | `datei`/`quelltext`, `urteile` (feste Liste), `elemente` (`{zeile, text, loesung, begruendung}`) |
@@ -219,6 +224,44 @@ Was du nicht weißt, schreibst du als Frage. Erfinde keine Felder stillschweigen
 ---
 
 ## Teil 4 · Änderungen und Antworten auf Meldungen
+
+### Änderung 2 · 25.10.2026 · Meldung GP (DS 07)
+
+**Neu oder geändert:**
+
+| Was | neu |
+|---|---|
+| `einbetten` | neuer Baustein: alte Tafel-App als Reiter, Zustand bleibt erhalten |
+| `folie` | Schrift passt sich an, `aufdecken: true`, `groesse: normal` |
+| `code` | Schrift füllt die Fläche (nie unter der Grundgröße), `marken[].als: zeile`, `position` |
+| Fachordner | Ordner mit `Tafel starten.bat` oder `stundenplan.json`, oder Feld `fachordner` |
+| Umbrechen | nie in `code`, `testfaelle`, `codestreifen`, `beschriften`, `urteilen`, `einbetten`, nie in `erwartet`, `eingabe`, `eingaben`, `probelauf`, `fehler`, `faelle` |
+| Material | `ort` und `datei` nur bei GitHub-Links abgeleitet, Kurzlinks bleiben ohne |
+| Sicherung | Dateiname `Sicherung_JJJJ-MM-TT_<Titel>.png` (Reiter angehängt), gibt es ihn schon: `_2`, `_3` |
+
+**Antworten auf die Fragen von GP:**
+
+| Frage | Antwort |
+|---|---|
+| `code.fehler` | Deine Lesart stimmt: Zeile 20 wird durchgestrichen, `ersetzen_durch` erscheint grün nach `einfuegen_nach`, `begruendung` nach „Fehler beheben“. Drei Knöpfe wie beschrieben. **Noch nicht gebaut**, kommt als Nächstes |
+| `code.probelauf`, echtes oder simuliertes Python | Weder Pyodide noch ein nachgebautes Python im Browser: Das **Bauskript führt das Programm beim Bauen mit echtem Python aus**, einmal mit und einmal ohne Fehler, mit den Eingaben aus `eingaben`. Es merkt sich Ausgabe und die `variable` nach jedem Läufer. Der Abspieler spielt das ab und färbt gegen `erwartet`. `erwartet_mit_fehler` braucht es nicht. **Noch nicht gebaut** |
+| `einblenden` ist Lösung | Ja, gilt ab jetzt als Lösungsfeld (wird in der Schülerfassung entfernt) |
+| `urteilen.elemente[].text` | `zeile` reicht, `text` darf fehlen (dann wird der Kommentar aus der Zeile genommen). Baustein noch nicht gebaut |
+| `partner`, Namen | `namen.txt` im Fachordner, eine Zeile je Name, nie in der Tafel.html. Der lokale Server liefert sie, nur an den eigenen Rechner. Baustein noch nicht gebaut |
+| `testfaelle` | wie beschrieben, `eingabe` darf mehrzeilig sein. Noch nicht gebaut |
+| Kontrollfragen aufdecken | `folie` mit `aufdecken: true` |
+| Notausstieg mit Ersatzschritt | `ersetzt: [planen, teilzielsicherung]` am ausgeblendeten Schritt wird übernommen |
+| `kuerzen: ja` | heißt **kürzen**: bis `mindest_min` (fehlt es, darf bis 0, also gestrichen). `wegfall_text` wird übernommen. Der Assistent selbst ist noch nicht gebaut, die Felder dürfen schon in die Datei |
+| `pruefpunkt` | Der Assistent prüft beim **Betreten** des Schritts mit Prüfpunkt |
+| Beamer bei Schritten ohne `auftrag` | `zeige: { Beamer: tafel }` ist richtig so, ein eigenes `spiegeln` braucht es nicht |
+| Zähler nachtragen | Ja: Die Regie behält alles, auch nach der Stunde. Zähler nachtragen, dann „Zeiten sichern“ |
+| Eine Quelle | Vorerst bleibt `stunde_texte.py` die Quelle. Sobald das Bauskript Heft und Exit-Ticket selbst baut (S1), wird `Tafel.yaml` die Quelle. Das steht dann hier unter einer neuen Änderung |
+| `soll_min: 0` | erlaubt, bleibt so |
+| Board und Beamer am selben Laptop | Board im Vollbild über das Hauptfenster, Beamer als zweites Fenster auf seinem Monitor (ein Tipp für Vollbild). Hängt der Beamer an einem anderen Rechner, braucht es den Netz-Abgleich, der ist noch nicht gebaut |
+
+**Bis Mittwoch empfohlen:** Teilzielsicherung, Theoriesicherung, Planen und Abnahme als `einbetten`-Reiter mit
+den vorhandenen Tafel-Apps, z. B. `{baustein: einbetten, datei: ../../Lernhilfen/anmeldung/tafel_kommentare.html}`.
+Dann läuft die Stunde ohne Programmwechsel.
 
 ### Änderung 1 · 25.10.2026 · Meldung SYS (DS 06)
 

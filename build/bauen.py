@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import os
 import html
 import io
 import json
@@ -50,8 +51,8 @@ JS_REIHENFOLGE = [
 
 TAFEL_BAUSTEINE = {"titel", "bild", "folie", "qr", "schwarz", "uhr", "code", "zeichnen", "ergebnis",
                    "zuordnen", "beschriften", "urteilen", "codestreifen", "testfaelle", "partner",
-                   "kette", "grafik", "brett", "sql", "neu"}
-UMGESETZT = {"titel", "bild", "folie", "qr", "schwarz", "uhr", "code", "zeichnen", "ergebnis", "auftrag"}
+                   "kette", "grafik", "brett", "sql", "neu", "einbetten"}
+UMGESETZT = {"titel", "bild", "folie", "qr", "schwarz", "uhr", "code", "zeichnen", "ergebnis", "auftrag", "einbetten"}
 SCHUELER_BAUSTEINE = {"abstimmung", "vorhersage", "formular", "feedback", "fragen"}
 ANSICHTEN = {"tafel", "auftrag", "geteilt", "extern", "schwarz"}
 SOZIALFORMEN = {"EA", "PA", "GA", "Plenum"}
@@ -100,7 +101,9 @@ def inline(text: str) -> str:
 
 # Trennpunkte und Gedankenstriche in Texten der Stunde werden zu Zeilenumbrüchen (Wunsch der Lehrkraft:
 # „·“ und „—“ irritieren an der Tafel). Code, Links, Dateinamen und Kennungen bleiben unberührt.
-NICHT_UMBRECHEN = {"quelltext", "url", "datei", "id", "baustein", "sozialform", "von", "aufloesen_in", "kennung", "sprache", "format", "datum"}
+NICHT_UMBRECHEN = {"quelltext", "url", "datei", "id", "baustein", "sozialform", "von", "aufloesen_in", "kennung", "sprache", "format", "datum",
+                   "erwartet", "eingabe", "eingaben", "probelauf", "fehler", "faelle", "fachordner", "ort"}
+NICHT_UMBRECHEN_BAUSTEINE = {"code", "testfaelle", "codestreifen", "beschriften", "urteilen", "einbetten"}   # Programmtext bleibt wörtlich
 TRENNER = re.compile(r"\s+[·—–]\s+")
 TRENNER_ENDE = re.compile(r"\s+[·—–]\s*$")
 
@@ -113,6 +116,8 @@ def umbrechen(wert, schluessel=None):
     if isinstance(wert, list):
         return [umbrechen(v) for v in wert]
     if isinstance(wert, dict):
+        if wert.get("baustein") in NICHT_UMBRECHEN_BAUSTEINE:
+            return wert
         return {k: umbrechen(v, k) for k, v in wert.items()}
     return wert
 
@@ -130,7 +135,7 @@ def ort_und_datei(url: str) -> tuple[str, str]:
         if teile[2:3] == ["blob"] and rest:
             return "\n".join(["Repository " + repo] + ["Ordner " + o for o in rest[:-1]]), rest[-1]
         return "\n".join(["Repository " + repo] + ["Ordner " + o for o in rest]), ""
-    return u.netloc, unquote(teile[-1]) if teile else ""
+    return "", ""   # nur GitHub-Links werden zerlegt, Kurzlinks wie bycs.link bleiben ohne Ort
 
 
 def qr_svg(url: str) -> str:
@@ -237,6 +242,19 @@ def baustein_aufbereiten(b: dict, ort: str, ctx: dict) -> dict:
             bericht.f(ort, "qr ohne url")
         else:
             b["svg"] = qr_svg(b["url"])
+    elif art == "einbetten":
+        pfad = datei_finden(b.get("datei"), ort, ctx)
+        if pfad:
+            if pfad.suffix.lower() not in (".html", ".htm"):
+                bericht.f(ort, "einbetten: nur .html-Dateien")
+            else:
+                b["html_einbettung"] = pfad.read_text(encoding="utf-8", errors="replace")
+                rel = Path(os.path.relpath(pfad.parent, ctx["ordner"])).as_posix()
+                b["basis"] = (rel + "/") if rel != "." else ""
+                b["name"] = pfad.name
+                if len(b["html_einbettung"]) > 3_000_000:
+                    bericht.w(ort, f"einbetten: {pfad.name} ist {len(b['html_einbettung']) / 1e6:.1f} MB groß")
+                bericht.h(ort, f"einbetten: {pfad.name} läuft nur auf der Anzeige, nicht in der Vorschau, und wird nicht als PNG gesichert")
     elif art == "folie":
         b["html"] = markdown_zu_html(b.get("markdown", ""))
     elif art == "auftrag":
@@ -295,8 +313,19 @@ def datei_finden(datei: str | None, ort: str, ctx: dict) -> Path | None:
 
 # ---------------------------------------------------------------------------------------------- Stunde
 
+def fachordner_finden(roh: dict, ordner: Path) -> Path:
+    """Fachordner: Feld `fachordner` im Kopf (relativ zum Stundenordner), sonst der nächste Ordner nach oben
+    mit „Tafel starten.bat“ oder „stundenplan.json“, sonst der Elternordner des Stundenordners."""
+    if roh.get("fachordner"):
+        return (ordner / roh["fachordner"]).resolve()
+    for o in [ordner, *ordner.parents]:
+        if (o / "Tafel starten.bat").exists() or (o / "stundenplan.json").exists():
+            return o.resolve()
+    return ordner.parent.resolve()
+
+
 def stunde_aufbereiten(roh: dict, ordner: Path, bericht: Bericht, bildbreite: int, server: str = STANDARD_SERVER) -> tuple[dict, dict]:
-    ctx = {"bericht": bericht, "ordner": ordner, "fachordner": ordner.parent.resolve(),
+    ctx = {"bericht": bericht, "ordner": ordner, "fachordner": fachordner_finden(roh, ordner),
            "bilder": Bilder(bildbreite, round(bildbreite * 9 / 16)), "verweise": []}
     if roh.get("format") != "tafelstunde/0":
         bericht.w("Kopf", f"format ist `{roh.get('format')}`, erwartet `tafelstunde/0`")

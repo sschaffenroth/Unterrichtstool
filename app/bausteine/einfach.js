@@ -16,7 +16,49 @@ BAUSTEINE.bild = (b) => {
     band);
 };
 
-BAUSTEINE.folie = (b) => el("div", { class: "baustein b-folie" }, el("div", { class: "inhalt", html: b.html || "" }));
+/* Schrift so groß wie möglich, bis der Inhalt die Hülle füllt (zwischen minEm und maxEm, in em der Bühne) */
+function schriftEinpassen(huelle, inhalt, minEm, maxEm) {
+  const passen = () => {
+    if (!huelle.isConnected || !huelle.clientHeight) return;
+    const stil = getComputedStyle(huelle);
+    const hoehe = huelle.clientHeight - parseFloat(stil.paddingTop) - parseFloat(stil.paddingBottom);
+    const breite = huelle.clientWidth - parseFloat(stil.paddingLeft) - parseFloat(stil.paddingRight);
+    let lo = minEm, hi = maxEm;
+    for (let i = 0; i < 14; i++) {
+      const mitte = (lo + hi) / 2;
+      inhalt.style.fontSize = mitte + "em";
+      if (inhalt.scrollHeight <= hoehe + 1 && inhalt.scrollWidth <= breite + 1) lo = mitte; else hi = mitte;
+    }
+    inhalt.style.fontSize = lo + "em";
+  };
+  requestAnimationFrame(passen);
+  try { new ResizeObserver(passen).observe(huelle); } catch (e) { /* ältere Browser */ }
+}
+
+/* folie: Markdown-Text. Schrift passt sich der Textmenge an.
+   aufdecken: true  Absätze (und Listenpunkte) nacheinander zeigen: Tipp auf die Folie oder Regie */
+BAUSTEINE.folie = (b, ctx) => {
+  const inhalt = el("div", { class: "inhalt", html: b.html || "" });
+  const huelle = el("div", { class: "baustein b-folie" }, inhalt);
+  if (b.aufdecken) {
+    const teile = [...inhalt.querySelectorAll(":scope > p, :scope > h2, :scope > ul > li, :scope > ol > li")];
+    const n = Math.max(1, Z.marken[ctx.schluessel] || 1);
+    teile.forEach((t, i) => t.classList.toggle("verdeckt", i >= n));
+    huelle.classList.add("aufdecken");
+    if (ctx.rolle !== "vorschau") huelle.addEventListener("click", () => tun("marke", { schluessel: ctx.schluessel, anzahl: n < teile.length ? n + 1 : 1 }));
+  }
+  schriftEinpassen(huelle, inhalt, 1.9, b.groesse === "normal" ? 1.9 : 5);
+  return huelle;
+};
+
+/* einbetten: vorhandene HTML-Datei (z. B. eine Tafel-App) als Reiter. Läuft nur auf der Anzeige in einem
+   dauerhaften Rahmen, damit ihr Zustand beim Weiterschalten der Regie nicht verloren geht. */
+BAUSTEINE.einbetten = (b, ctx) => {
+  if (ctx.rolle === "vorschau") {
+    return el("div", { class: "baustein b-platzhalter" }, el("div", null, el("b", null, b.name || "Eingebettete Seite"), el("p", null, "läuft auf der Anzeige")));
+  }
+  return el("div", { class: "baustein b-einbetten", "data-einbetten": ctx.schluessel });
+};
 
 BAUSTEINE.qr = (b) =>
   el("div", { class: "baustein b-qr" },

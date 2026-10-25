@@ -6,7 +6,7 @@ doppelt anlegen. Priorität: **H** unverzichtbar für den Start · **M** wäre s
 
 | Quelle | Steckbrief |
 |---|---|
-| GP | Grundlagen der Programmierung, KI 1 (`steckbriefe/GP.md`) |
+| GP | Grundlagen der Programmierung, KI 1 (`steckbriefe/GP.md`), Meldung 25.10. zu DS 07 (Projekt: `claude/Tafelsystem_Meldung_GP.md`) |
 | KIG | Prototyp ES 06 (`konzept_tafelsteuerung_v0.md`) |
 | SYS | Meldung 25.10.2026 zu DS 06, KI 2. Jahr (Projekt: `claude/Tafelsystem_Meldung_SYS.md`). Raum: ein Board, kein Beamer, Schul-PCs |
 
@@ -47,6 +47,9 @@ doppelt anlegen. Priorität: **H** unverzichtbar für den Start · **M** wäre s
 | S10 | UVP-Export (Verlaufsplan, ZFG-Tabelle, Kontrollfragen, Bilder) für `uvp-erstellen` | GP | M | 3 |
 | S11 | Übernahme vorhandener Quellen (`stunde_texte.py`, `_quelle/*.src.html`, `00_Stundenverlauf.md`, SYS: python-pptx-Folien, `07_grafiken.py`) | GP, SYS | H | 2 |
 | S12 | Pfade relativ zum Stundenordner, `../` innerhalb des Fachordners, Bauskript bettet ein | SYS | H | 2 |
+| S13 | Fachordner = Ordner mit `Tafel starten.bat`/`stundenplan.json` oder Feld `fachordner` | GP | H | 2 ✓ |
+| S14 | Notausstieg: `mindest_min`, `ersetzt`, `wegfall_text` | GP | M | 3 |
+| S15 | Kein Umbrechen in Programmtext und erwarteten Ausgaben | GP | H | 2 ✓ |
 
 ## Darstellung und Bedienung (alle Bausteine)
 
@@ -82,6 +85,11 @@ doppelt anlegen. Priorität: **H** unverzichtbar für den Start · **M** wäre s
 | B14 | `ergebnis`: Ergebnis früherer Schüler-Schritte auf der Tafel, mehrere nebeneinander | SYS | H | 2 |
 | B15 | `zeichnen`: Hintergrund Bild oder Zahlenraster (z. B. 3 × 3-Kern), Zellen beschreibbar, Freihand. In SYS Kurzarbeitsstoff (Faltung, Gewichtssumme) | SYS, GP | H | 2 |
 | B16 | `vorhersage`: Auflösung in einem späteren Schritt (`aufloesen_in`) | SYS | M | 2 |
+| B17 | `einbetten`: vorhandene HTML-Datei als Reiter, Zustand bleibt (Übergang) | GP | H | 2 ✓ |
+| B18 | `folie`: Schrift passt sich an, `aufdecken` Absatz für Absatz | GP | H | 2 ✓ |
+| B19 | `code.marken als: zeile` (Docstring/Kommentar als Codezeile), Schrift füllt die Fläche | GP | H | 2 ✓ |
+| B20 | `code.fehler` (zeigen, beheben, wieder einbauen) | GP | H | 3 |
+| B21 | `code.probelauf`: Bauskript rechnet mit echtem Python vor, Abspieler spielt ab, Variable je Läufer | GP | H | 3 |
 
 ## Schüler-Interaktion
 

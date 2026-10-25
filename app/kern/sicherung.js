@@ -55,6 +55,16 @@ async function dateiAblegen(name, blob, unterordner, ordnerBereit) {
   }
 }
 
+/* gibt es die Datei im Ablageordner schon, wird _2, _3 … angehängt statt zu überschreiben */
+async function freierName(name) {
+  const [stamm, endung] = [name.replace(/\.png$/, ""), ".png"];
+  for (let i = 1; i < 100; i++) {
+    const versuch = i === 1 ? name : stamm + "_" + i + endung;
+    try { await ABLAGE.getFileHandle(versuch); } catch (e) { return versuch; }
+  }
+  return name;
+}
+
 function meldung(text) {
   sicherungMeldung = text;
   for (const e of document.querySelectorAll("[data-sicherung]")) e.textContent = text;
@@ -125,7 +135,9 @@ async function ansichtSichern(name) {
   try {
     const s = schritt();
     const blob = await schrittAlsPng(Z.schritt, null, name, { mitOverlay: true });
-    const datei = "Sicherung_" + datumHeute() + "_" + dateiname(s.titel) + (s.tafel && s.tafel.reiter.length > 1 ? "_" + dateiname(s.tafel.reiter[Z.reiter[s.id] || 0].titel || "") : "") + "_" + new Date().toTimeString().slice(0, 5).replace(":", "") + ".png";
+    // Form Sicherung_JJJJ-MM-TT_<Titel>.png (so nimmt schueler_repo.py sie ins Klassen-Repository)
+    let datei = "Sicherung_" + datumHeute() + "_" + dateiname(s.titel) + (s.tafel && s.tafel.reiter.length > 1 ? "_" + dateiname(s.tafel.reiter[Z.reiter[s.id] || 0].titel || "") : "") + ".png";
+    if (bereit) datei = await freierName(datei);
     await dateiAblegen(datei, blob, null, bereit);
     meldung("Gesichert: " + datei + (bereit ? " in " + ABLAGE.name : " (Downloads)"));
   } catch (e) { console.error(e); meldung("Sichern fehlgeschlagen: " + e.message); }
