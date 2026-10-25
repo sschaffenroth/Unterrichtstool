@@ -22,7 +22,9 @@ Prüft die Datei und schreibt `Tafel.html` daneben. Nur prüfen: `--nur-pruefen`
 | Was | Wie |
 |---|---|
 | Regie | `Tafel.html` in Chrome oder Edge öffnen |
-| Fenster öffnen | „Fenster öffnen“ (oder automatisch bei „Stunde starten“), Liste „Fenster und Monitore“ zeigt, was offen ist |
+| Fenster öffnen | „Fenster öffnen“ (oder automatisch bei „Stunde starten“). Ist dem Board ein anderer Monitor zugeordnet, geht dieses Fenster dort ins Vollbild und die Regie öffnet sich als eigenes Fenster auf dem Laptop |
+| Board beenden, verschieben | in „Fenster und Monitore“: „Beenden“ (Hauptfenster wird wieder Regie), Monitor wechseln, „Vollbild“ |
+| Überwachen | Karte „Überwachen“: Alle, je Anzeige, Handys (was die Schüler sehen, mit Anmelde-QR) |
 | Fenster fest einem Monitor zuordnen | „Monitore erkennen“, einmal „Fensterverwaltung“ erlauben, je Fenster Monitor wählen. Gilt auf diesem Laptop für alle Stunden |
 | zusätzliches Fenster | „+ Fenster“, z. B. „Monitor 2“ mit Ansicht auftrag |
 | nur ein Rechner am Board | „Hier Board zeigen“, Regie dann hinter ☰ (oder Taste R) |

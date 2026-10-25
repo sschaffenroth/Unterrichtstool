@@ -147,8 +147,51 @@ def test_abspieler(tmp_path: Path) -> None:
     assert not fehler, fehler
 
 
+def test_board_im_hauptfenster(tmp_path: Path) -> None:
+    """Zwei Monitore (nachgestellt): „Fenster öffnen“ macht das Hauptfenster zum Board im Vollbild
+    und öffnet die Regie als eigenes Fenster. „Beenden“ in der Regie macht es wieder zur Regie."""
+    datei = tmp_path / "Tafel.html"
+    bauen_beispiel(datei)
+    fehler: list[str] = []
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        haupt = browser.new_page(viewport={"width": 1400, "height": 900})
+        haupt.on("pageerror", lambda e: fehler.append(f"haupt: {e}"))
+        haupt.goto(datei.as_uri())
+        haupt.evaluate("""() => {
+            BILDSCHIRME = [
+              { label: 'Laptop', left: 0, top: 0, width: 1400, height: 900, availLeft: 0, availTop: 0, availWidth: 1400, availHeight: 860, isPrimary: true },
+              { label: 'Tafel', left: 1400, top: 0, width: 1920, height: 1080, availLeft: 1400, availTop: 0, availWidth: 1920, availHeight: 1080, isPrimary: false }];
+            geraetAendern(g => { g.monitor = { Board: fingerabdruck(BILDSCHIRME[1]) }; });
+            document.documentElement.requestFullscreen = () => Promise.resolve();
+            neuZeichnen();
+        }""")
+        assert "öffnet im Vollbild" in haupt.locator(".fenster-zeile").first.text_content()
+        with haupt.expect_popup() as info:
+            haupt.get_by_role("button", name="Fenster öffnen").click()
+        regie = info.value
+        regie.on("pageerror", lambda e: fehler.append(f"regie: {e}"))
+        haupt.wait_for_selector(".buehne")
+        regie.wait_for_selector(".schritt-steuerung")
+        assert haupt.evaluate("ROLLE") == "anzeige"
+        regie.wait_for_function("document.querySelector('.fenster-zeile .fenster-status.offen') !== null")
+        regie.locator(".schritt-steuerung .weiter").click()
+        haupt.wait_for_selector(".b-bild")
+        # Überwachen: Handys-Tab zeigt die nachgebaute Schüler-Seite
+        regie.locator(".karte", has_text="Überwachen").get_by_role("button", name="Handys").click()
+        regie.wait_for_selector(".handy.gross")
+        # Board beenden → Hauptfenster ist wieder die Regie, Regie-Fenster geht zu
+        regie.locator(".fenster-zeile").first.get_by_role("button", name="Beenden").click()
+        haupt.wait_for_selector(".regie")
+        assert haupt.evaluate("ROLLE") == "regie"
+        haupt.wait_for_function("REGIE_FENSTER === null")
+        browser.close()
+    assert not fehler, fehler
+
+
 if __name__ == "__main__":
     with tempfile.TemporaryDirectory() as t:
         test_pruefung_findet_fehler(Path(t))
         test_abspieler(Path(t))
+        test_board_im_hauptfenster(Path(t))
     print("alle Tests bestanden")

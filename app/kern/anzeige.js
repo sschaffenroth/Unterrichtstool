@@ -89,46 +89,56 @@ function anzeigeSchluessel(name) {
   return JSON.stringify([name, Z.schritt, Z.reiter, Z.ansicht, Z.marken, Z.codeteil, Z.stimmen, Z.striche, Z.overlay, Z.aktiv, Z.countdown && Z.countdown.id, Z.raum && Z.raum.code, Z.freigabe, Z.online]);
 }
 
-/* Vollbild-Anzeige (eigenes Fenster oder dieses Fenster) */
-function anzeigeStarten(name) {
-  document.title = name + " · " + STUNDE.stunde.titel;
-  const rahmen = el("div", { class: "rahmen" });
-  document.getElementById("app").replaceChildren(rahmen);
-  let letzter = "";
-  let buehne = null;
-  const eck = () => el("div", { class: "eckknoepfe" },
-    el("button", { title: "Zurück (←)", onclick: () => tun("zurueck") }, "‹"),
-    el("button", { title: "Weiter (→)", onclick: () => tun("weiter") }, "›"),
-    el("button", { title: "Vollbild (F)", onclick: vollbild }, "⛶"),
-    el("button", { title: "Diese Ansicht als PNG sichern (S)", onclick: () => ansichtSichern(name) }, "📷"),
-    el("button", { title: "Regie (R)", onclick: () => regieSchublade(name) }, "☰"));
+/* Vollbild-Anzeige (eigenes Fenster oder dieses Fenster). Kann mehrmals aufgerufen werden:
+   das Hauptfenster wechselt zwischen Regie und Board. */
+let anzeigeRahmen = null, anzeigeBuehne = null, anzeigeLetzter = "", anzeigeEingerichtet = false;
 
-  function zeichnen(erzwingen) {
-    const k = anzeigeSchluessel(name) + innerWidth + "x" + innerHeight;
-    if (k !== letzter || erzwingen) {
-      letzter = k;
-      buehne = anzeigeInhalt(name, "anzeige");
-      buehne.append(eck());
-      rahmen.replaceChildren(buehne);
-    }
-    einpassen(buehne, innerWidth, innerHeight);
-    countdownsAktualisieren(rahmen);
+function anzeigeStarten(name) {
+  ROLLE = "anzeige";
+  ANZEIGE_NAME = name;
+  document.title = name + " · " + STUNDE.stunde.titel;
+  document.body.classList.remove("regie-seite");
+  anzeigeRahmen = el("div", { class: "rahmen" });
+  anzeigeLetzter = "";
+  document.getElementById("app").replaceChildren(anzeigeRahmen);
+  if (!anzeigeEingerichtet) {
+    anzeigeEingerichtet = true;
+    beobachten(() => { if (ROLLE === "anzeige") anzeigeZeichnen(); });
+    addEventListener("resize", () => { if (ROLLE === "anzeige") anzeigeZeichnen(); });
+    setInterval(() => { if (ROLLE === "anzeige") countdownsAktualisieren(anzeigeRahmen); }, 250);
   }
-  beobachten(() => zeichnen());
-  addEventListener("resize", () => zeichnen());
-  setInterval(() => countdownsAktualisieren(rahmen), 250);
-  tastenBelegen(name);
-  zeichnen(true);
+  anzeigeZeichnen(true);
+}
+
+function anzeigeZeichnen(erzwingen) {
+  const name = ANZEIGE_NAME;
+  const k = anzeigeSchluessel(name) + innerWidth + "x" + innerHeight;
+  if (k !== anzeigeLetzter || erzwingen || !anzeigeBuehne) {
+    anzeigeLetzter = k;
+    anzeigeBuehne = anzeigeInhalt(name, "anzeige");
+    anzeigeBuehne.append(el("div", { class: "eckknoepfe" },
+      el("button", { title: "Zurück (←)", onclick: () => tun("zurueck") }, "‹"),
+      el("button", { title: "Weiter (→)", onclick: () => tun("weiter") }, "›"),
+      el("button", { title: "Vollbild (F)", onclick: vollbild }, "⛶"),
+      el("button", { title: "Diese Ansicht als PNG sichern (S)", onclick: () => ansichtSichern(name) }, "📷"),
+      el("button", { title: "Regie (R)", onclick: () => regieSchublade(name) }, "☰")));
+    anzeigeRahmen.replaceChildren(anzeigeBuehne);
+  }
+  einpassen(anzeigeBuehne, innerWidth, innerHeight);
+  countdownsAktualisieren(anzeigeRahmen);
 }
 
 function vollbild() {
-  if (document.fullscreenElement) document.exitFullscreen();
-  else document.documentElement.requestFullscreen().catch(() => {});
+  if (document.fullscreenElement) { document.exitFullscreen(); return; }
+  const s = ROLLE === "anzeige" ? bildschirmFinden((geraet().monitor || {})[ANZEIGE_NAME]) : null;
+  document.documentElement.requestFullscreen(s ? { screen: s } : undefined).catch(() => {});
 }
 
-function tastenBelegen(name) {
+/* eine Tastenbelegung für beide Rollen */
+function tastenEinrichten() {
   addEventListener("keydown", (e) => {
-    if (e.target.closest && e.target.closest("input, textarea")) return;
+    if (e.target.closest && e.target.closest("input, textarea, select")) return;
+    const name = ROLLE === "anzeige" ? ANZEIGE_NAME : null;
     const k = e.key;
     if (["ArrowRight", "PageDown", " "].includes(k)) { e.preventDefault(); tun("weiter"); }
     else if (["ArrowLeft", "PageUp"].includes(k)) { e.preventDefault(); tun("zurueck"); }

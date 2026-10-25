@@ -20,11 +20,11 @@ function regieInhalt(modus) {
     el("div", { class: "rechts" },
       el("button", { class: "knopf" + (laeuft ? "" : " haupt"), onclick: () => {
         tun(laeuft ? "uhrPause" : "uhrStart");
-        if (!laeuft && modus === "fenster" && geraet().autoStart !== false) alleFensterOeffnen();
+        if (!laeuft && modus !== "schublade" && geraet().autoStart !== false) alleFensterOeffnen();
         if (!laeuft && !Z.raum && SERVER && SCHRITTE.some((x) => x.schueler)) raumAnlegen();
       } }, laeuft ? "Uhr anhalten" : Z.uhr.basis ? "Uhr weiter" : "Stunde starten"),
       handyKnoepfe(),
-      modus === "fenster" ? el("button", { class: "knopf", title: "alle Anzeige-Fenster öffnen und auf ihre Monitore legen", onclick: alleFensterOeffnen }, "Fenster öffnen") : null,
+      modus !== "schublade" ? el("button", { class: "knopf", title: "Board im Vollbild auf seinem Monitor, weitere Fenster auf ihre Monitore", onclick: alleFensterOeffnen }, "Fenster öffnen") : null,
       modus === "fenster" ? el("button", { class: "knopf", title: "Dieses Fenster zeigt das Board, die Regie liegt dann hinter ☰", onclick: () => { location.hash = "anzeige=" + alleAnzeigen()[0]; location.reload(); } }, "Hier " + alleAnzeigen()[0] + " zeigen") : null,
       el("select", { class: "knopf", title: "Ton bei Soll-Ende", onchange: (e) => { tonEinstellung = e.target.value; try { localStorage.setItem("tafelsystem:ton", tonEinstellung); } catch (x) {} } },
         [["extern", "Ton: nur bei Extern"], ["alle", "Ton: jeder Schritt"], ["aus", "Ton: aus"]].map(([w, t]) => el("option", { value: w, selected: w === tonEinstellung }, t))),
@@ -66,9 +66,9 @@ function regieInhalt(modus) {
     el("div", { class: "schritt-steuerung" },
       el("button", { class: "knopf", onclick: () => tun("zurueck") }, "‹ Zurück"),
       el("button", { class: "knopf haupt weiter", onclick: () => tun("weiter") }, naechster ? "Weiter: " + naechster.titel + " ›" : "Ende der Stunde")),
-    alleAnzeigen().map((n) => anzeigeKarte(n)),
+    ueberwachenKarte(),
     steuerKarte(s),
-    modus === "fenster" ? fensterKarte() : null,
+    modus !== "schublade" ? fensterKarte() : null,
     sicherungKarte());
 
   /* Spalte 3: Notizen, Handzeichen, Zähler */
@@ -87,6 +87,73 @@ function regieInhalt(modus) {
 
   return el("div", { class: "regie" }, kopf,
     el("div", { class: "regie-rumpf" }, el("div", { class: "spalte" }, el("div", { class: "karte" }, el("h2", null, "Ablauf"), ablauf)), mitte, rechts));
+}
+
+/* Überwachen: durch alle Ansichten schalten (Anzeigen und Handys). Nur zum Ansehen, nichts davon geht aufs Board. */
+let ueberwachenTab = "alle";
+function ueberwachenKarte() {
+  const namen = alleAnzeigen();
+  const tabs = [["alle", "Alle"], ...namen.map((n) => [n, n]), ["handys", "Handys"]];
+  if (!tabs.some(([t]) => t === ueberwachenTab)) ueberwachenTab = "alle";
+  const leiste = el("div", { class: "zeile", style: "margin-bottom:10px" },
+    tabs.map(([t, text]) => el("button", { class: "knopf klein" + (t === ueberwachenTab ? " aktiv" : ""), onclick: () => { ueberwachenTab = t; neuZeichnen(); } }, text)));
+  let inhalt;
+  if (ueberwachenTab === "alle") {
+    inhalt = el("div", { class: "ueberwachen-raster" },
+      namen.map((n) => el("div", null, el("div", { class: "ueberwachen-titel" }, n + " · " + ansichtName(ansichtVon(n)) + (fensterOffen(n) ? "" : " · Fenster zu")), vorschau(n))),
+      el("div", null, el("div", { class: "ueberwachen-titel" }, "Handys"), handyVorschau(false)));
+  } else if (ueberwachenTab === "handys") {
+    inhalt = handyVorschau(true);
+  } else {
+    const wert = ansichtVon(ueberwachenTab);
+    inhalt = el("div", null,
+      el("div", { class: "zeile", style: "margin-bottom:8px" }, el("span", { class: "etikett" }, "zeigt"), ANSICHTEN.map(([w, t]) =>
+        el("button", { class: "knopf klein" + (w === wert ? " aktiv" : ""), onclick: () => tun("ansicht", { anzeige: ueberwachenTab, wert: w }) }, t))),
+      vorschau(ueberwachenTab));
+  }
+  return el("div", { class: "karte" }, el("h2", null, "Überwachen"), leiste, inhalt);
+}
+function ansichtName(w) { return (ANSICHTEN.find(([x]) => x === w) || [w, w])[1]; }
+function vorschau(name) {
+  const rahmen = el("div", { class: "vorschau-rahmen" });
+  const buehne = anzeigeInhalt(name, "vorschau");
+  rahmen.append(buehne);
+  requestAnimationFrame(() => { const r = rahmen.getBoundingClientRect(); einpassen(buehne, r.width, r.height); countdownsAktualisieren(rahmen); });
+  return rahmen;
+}
+
+/* Was die Schüler am Handy sehen, nachgebaut aus dem Zustand */
+function handyVorschau(gross) {
+  const s = Z.freigabe ? schrittNachId(Z.freigabe) : null;
+  const sch = s && s.schueler;
+  const online = sch ? ((Z.online.stimmen || {})[s.id] || {}) : {};
+  const antworten = sch ? ((Z.online.teilnehmer || {})[s.id] || 0) : 0;
+  let bildschirm;
+  if (!Z.raum) {
+    bildschirm = el("div", { class: "handy-warten" }, "Noch kein Raum. „Handys verbinden“ oder „Stunde starten“ legt ihn an.");
+  } else if (sch) {
+    bildschirm = el("div", null,
+      el("div", { class: "handy-frage" }, sch.frage || s.titel),
+      sch.kennung === "team" ? el("div", { class: "handy-klein" }, "Eure Teamnummer: [  ]") : null,
+      sch.mehrfach ? el("div", { class: "handy-klein" }, "Mehrere Antworten möglich.") : null,
+      (sch.optionen || []).map((o) => el("div", { class: "handy-option" }, el("span", { class: "handy-kreis" + (sch.mehrfach ? " eckig" : "") }), el("span", null, o), el("b", { class: "handy-zahl" }, online[o] || ""))),
+      el("div", { class: "handy-knopf" }, "Senden"),
+      el("div", { class: "handy-klein", style: "margin-top:8px;color:#2f8f4e;font-weight:600" }, antworten + (sch.kennung === "team" ? " Teams" : " Handys") + " haben geantwortet"));
+  } else {
+    bildschirm = el("div", { class: "handy-warten" }, el("div", { class: "handy-punkte" }, "● ● ●"), "Angemeldet. Warte auf die nächste Frage …");
+  }
+  const handy = el("div", { class: "handy" + (gross ? " gross" : "") },
+    el("div", { class: "handy-kopf" }, el("span", null, el("b", null, "Mitmachen"), " · ohne Namen"), el("span", null, Z.raum ? "Raum " + Z.raum.code : "")),
+    el("div", { class: "handy-inhalt" }, bildschirm));
+  const anmeldung = Z.raum ? el("div", { class: "handy-anmeldung" },
+    el("div", { class: "qr", html: qrFuer(anmeldeAdresse()) }),
+    el("div", null,
+      el("div", { style: "font-weight:700;color:var(--orange)" }, "Anmeldung"),
+      el("div", null, anmeldeKurz()),
+      el("div", null, "Code ", el("b", null, Z.raum.code)),
+      el("a", { href: anmeldeAdresse(), target: "_blank", rel: "noopener" }, "Schüler-Seite öffnen"),
+      Z.verbindung === "fehler" ? el("div", { style: "color:var(--rot);font-weight:600" }, "Server nicht erreichbar") : null)) : null;
+  return el("div", { class: "handy-bereich" + (gross ? " gross" : "") }, handy, gross ? anmeldung : (anmeldung ? el("div", { class: "handy-klein" }, anmeldeKurz()) : null));
 }
 
 function anzeigeKarte(name) {
@@ -224,16 +291,22 @@ function regieZeichnen(ziel, modus) {
   regieTakt(ziel);
 }
 
-function regieStarten() {
+let regieEingerichtet = false;
+function regieStarten(modus) {
+  ROLLE = "regie";
+  REGIE_MODUS = modus;
   document.title = "Regie · " + STUNDE.stunde.titel;
   document.body.classList.add("regie-seite");
   const ziel = document.getElementById("app");
-  beobachten(() => regieZeichnen(ziel, "fenster"));
-  setInterval(() => regieTakt(ziel), 500);
-  let groesse = 0;
-  addEventListener("resize", () => { clearTimeout(groesse); groesse = setTimeout(() => regieZeichnen(ziel, "fenster"), 150); });
-  tastenBelegen(null);
-  regieZeichnen(ziel, "fenster");
+  ziel.replaceChildren();
+  if (!regieEingerichtet) {
+    regieEingerichtet = true;
+    beobachten(() => { if (ROLLE === "regie") regieZeichnen(ziel, REGIE_MODUS); });
+    setInterval(() => { if (ROLLE === "regie") regieTakt(ziel); }, 500);
+    let groesse = 0;
+    addEventListener("resize", () => { clearTimeout(groesse); groesse = setTimeout(() => { if (ROLLE === "regie") regieZeichnen(ziel, REGIE_MODUS); }, 150); });
+  }
+  regieZeichnen(ziel, modus);
 }
 
 function regieSchublade() {

@@ -20,7 +20,7 @@ Konzept: `claude/Tafelsystem_Konzept_und_Steckbrief_Vorlage.md` im Projekt
 | Bauskript | prüft `Tafel.yaml` (Bausteine, Felder, Verweise, Pfade, Zeitsumme) und baut `Tafel.html` |
 | Regie | Ablauf mit Soll/Ist, Prognose, Notizen, Zähler, Handzeichen, Reiter, Marken, Countdown, Ergebnis aufs Board, Signal bei Soll-Ende, Zeiten als JSON sichern. Auf dem Laptop oder als Schublade über dem Board |
 | Anzeigen | `geteilt`, `tafel`, `auftrag`, `extern`, `schwarz`, Ablaufleiste. Zweites Fenster auf zweitem Bildschirm, abgeglichen ohne Netz |
-| Fenster und Monitore | Regie zeigt, welche Fenster offen sind, öffnet/schließt sie, ordnet jedes fest einem Monitor zu (Chrome/Edge, gilt je Laptop für alle Stunden), zusätzliche Fenster mit eigener Ansicht |
+| Fenster und Monitore | Regie zeigt, welche Fenster offen sind, öffnet/schließt/verschiebt sie. Monitor fest zuordnen (Chrome/Edge, gilt je Laptop für alle Stunden). Board geht ohne Antippen ins Vollbild auf seinem Monitor (Hauptfenster), Regie dann als eigenes Fenster. Karte „Überwachen“ mit allen Ansichten und der Handy-Sicht |
 | Sicherung | aktuelle Ansicht als PNG (Regie, 📷 am Board), alle Folien als PNG oder PDF, lokal in einem gewählten Ordner oder im Download-Ordner |
 | Bausteine **fertig** | `titel`, `bild`, `folie`, `qr`, `uhr`, `schwarz`, `auftrag` (Countdown, Material mit QR), `code` (Marken, Teile), `zeichnen` (Raster/Bild, Stift, Rückgängig, PNG), `ergebnis` |
 | Bausteine **Platzhalter** | `zuordnen`, `beschriften`, `urteilen`, `codestreifen`, `testfaelle`, `partner`, `kette`, `grafik`, `brett`, `sql`, `neu`. `code`: `fehler`, `probelauf`, `nebeneinander` fehlen |

@@ -183,8 +183,11 @@ function tun(typ, daten = {}) {
   senden();
   neuZeichnen();
 }
+const GESEHEN = new Set();
 function senden() {
-  const nachricht = { tafelsystem: "zustand", schluessel: SPEICHER_SCHLUESSEL, z: Z };
+  const id = Math.random().toString(36).slice(2) + Date.now();
+  GESEHEN.add(id);
+  const nachricht = { tafelsystem: "zustand", schluessel: SPEICHER_SCHLUESSEL, z: Z, id };
   for (const w of PARTNER) {
     try { if (w.closed) PARTNER.delete(w); else w.postMessage(nachricht, "*"); } catch (e) { PARTNER.delete(w); }
   }
@@ -200,12 +203,19 @@ window.addEventListener("message", (e) => {
   if (d.tafelsystem === "schliessen") { window.close(); return; }
   const neu = e.source && !PARTNER.has(e.source);
   if (e.source) PARTNER.add(e.source);
-  if (d.name && e.source && FENSTER[d.name] !== e.source) { FENSTER[d.name] = e.source; neuZeichnen(); }
+  if ((d.tafelsystem === "da" || d.tafelsystem === "hallo") && d.name && e.source) {
+    const vorher = JSON.stringify(ANZEIGE_STATUS[d.name] || {});
+    ANZEIGE_STATUS[d.name] = { haupt: !!d.haupt, vollbild: !!d.vollbild };
+    if (FENSTER[d.name] !== e.source || vorher !== JSON.stringify(ANZEIGE_STATUS[d.name])) { FENSTER[d.name] = e.source; neuZeichnen(); }
+  }
   if (d.tafelsystem === "hallo" || (d.tafelsystem === "da" && neu)) {
     e.source.postMessage({ tafelsystem: "zustand", schluessel: SPEICHER_SCHLUESSEL, z: Z }, "*");
   } else if (d.tafelsystem === "zustand") {
+    if (d.id && GESEHEN.has(d.id)) return;
+    if (d.id) GESEHEN.add(d.id);
     Z = Object.assign(neuerZustand(), d.z);
     speichern();
+    for (const w of PARTNER) if (w !== e.source) { try { w.postMessage(d, "*"); } catch (x) { PARTNER.delete(w); } }
     neuZeichnen();
   }
 });

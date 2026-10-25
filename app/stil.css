@@ -289,3 +289,30 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .fenster-status { color: var(--grau-hell); font-size: 16px; }
 .fenster-status.offen { color: var(--gruen); }
 .fenster-name { font-weight: 600; }
+
+.vollbild-hinweis { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; background: rgba(0,0,0,.55); color: #fff; font-size: 4vw; text-align: center; cursor: pointer; }
+.vollbild-hinweis b { display: block; font-size: 1.4em; }
+
+/* Überwachen */
+.ueberwachen-raster { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; align-items: start; }
+.ueberwachen-titel { font-size: 12px; color: var(--grau); margin-bottom: 4px; font-weight: 600; }
+.handy-bereich { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+.handy { width: 200px; border: 6px solid #2a2a2e; border-radius: 22px; overflow: hidden; background: var(--flaeche); font-size: 11px; }
+.handy.gross { width: 280px; font-size: 14px; }
+.handy-kopf { background: #fff; border-bottom: 2px solid var(--orange); padding: 7px 10px; display: flex; justify-content: space-between; }
+.handy-kopf b { color: var(--orange); }
+.handy-inhalt { padding: 10px; min-height: 220px; }
+.handy.gross .handy-inhalt { min-height: 360px; }
+.handy-frage { font-weight: 700; font-size: 1.2em; margin-bottom: 8px; line-height: 1.25; }
+.handy-option { display: flex; gap: 8px; align-items: center; background: #fff; border: 1.5px solid var(--linie); border-radius: 8px; padding: 7px 8px; margin-bottom: 6px; }
+.handy-kreis { width: 12px; height: 12px; border: 1.5px solid var(--grau); border-radius: 50%; flex: none; }
+.handy-kreis.eckig { border-radius: 3px; }
+.handy-zahl { margin-left: auto; color: var(--blau); }
+.handy-knopf { background: var(--orange); color: #fff; text-align: center; font-weight: 600; border-radius: 8px; padding: 8px; margin-top: 4px; }
+.handy-klein { color: var(--grau); font-size: .9em; margin: 4px 0; }
+.handy-warten { color: var(--grau); text-align: center; padding: 50px 6px; }
+.handy-punkte { color: var(--orange); letter-spacing: 4px; margin-bottom: 8px; }
+.handy-anmeldung { display: flex; gap: 12px; align-items: center; background: #fff; border: 1px solid var(--linie); border-radius: 10px; padding: 10px; }
+.handy-anmeldung .qr { width: 130px; height: 130px; }
+.handy-anmeldung .qr svg { width: 100%; height: 100%; display: block; }
+.handy-anmeldung a { color: var(--blau); font-size: 13px; }
