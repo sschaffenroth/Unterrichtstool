@@ -75,6 +75,14 @@ Muster anbieten, damit die Fach-Chats die Bausteine danach anordnen.
 | SYS | Auf dem Bild tippen (Hotspot) | SYS, später ET1 | I10 |
 | GP, ET1 | Codezeilen ordnen am Handy (ohne Ablenkzeilen) | GP, ET1 | I11 |
 | DB | SQL live im Browser (sql.js) | DB | B12 |
+| K1 | Think-Pair-Share, 1-2-4-All als `phasen` im Auftrag | alle | B23 |
+| K2 | Energizer-Knopf in der Regie mit Sammlung | alle | B24 |
+| K4 | Wortwolke | alle | I12 |
+| K5 | Lerntempoduett und Helfersystem (baut auf I7, I8) | Praxisphasen | I13 |
+| K6 | Fehlerzeile antippen | GP, ET1, DB | I14 |
+| K | Zielscheibe (Selbsteinschätzung am Stundenende) | alle | I15 |
+
+Zweite Auswahl am 25.10.2026 (K = Nummer in „Nächste Kandidaten“, Teil 6).
 
 Peer Instruction (zweimal abstimmen) ist **nicht** vorgemerkt.
 

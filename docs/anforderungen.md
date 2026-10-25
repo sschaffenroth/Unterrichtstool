@@ -86,6 +86,8 @@ doppelt anlegen. Priorität: **H** unverzichtbar für den Start · **M** wäre s
 | B15 | `zeichnen`: Hintergrund Bild oder Zahlenraster (z. B. 3 × 3-Kern), Zellen beschreibbar, Freihand. In SYS Kurzarbeitsstoff (Faltung, Gewichtssumme) | SYS, GP | H | 2 |
 | B16 | `vorhersage`: Auflösung in einem späteren Schritt (`aufloesen_in`) | SYS | M | 2 |
 | B22 | Rollenwechsel beim Pair Programming (`rollenwechsel_min`), Signal an der Tafel | Ideen (vorgemerkt) | M | 3 |
+| B23 | `auftrag.phasen`: Sozialformen nacheinander (allein, zu zweit, zu viert, alle), Tafel wechselt Piktogramm und Countdown selbst | Ideen (vorgemerkt) | M | 3 |
+| B24 | Energizer-Knopf in der Regie: schiebt 1 bis 3 min ein (zählt nicht gegen den Plan), Anleitung und Countdown an der Tafel, Sammlung mitgeliefert, Begriffe aus `BEGRIFFE.md` | Ideen (vorgemerkt) | M | 3 |
 | B17 | `einbetten`: vorhandene HTML-Datei als Reiter, Zustand bleibt (Übergang) | GP | H | 2 ✓ |
 | B18 | `folie`: Schrift passt sich an, `aufdecken` Absatz für Absatz | GP | H | 2 ✓ |
 | B19 | `code.marken als: zeile` (Docstring/Kommentar als Codezeile), Schrift füllt die Fläche | GP | H | 2 ✓ |
@@ -104,6 +106,10 @@ doppelt anlegen. Priorität: **H** unverzichtbar für den Start · **M** wäre s
 | I9 | Sicherheit zur Antwort („sicher“/„geraten“), Regie zeigt „falsch, aber sicher“ | Ideen (vorgemerkt) | M | 3 |
 | I10 | Hotspot: auf dem Bild tippen, Punktwolke an der Tafel | SYS, Ideen (vorgemerkt) | M | 3 |
 | I11 | Codezeilen ordnen am Handy (Parsons, ohne Ablenkzeilen) | GP, ET1, Ideen (vorgemerkt) | M | 3 |
+| I12 | `wortwolke`: 1 bis 3 Wörter je Handy, Tafel nach Häufigkeit, Regie blendet einzelne aus | Ideen (vorgemerkt) | M | 3 |
+| I13 | Lerntempoduett und Helfersystem: wer fertig ist oder helfen kann, meldet sich, Tafel bildet Paare über Platznummern (baut auf I7, I8) | Ideen (vorgemerkt) | M | 3 |
+| I14 | Fehlerzeile antippen: Handy zeigt Code, jeder tippt die Fehlerzeile, Tafel färbt Zeilen nach Anzahl | GP, ET1, DB, Ideen (vorgemerkt) | M | 3 |
+| I15 | Zielscheibe: Regler je Dimension am Handy, Punkte auf der Zielscheibe an der Tafel, ohne Namen | Ideen (vorgemerkt) | M | 3 |
 | I2 | Vorhersage per Handy, gesammelt an der Tafel | GP | M | 3 |
 | I3 | Exit-Ticket am Handy mit Muddiest Point, nur Regie, Lehrkraft markiert richtig/falsch | GP, Ideen (vorgemerkt) | M | 3 |
 | I4 | Hilfe melden mit Platznummer | GP | N | 4 |
