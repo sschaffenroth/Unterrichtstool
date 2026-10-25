@@ -3,7 +3,40 @@
 Tafelsystem für den Unterricht an der Technikerschule: Touch-Tafel, Auftragsansicht,
 Regie für die Lehrkraft und Schüler-Interaktion per QR-Code, für jede Stunde jedes Fachs.
 
-**Stand:** Grundgerüst. Noch keine Funktion, nur Konzept und Ordner.
+**Stand:** erster Abspieler (Version 0.1). Aus einer `Tafel.yaml` entsteht eine HTML-Datei, die
+offline läuft: Regie, Board mit Ansichten geteilt/tafel/auftrag/extern/schwarz, Bausteine titel,
+bild, folie, qr, auftrag, code (mit Marken), zeichnen, ergebnis. Schüler-Handys noch nicht
+angebunden, Abstimmungen werden als Handzeichen in der Regie gezählt.
+
+## Stunde bauen
+
+```
+pip install pyyaml pillow pygments segno
+python build/bauen.py PFAD/ZUM/Stundenordner/Tafel.yaml
+```
+
+Prüft die Datei und schreibt `Tafel.html` daneben. Nur prüfen: `--nur-pruefen`.
+
+## Bedienung
+
+| Was | Wie |
+|---|---|
+| Regie | `Tafel.html` in Chrome oder Edge öffnen |
+| Board als zweiter Bildschirm | in der Regie „Board öffnen“, Fenster auf das Board, einmal antippen = Vollbild |
+| nur ein Rechner am Board | „Hier Board zeigen“, Regie dann hinter ☰ (oder Taste R) |
+| weiter / zurück | Pfeiltasten, Bild↑/Bild↓ (Presenter), Leertaste, Knöpfe ‹ › |
+| Board schwarz | Taste B |
+| Vollbild | Taste F oder ⛶ |
+| Zeiten, Zähler, Stimmen sichern | „Zeiten sichern“ (JSON) |
+
+Der Zustand bleibt beim Neuladen erhalten (Browser-Speicher). „Zurücksetzen“ löscht ihn.
+
+## Tests
+
+```
+pip install pytest playwright && python -m playwright install chromium
+python -m pytest tests/
+```
 
 ## Dokumente
 

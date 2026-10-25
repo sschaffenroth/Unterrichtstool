@@ -1,6 +1,6 @@
 # Tafelsystem: Stand und Auftrag „Stunde schreiben“
 
-Stand 25.10.2026, Änderung 1 (Meldung SYS) · Stundenformat `tafelstunde/0` (Entwurf) · Repo `sschaffenroth/Unterrichtstool`
+Stand 25.10.2026, Änderung 1 (Meldung SYS), Abspieler 0.1 · Stundenformat `tafelstunde/0` (Entwurf) · Repo `sschaffenroth/Unterrichtstool`
 Was sich geändert hat und die Antworten auf Meldungen: **Teil 4**.
 Konzept: `claude/Tafelsystem_Konzept_und_Steckbrief_Vorlage.md` im Projekt
 
@@ -12,13 +12,18 @@ Konzept: `claude/Tafelsystem_Konzept_und_Steckbrief_Vorlage.md` im Projekt
 
 ## Teil 1 · Was das Werkzeug heute kann
 
-**Ehrlich gesagt: noch fast nichts.** Das Werkzeug steht am Anfang.
+**Erster Abspieler (Version 0.1, 25.10.2026).** Aus `Tafel.yaml` baut der Werkzeug-Chat eine
+`Tafel.html` daneben. Sie läuft offline in Chrome oder Edge.
 
 | Was | Stand |
 |---|---|
-| Repository | Grundgerüst mit Ordnern, Konzept, Anforderungskatalog. **Keine Funktion.** |
-| Stundenformat | Entwurf `tafelstunde/0` (Teil 2). Noch kein Bauskript, das es liest |
-| Tafel, Auftrag, Regie | geplant (Stufe 1). Heute nicht nutzbar |
+| Bauskript | prüft `Tafel.yaml` (Bausteine, Felder, Verweise, Pfade, Zeitsumme) und baut `Tafel.html` |
+| Regie | Ablauf mit Soll/Ist, Prognose, Notizen, Zähler, Handzeichen, Reiter, Marken, Countdown, Ergebnis aufs Board, Signal bei Soll-Ende, Zeiten als JSON sichern. Auf dem Laptop oder als Schublade über dem Board |
+| Anzeigen | `geteilt`, `tafel`, `auftrag`, `extern`, `schwarz`, Ablaufleiste. Zweites Fenster auf zweitem Bildschirm, abgeglichen ohne Netz |
+| Bausteine **fertig** | `titel`, `bild`, `folie`, `qr`, `uhr`, `schwarz`, `auftrag` (Countdown, Material mit QR), `code` (Marken, Teile), `zeichnen` (Raster/Bild, Stift, Rückgängig, PNG), `ergebnis` |
+| Bausteine **Platzhalter** | `zuordnen`, `beschriften`, `urteilen`, `codestreifen`, `testfaelle`, `partner`, `kette`, `grafik`, `brett`, `sql`, `neu`. `code`: `fehler`, `probelauf`, `nebeneinander` fehlen |
+| Schüler-Handys | **noch nicht angebunden.** `abstimmung` und `vorhersage` zählt die Lehrkraft als Handzeichen in der Regie, `ergebnis` zeigt die Balken |
+| Regie auf dem Handy | nur auf demselben Rechner wie das Board (kein Netz-Abgleich) |
 | Prototyp KIG ES 06 | läuft: Tafeldatei offline (Spielbrett, Kette, Zuordnen, Vorhersage, Formular, Zeitplan, PNG) + Abstimmungs-Worker auf Cloudflare (QR, `/lehrer`). Fachgebunden, noch nicht im Repo |
 | Tafel-Apps GP DS 05 bis 07 | laufen als einzelne HTML-Dateien in `Lernhilfen/`. Noch nicht im Repo |
 | Schüler-Handy | nur über den ES-06-Worker (Abstimmung, Zuordnen, Formular) |
@@ -26,11 +31,11 @@ Konzept: `claude/Tafelsystem_Konzept_und_Steckbrief_Vorlage.md` im Projekt
 
 **Was das für dich heißt:**
 
-- Die Stunde, die du jetzt schreibst, **läuft noch nicht im Werkzeug**. Sie ist der Pilot und der
-  Testfall, an dem Stufe 1 und 2 gebaut werden.
-- Bereite den Unterricht deshalb **wie gewohnt** vor (PowerPoint, Tafel-Apps, Druck). Die
-  Stunden-Datei kommt dazu, sie ersetzt noch nichts.
-- Je genauer die Datei ist, desto schneller wird sie lauffähig.
+- Stunden aus den fertigen Bausteinen laufen. Wo ein Platzhalter steht, bleibt die bisherige
+  Lösung (PowerPoint, Tafel-App) als Rückfall bereit.
+- Die PowerPoint bleibt vorerst Notfallfassung. Probelauf am Board vor der ersten echten Stunde.
+- Bauen lässt du die Stunde vom Werkzeug-Chat („Tafel.yaml für DS xx ist fertig“). Die Prüfmeldungen
+  des Bauskripts bekommst du zurück.
 
 ---
 

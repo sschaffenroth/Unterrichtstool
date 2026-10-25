@@ -1,0 +1,68 @@
+# Beispielstunde für die Tests. Erfundene Inhalte, keine echten Notizen.
+format: tafelstunde/0
+stunde:
+  fach: TEST
+  nr: 1
+  titel: "Beispielstunde"
+  datum: 2026-01-01
+  dauer: 10
+  klasse: Testklasse
+anzeigen:
+  Board: geteilt
+ablaufleiste: true
+schritte:
+  - id: start
+    titel: Start
+    abschnitt: "Anfang"
+    soll_min: 1
+    tafel: { baustein: titel, text: "Beispiel", untertitel: "Untertitel" }
+  - id: tipp
+    titel: Tipp
+    abschnitt: "Anfang"
+    soll_min: 1
+    tafel: { baustein: bild, datei: bild.png, frage: "Was ist das?", untertitel: "Zweite Zeile" }
+    auftrag: { baustein: auftrag, text: "Tippt eine Antwort.", sozialform: EA, dauer_min: 1, material: [{ text: "Link", url: "https://example.org" }, "Heft"] }
+    schueler: { baustein: vorhersage, frage: "Farbe?", optionen: [orange, blau], loesung: orange, aufloesen_in: code }
+    regie: { notiz: "Notiz zum Tipp", zaehler: ["Meldungen"] }
+  - id: extern
+    titel: Referat
+    abschnitt: "Mitte"
+    soll_min: 1
+    zeige: { Board: extern }
+  - id: reserve
+    titel: Reserve
+    abschnitt: "Mitte"
+    soll_min: 1
+    ausgeblendet: true
+    tafel: { baustein: folie, markdown: "**fett** und `code`" }
+  - id: code
+    titel: Code
+    abschnitt: "Mitte"
+    soll_min: 2
+    tafel:
+      reiter:
+        - titel: "Code"
+          baustein: code
+          sprache: python
+          quelltext: |
+            a = 1
+            b = a + 1
+            print(b)
+          marken:
+            - { zeile: 1, label: "eins", einblenden: "Erklärung eins" }
+            - { zeile: 3, label: "drei", einblenden: "Erklärung drei" }
+        - titel: "Rechnen"
+          baustein: zeichnen
+          hintergrund: { raster: [[1, 2], [3, 4]], titel: "Raster" }
+        - titel: "Nachbar"
+          baustein: bild
+          datei: ../05_Vorher/nachbar.png
+  - id: ende
+    titel: Ende
+    abschnitt: "Ende"
+    soll_min: 5
+    tafel:
+      reiter:
+        - { titel: "Ergebnis", baustein: ergebnis, von: tipp }
+        - { titel: "QR", baustein: qr, url: "https://example.org/repo", text: "Repository" }
+        - { titel: "Neu", baustein: neu, name: "wunsch", beschreibung: "Etwas Neues" }
