@@ -102,6 +102,7 @@ function anzeigeImVollbildStarten(name) {
   const platz = rm ? { left: rm.availLeft, top: rm.availTop, width: rm.availWidth, height: rm.availHeight }
     : rp ? { left: rp.x, top: rp.y, width: rp.w, height: rp.h }
     : { left: screenX, top: screenY, width: outerWidth, height: outerHeight };
+  navigator.permissions.query({ name: "window-management" }).then((r) => prot("Erlaubnis beim Klick: " + r.state)).catch(() => {});
   prot("Vollbild-Start " + name + " auf " + (ziel.label || "?") + " @" + ziel.left + "," + ziel.top + " · Klick noch gültig: " + (navigator.userActivation ? navigator.userActivation.isActive : "?"));
   // Reihenfolge ist wichtig: erst Vollbild auf dem anderen Monitor anfordern, dann das Regie-Fenster öffnen (ein Klick reicht für beides)
   const fs = document.documentElement.requestFullscreen({ screen: ziel });
@@ -110,8 +111,19 @@ function anzeigeImVollbildStarten(name) {
   prot("Regie-Fenster: " + (w ? "offen" : "blockiert"));
   if (w) { REGIE_FENSTER = w; partnerVerbinden(w); }
   // Dieses Fenster wird erst Board, wenn das Vollbild auf dem Tafel-Monitor wirklich geklappt hat
-  fs.then(() => {
-    prot("Vollbild angenommen, Fenster jetzt bei " + screenX + "," + screenY + " " + innerWidth + "×" + innerHeight);
+  fs.then(async () => {
+    await new Promise((r) => setTimeout(r, 300));
+    prot("Vollbild angenommen, Fenster jetzt bei " + screenX + "," + screenY + " " + innerWidth + "×" + innerHeight + " · Ziel " + ziel.left + "," + ziel.top + " " + ziel.width + "×" + ziel.height);
+    const mitte = screenX + outerWidth / 2;
+    if (!(mitte >= ziel.left && mitte < ziel.left + ziel.width)) {
+      // Browser hat das Vollbild auf dem eigenen Monitor gemacht (z. B. ohne Erlaubnis „Fensterverwaltung“)
+      prot("Vollbild auf falschem Monitor, zurück zur Regie");
+      if (document.fullscreenElement) await document.exitFullscreen().catch(() => {});
+      if (w && !w.closed) w.close();
+      REGIE_FENSTER = null;
+      alert("Der Browser hat das Vollbild auf diesem Monitor gemacht statt auf „" + (ziel.label || "der Tafel") + "“.\nMeist fehlt die Erlaubnis „Fensterverwaltung“: Schloss-Symbol links in der Adresszeile → Fensterverwaltung → Zulassen, dann die Datei neu laden.\n\nBitte danach „Diagnose“ öffnen und mir den Text schicken.");
+      return;
+    }
     FUEHREND = !w;            // die Regie im eigenen Fenster holt die Handy-Antworten
     anzeigeStarten(name);
     hauptMelden(name);

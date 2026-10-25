@@ -160,8 +160,8 @@ def test_board_im_hauptfenster(tmp_path: Path) -> None:
         haupt.goto(datei.as_uri())
         haupt.evaluate("""() => {
             BILDSCHIRME = [
-              { label: 'Laptop', left: 0, top: 0, width: 1400, height: 900, availLeft: 0, availTop: 0, availWidth: 1400, availHeight: 860, isPrimary: true },
-              { label: 'Tafel', left: 1400, top: 0, width: 1920, height: 1080, availLeft: 1400, availTop: 0, availWidth: 1920, availHeight: 1080, isPrimary: false }];
+              { label: 'Laptop', left: 1920, top: 0, width: 1400, height: 900, availLeft: 1920, availTop: 0, availWidth: 1400, availHeight: 860, isPrimary: true },
+              { label: 'Tafel', left: 0, top: 0, width: 1920, height: 1080, availLeft: 0, availTop: 0, availWidth: 1920, availHeight: 1080, isPrimary: false }];
             geraetAendern(g => { g.monitor = { Board: fingerabdruck(BILDSCHIRME[1]) }; });
             document.documentElement.requestFullscreen = () => Promise.resolve();
             neuZeichnen();
@@ -171,9 +171,8 @@ def test_board_im_hauptfenster(tmp_path: Path) -> None:
             haupt.get_by_role("button", name="Fenster öffnen").click()
         regie = info.value
         regie.on("pageerror", lambda e: fehler.append(f"regie: {e}"))
-        haupt.wait_for_selector(".buehne")
+        haupt.wait_for_function("ROLLE === 'anzeige'")
         regie.wait_for_selector(".schritt-steuerung")
-        assert haupt.evaluate("ROLLE") == "anzeige"
         regie.wait_for_function("document.querySelector('.fenster-zeile .fenster-status.offen') !== null")
         regie.locator(".schritt-steuerung .weiter").click()
         haupt.wait_for_selector(".b-bild")
