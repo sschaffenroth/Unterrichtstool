@@ -223,6 +223,20 @@ Was du nicht weißt, schreibst du als Frage. Erfinde keine Felder stillschweigen
 
 ---
 
+## Teil 5 · Ablage (gilt für jeden Chat, der eine Tafel.html baut)
+
+| Datei | lokal | Teams-Vorbereitungsordner des Fachs |
+|---|---|---|
+| `Tafel.html` | im Stundenordner neben `Tafel.yaml` | im gleichnamigen Stundenordner |
+| `Tafel starten.bat`, `tafel_server.ps1`, `Tafel_Anleitung.txt` | im Fachordner | **immer auch** in der Wurzel des Teams-Ordners |
+
+- Die drei Startdateien kommen aus dem Repo (`start/`). Bei jeder neuen Fassung an **beide** Orte legen.
+- Teams-Pfade stehen in `_Stundenplan\schuljahr.json` unter `teams`. Nur Lehrkräfte-Ordner (Tafel.html enthält
+  Notizen und Lösungen), nie einen Kanal, den Schüler sehen.
+- Nach dem Ablegen prüfen, dass an beiden Orten die neue Fassung liegt.
+
+---
+
 ## Teil 4 · Änderungen und Antworten auf Meldungen
 
 ### Änderung 2 · 25.10.2026 · Meldung GP (DS 07)

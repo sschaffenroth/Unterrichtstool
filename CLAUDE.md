@@ -9,3 +9,6 @@
 - Die Anwendung muss als Offline-Einzeldatei laufen (Chromium, `file://`). Keine Abhängigkeit, die
   das verhindert.
 - Jeder Baustein bekommt einen Browser-Test unter `tests/`.
+- Ablage: `Tafel.html` in den Stundenordner lokal **und** in den Teams-Ordner des Fachs. Die Startdateien aus
+  `start/` (`Tafel starten.bat`, `tafel_server.ps1`, `Tafel_Anleitung.txt`) **immer** in den Fachordner und in die
+  Wurzel des Teams-Ordners, bei jeder neuen Fassung an beide Orte. Danach an beiden Orten prüfen.
