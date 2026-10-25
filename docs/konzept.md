@@ -35,6 +35,11 @@ Zuweisung ist frei: Jeder Bildschirm (Anzeige A, B, C …) kann jede **Ansicht**
 ein Bildschirm der Stunde, Arbeitsauftrag, QR-Code, Ergebnisse, Uhr/Countdown, Bild/PDF-Seite,
 schwarz. Die Lehrkraft schaltet in der Regie um, oder der Ablauf der Stunde schaltet automatisch.
 
+**Räume mit nur einer Anzeige** (z. B. SYS: ein Board, kein Beamer): Ansicht `geteilt` zeigt den
+Tafel-Baustein groß und daneben eine schmale Auftragsleiste mit Countdown. Ansicht `extern` heißt:
+Das Board zeigt einen fremden Eingang (Laptop per HDMI). Die Regie zählt weiter und gibt bei
+Soll-Ende ein Signal. Die Regie liegt dann auf Laptop oder Handy. Format: `docs/stand.md`, Teil 2.
+
 ## A3 · Die Stunde als Daten
 
 Eine Stunde ist **keine Folienpräsentation**, sondern ein **Ablauf aus Schritten**. Jeder Schritt
