@@ -100,6 +100,7 @@ var Raum = class extends DurableObject {
       })),
       countdown: status.countdown ? { rest: Math.max(0, Number(status.countdown.rest) || 0), laeuft: !!status.countdown.laeuft } : null,
       extern: !!status.extern,
+      tafel: tafelSauber(status.tafel),
       gesendet: Date.now()
     };
     await this.ctx.storage.put("status", sauber);
@@ -160,6 +161,26 @@ var Raum = class extends DurableObject {
     return { ok: true };
   }
 };
+function tafelSauber(t, tiefe = 0) {
+  if (t == null || tiefe > 8) return null;
+  if (typeof t === "string") return t.slice(0, 3e3);
+  if (typeof t === "number" || typeof t === "boolean") return t;
+  if (Array.isArray(t)) return t.slice(0, 60).map((x) => tafelSauber(x, tiefe + 1));
+  if (typeof t === "object") {
+    const aus = {};
+    for (const [k, v] of Object.entries(t).slice(0, 20)) {
+      if (!/^[a-z_]{1,20}$/.test(k)) continue;
+      if (k === "url") {
+        if (/^https?:\/\//.test(String(v))) aus.url = String(v).slice(0, 500);
+        continue;
+      }
+      aus[k] = tafelSauber(v, tiefe + 1);
+    }
+    return aus;
+  }
+  return null;
+}
+__name(tafelSauber, "tafelSauber");
 
 // ../../../tmp/claude-0/-home-claude/1093c21b-5bd9-5edc-ac32-98a747a32099/scratchpad/npm/node_modules/wrangler/templates/middleware/middleware-ensure-req-body-drained.ts
 var drainBody = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx) => {

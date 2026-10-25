@@ -122,6 +122,25 @@ function vorschau(name) {
   return rahmen;
 }
 
+/* Tafel-Inhalt in der Handy-Vorschau, wie public/schueler.html ihn zeigt */
+function handyTafel(t) {
+  if (!t) return null;
+  let inhalt;
+  if (t.art === "titel" || t.art === "bild") inhalt = [el("div", { style: "font-weight:700" }, t.text || ""), t.untertitel ? el("div", { class: "handy-klein" }, t.untertitel) : null];
+  else if (t.art === "folie") inhalt = el("div", { style: "white-space:pre-wrap" }, t.text || "");
+  else if (t.art === "link") inhalt = el("div", { style: "font-weight:600" }, (t.text || t.url) + " ↗");
+  else if (t.art === "code") inhalt = [el("pre", { class: "handy-code" }, (t.zeilen || []).join("\n")),
+    (t.erklaerungen || []).map((e) => el("div", { class: "handy-klein", style: "color:var(--gruen)" }, "Zeile " + e.zeile + " · " + e.label + ": " + e.text))];
+  else if (t.art === "ergebnis") inhalt = (t.bloecke || []).map((b) => {
+    const max = Math.max(1, ...b.optionen.map((o) => o.n));
+    return el("div", null, el("div", { style: "font-weight:700;margin-bottom:3px" }, b.frage),
+      b.optionen.map((o) => el("div", { class: "handy-balken" + (o.loesung ? " loesung" : "") },
+        el("span", null, o.name), el("div", { class: "bahn" }, el("div", { style: "width:" + (o.n / max * 100) + "%" })), el("b", null, o.n))));
+  });
+  else inhalt = el("div", { class: "handy-klein" }, t.text || "");
+  return el("div", { class: "handy-tafel" }, el("div", { class: "handy-klein", style: "text-transform:uppercase;margin:0 0 2px" }, "An der Tafel" + (t.reiter ? " · " + t.reiter : "")), inhalt);
+}
+
 /* Was die Schüler am Handy sehen, nachgebaut aus dem Zustand (wie public/schueler.html) */
 function handyVorschau(gross) {
   const s = Z.freigabe ? schrittNachId(Z.freigabe) : null;
@@ -145,12 +164,13 @@ function handyVorschau(gross) {
     const begleitung = el("div", { class: "handy-begleitung" },
       st.abschnitt ? el("div", { class: "handy-abschnitt" }, st.abschnitt) : null,
       el("div", { class: "handy-schritt" }, st.titel),
+      handyTafel(st.tafel),
       a ? el("div", { class: "handy-auftrag" },
         el("div", { class: "handy-auftrag-kopf" }, el("b", null, FORM[a.sozialform] || a.sozialform || "Auftrag"),
           Z.countdown ? el("b", { class: "handy-uhr", "data-countdown": schritt().id }, "") : null),
         el("div", { class: "handy-satz" }, a.text),
         a.abgabe ? el("div", { class: "handy-klein" }, el("b", null, "Abgabe: "), a.abgabe) : null)
-        : el("div", { class: "handy-klein" }, st.extern ? "Gerade läuft ein Vortrag." : "Schaut nach vorn an die Tafel."),
+        : st.tafel ? null : el("div", { class: "handy-klein" }, st.extern ? "Gerade läuft ein Vortrag." : "Schaut nach vorn an die Tafel."),
       st.material.map((m) => el("div", { class: "handy-material" + (m.url ? "" : " ohne-link") },
         el("div", { style: "font-weight:600" }, m.text, m.url ? el("span", { style: "color:var(--orange)" }, " ↗") : null),
         m.ort ? el("div", { class: "handy-klein" }, "Ort: " + m.ort) : null,

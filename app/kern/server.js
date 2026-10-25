@@ -95,12 +95,45 @@ function begleitStatus() {
     auftrag: a ? { text: a.text, sozialform: a.sozialform, dauer_min: a.dauer_min, abgabe: a.abgabe } : null,
     material: (a && a.material ? a.material : []).map((m) => ({ text: m.text, url: m.url || "", ort: m.ort || "", datei: m.datei || "" })),
     countdown: Z.countdown && rest != null ? { rest: Math.max(0, Math.round(rest)), laeuft: !!Z.countdown.seit } : null,
+    tafel: tafelAlsText(s),
   };
+}
+
+/* Was gerade auf der Tafel steht, als Text fürs Handy (keine Bilder, keine Notizen, Lösungen nur wenn aufgelöst) */
+function htmlZuText(html) { const d = document.createElement("div"); d.innerHTML = html || ""; return d.innerText || d.textContent || ""; }
+function tafelAlsText(s) {
+  if (!s.tafel) return null;
+  if (alleAnzeigen().every((n) => ["extern", "schwarz", "auftrag"].includes(ansichtVon(n)))) return null;
+  const i = Math.min(Z.reiter[s.id] || 0, s.tafel.reiter.length - 1);
+  const b = s.tafel.reiter[i];
+  const reiter = s.tafel.reiter.length > 1 ? b.titel || "" : "";
+  const schluessel = s.id + ":" + i;
+  if (b.baustein === "titel") return { art: "titel", reiter, text: b.text, untertitel: b.untertitel || "" };
+  if (b.baustein === "bild") return b.frage || b.untertitel ? { art: "bild", reiter, text: b.frage || "", untertitel: b.untertitel || "" } : { art: "hinweis", reiter, text: b.alt ? "Bild: " + b.alt : "Bild an der Tafel" };
+  if (b.baustein === "folie") return { art: "folie", reiter, text: htmlZuText(b.html) };
+  if (b.baustein === "qr") return { art: "link", reiter, text: b.text || b.url, url: b.url };
+  if (b.baustein === "code") {
+    const offen = Z.marken[schluessel] || 0;
+    return { art: "code", reiter, zeilen: (b.zeilen_html || []).map(htmlZuText),
+      erklaerungen: (b.marken || []).slice(0, offen).map((m) => ({ zeile: m.zeile, label: m.label, text: m.einblenden || "" })) };
+  }
+  if (b.baustein === "ergebnis") {
+    const ids = Array.isArray(b.von) ? b.von : [b.von];
+    return { art: "ergebnis", reiter, bloecke: ids.map((id) => {
+      const q = schrittNachId(id), sch = q && q.schueler;
+      if (!sch) return null;
+      const st = stimmenVon(id);
+      const loesung = vorhersageAufgeloest(id, s) ? sch.loesung : null;
+      return { frage: sch.frage || q.titel, optionen: (sch.optionen || []).map((o) => ({ name: o, n: st[o] || 0, loesung: o === loesung })) };
+    }).filter(Boolean) };
+  }
+  if (b.baustein === "zeichnen") return { art: "hinweis", reiter, text: "An der Tafel wird gerechnet" + (b.hintergrund && b.hintergrund.titel ? ": " + b.hintergrund.titel : ".") };
+  return { art: "hinweis", reiter, text: "An der Tafel: " + (b.titel || s.titel) };
 }
 async function statusSenden() {
   const st = begleitStatus();
   const c = Z.countdown;
-  const schluessel = JSON.stringify([st.titel, st.auftrag, st.material, st.extern, c && [c.id, c.dauer, c.basis, !!c.seit]]);
+  const schluessel = JSON.stringify([st.titel, st.auftrag, st.material, st.extern, st.tafel, c && [c.id, c.dauer, c.basis, !!c.seit]]);
   if (schluessel === statusZuletzt && Date.now() - statusZeit < 30000) return;
   await serverRufen("/api/raum/" + Z.raum.code + "/status", { token: Z.raum.token, status: st });
   statusZuletzt = schluessel;

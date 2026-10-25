@@ -337,3 +337,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .handy-material.ohne-link { border-style: dashed; }
 .handy-material code { font-size: .9em; background: var(--flaeche); padding: 0 4px; border-radius: 3px; }
 .handy-material code { word-break: break-all; display: inline-block; max-width: 100%; }
+.handy-tafel { border-left: 3px solid var(--orange); padding: 4px 8px; margin: 0 0 8px; background: #fff; }
+.handy-code { font: 10px Consolas, Menlo, monospace; background: var(--flaeche); padding: 4px; margin: 2px 0; overflow-x: auto; white-space: pre; }
+.handy-balken { display: grid; grid-template-columns: 60px 1fr 18px; gap: 4px; align-items: center; margin: 2px 0; }
+.handy-balken .bahn { height: 8px; background: var(--flaeche); border-radius: 3px; overflow: hidden; }
+.handy-balken .bahn div { height: 100%; background: var(--blau); }
+.handy-balken.loesung span { color: var(--gruen); font-weight: 700; }
+.handy-balken.loesung .bahn div { background: var(--gruen); }
