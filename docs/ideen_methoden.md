@@ -14,7 +14,7 @@ Bezug zu `docs/anforderungen.md` in eckigen Klammern.
 
 ---
 
-## 1 · Schnell gebaut, großer Nutzen
+## 1. Schnell gebaut, großer Nutzen
 
 | Idee | Was passiert | Warum | Fächer | Aufwand |
 |---|---|---|---|---|
@@ -27,7 +27,7 @@ Bezug zu `docs/anforderungen.md` in eckigen Klammern.
 | **Exit-Ticket und Muddiest Point** | Stundenabschluss am Handy: eine Kontrollfrage, dazu „Was war heute am unklarsten?“ (Freitext) oder 3-2-1. Nur in der Regie, Lehrkraft markiert richtig/falsch | gängige formative Diagnose; die unklarsten Punkte steuern die nächste Stunde [I3, E2] | alle | M |
 | **Rollenwechsel beim Pair Programming** | `auftrag` mit `rollenwechsel_min: 10`: Board zeigt Fahrer und Navigator, gibt beim Wechsel ein Signal | Pair Programming lebt vom regelmäßigen Tausch der Rollen, das vergisst man in der Arbeitsphase leicht | GP, ET1, SYS | S |
 
-## 2 · Mittlerer Aufwand, passt besonders gut zu unseren Fächern
+## 2. Mittlerer Aufwand, passt besonders gut zu unseren Fächern
 
 | Idee | Was passiert | Warum | Fächer | Aufwand |
 |---|---|---|---|---|
@@ -38,7 +38,7 @@ Bezug zu `docs/anforderungen.md` in eckigen Klammern.
 | **Code-Galerie** | Teams geben ein kurzes Codestück ab. Regie wählt zwei, das Board zeigt sie anonym nebeneinander zum Vergleich | Code-Review und „Vorstellen“ ohne Laptop-Umstecken; passt zu GP Code-Review und Abnahme [B9] | GP, ET1 | M |
 | **SQL live im Browser** | `sql`-Baustein mit sql.js (SQLite im Browser, offline, rund 1 MB): Abfrage an der Tafel tippen, Ergebnis als Tabelle | DB braucht kein externes Programm am Board. Live Coding steigert laut Studie vor allem die Beteiligung; mit Vorhersage davor wird es PRIMM [B12] | DB | M |
 
-## 3 · Groß, später
+## 3. Groß, später
 
 | Idee | Warum später | Fächer | Aufwand |
 |---|---|---|---|
@@ -47,7 +47,7 @@ Bezug zu `docs/anforderungen.md` in eckigen Klammern.
 | **Lautstärke-Ampel** über das Mikrofon | nett, aber Mikrofon im Klassenzimmer braucht Klärung mit der Datenschutzbeauftragten | alle | S |
 | **H5P-Inhalte einbetten** | eigene H5P-Aufgaben lassen sich als HTML exportieren und mit `einbetten` zeigen, ohne Rückmeldung an die Regie | alle | S, wenn nur zeigen |
 
-## 4 · PRIMM als Stundenmuster für die Programmierfächer
+## 4. PRIMM als Stundenmuster für die Programmierfächer
 
 PRIMM (Predict, Run, Investigate, Modify, Make) ist ein erprobtes Muster für den Einstieg in Programme:
 erst lesen und vorhersagen, dann schreiben. Laut Forschung brauchen Anfänger etwa 50 % Treffsicherheit beim
@@ -64,7 +64,7 @@ Nachverfolgen von Code, bevor sie verlässlich selbst schreiben. Die Bausteine g
 Die Stundenschemata von GP und ET1 folgen schon diesem Bogen. Vorschlag: PRIMM in der Steckbrief-Vorlage als
 Muster anbieten, damit die Fach-Chats die Bausteine danach anordnen.
 
-## 5 · Vorschlag für die Reihenfolge
+## 5. Vorschlag für die Reihenfolge
 
 1. **Fortschritt melden** und **Hilfe-Ampel**: helfen in jeder Praxisphase, liefern Zahlen für Befund und Notausstieg.
 2. **Peer Instruction** mit **Sicherheit**: kleine Erweiterung von `abstimmung`/`vorhersage`, große Wirkung.
