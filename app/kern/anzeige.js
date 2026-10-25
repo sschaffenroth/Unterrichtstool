@@ -65,7 +65,11 @@ function anzeigeInhalt(name, rolle) {
   } else {
     flaeche.append(el("div", { class: "teil" }, stundenkarte(s)));
   }
-  if (Z.overlay && ansicht !== "auftrag") {
+  if (Z.overlay && Z.overlay.anmelden && Z.raum) {
+    flaeche.append(el("div", { class: "overlay" },
+      el("button", { class: "schliessen", onclick: () => tun("overlay", { wert: null }) }, "Schließen"),
+      el("div", { class: "baustein", style: "justify-content:center;align-items:center" }, mitmachenKasten(s.schueler ? s : null, true))));
+  } else if (Z.overlay && Z.overlay.von && ansicht !== "auftrag") {
     flaeche.append(el("div", { class: "overlay" },
       el("button", { class: "schliessen", onclick: () => tun("overlay", { wert: null }) }, "Schließen"),
       el("div", { class: "baustein b-ergebnis" }, Z.overlay.von.map((id) => ergebnisBlock(id, Z.overlay.loesung)))));
@@ -82,7 +86,7 @@ function einpassen(buehne, breite, hoehe) {
 }
 
 function anzeigeSchluessel(name) {
-  return JSON.stringify([name, Z.schritt, Z.reiter, Z.ansicht, Z.marken, Z.codeteil, Z.stimmen, Z.striche, Z.overlay, Z.aktiv, Z.countdown && Z.countdown.id]);
+  return JSON.stringify([name, Z.schritt, Z.reiter, Z.ansicht, Z.marken, Z.codeteil, Z.stimmen, Z.striche, Z.overlay, Z.aktiv, Z.countdown && Z.countdown.id, Z.raum && Z.raum.code, Z.freigabe, Z.online]);
 }
 
 /* Vollbild-Anzeige (eigenes Fenster oder dieses Fenster) */

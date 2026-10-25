@@ -18,7 +18,11 @@ function regieInhalt(modus) {
     el("span", { class: "lauf", "data-stundenzeit": "" }, ""),
     el("span", { class: "prognose" + (p.ueber > 60000 ? " spaet" : ""), "data-prognose": "", title: "Ende, wenn alle restlichen Schritte ihre Sollzeit brauchen" }, ""),
     el("div", { class: "rechts" },
-      el("button", { class: "knopf" + (laeuft ? "" : " haupt"), onclick: () => tun(laeuft ? "uhrPause" : "uhrStart") }, laeuft ? "Uhr anhalten" : Z.uhr.basis ? "Uhr weiter" : "Stunde starten"),
+      el("button", { class: "knopf" + (laeuft ? "" : " haupt"), onclick: () => {
+        tun(laeuft ? "uhrPause" : "uhrStart");
+        if (!laeuft && !Z.raum && SERVER && SCHRITTE.some((x) => x.schueler)) raumAnlegen();
+      } }, laeuft ? "Uhr anhalten" : Z.uhr.basis ? "Uhr weiter" : "Stunde starten"),
+      handyKnoepfe(),
       modus === "fenster" ? ANZEIGEN.map((n) => el("button", { class: "knopf", onclick: () => anzeigeOeffnen(n) }, n + " öffnen")) : null,
       modus === "fenster" ? el("button", { class: "knopf", title: "Dieses Fenster zeigt das Board, die Regie liegt dann hinter ☰", onclick: () => { location.hash = "anzeige=" + ANZEIGEN[0]; location.reload(); } }, "Hier " + ANZEIGEN[0] + " zeigen") : null,
       el("select", { class: "knopf", title: "Ton bei Soll-Ende", onchange: (e) => { tonEinstellung = e.target.value; try { localStorage.setItem("tafelsystem:ton", tonEinstellung); } catch (x) {} } },
@@ -136,15 +140,33 @@ function steuerKarte(s) {
   return el("div", { class: "karte" }, el("h2", null, "Steuerung"), teile.map((t) => el("div", { style: "margin-bottom:8px" }, t)));
 }
 
+function handyKnoepfe() {
+  if (!SERVER) return null;
+  if (!Z.raum) return el("button", { class: "knopf", title: "Raum auf dem Server anlegen: QR-Code und Link für die Handys", onclick: raumAnlegen }, "Handys verbinden");
+  const an = Z.overlay && Z.overlay.anmelden;
+  return el("span", { class: "handys" },
+    el("span", { class: "raum-chip" + (Z.verbindung === "fehler" ? " fehler" : ""), title: anmeldeAdresse() }, (Z.verbindung === "fehler" ? "⚠ " : "● ") + "Raum " + Z.raum.code),
+    el("button", { class: "knopf" + (an ? " aktiv" : ""), onclick: () => tun("overlay", { wert: an ? null : { anmelden: true } }) }, an ? "QR vom Board" : "Anmelde-QR aufs Board"),
+    el("button", { class: "knopf", title: "Link kopieren", onclick: () => { try { navigator.clipboard.writeText(anmeldeAdresse()); } catch (e) {} } }, "Link kopieren"),
+    el("button", { class: "knopf", onclick: raumLoeschen }, "Raum löschen"));
+}
+
 function handzeichenKarte(s) {
   const sch = s.schueler;
   if (!sch || !["abstimmung", "vorhersage"].includes(sch.baustein)) return null;
   const st = Z.stimmen[s.id] || {};
+  const online = (Z.online.stimmen || {})[s.id] || {};
+  const antworten = (Z.online.teilnehmer || {})[s.id] || 0;
+  const offen = Z.freigabe === s.id;
+  const freigabeZeile = SERVER ? el("div", { class: "zeile", style: "margin-bottom:10px" },
+    el("button", { class: "knopf" + (offen ? " aktiv" : " haupt"), onclick: () => (offen ? freigabeBeenden() : freigeben(s)) }, offen ? "Handys schließen" : "Für Handys freigeben"),
+    el("span", { class: "naechster" }, Z.raum ? antworten + (sch.kennung === "team" ? " Teams" : " Handys") + " geantwortet" + (Z.verbindung === "fehler" ? " · Server nicht erreichbar" : "") : "noch kein Raum")) : null;
   return el("div", { class: "karte" },
-    el("h2", null, (sch.baustein === "vorhersage" ? "Vorhersage" : "Abstimmung") + " · Handzeichen" + (sch.kennung === "team" ? " je Team" : "")),
+    el("h2", null, (sch.baustein === "vorhersage" ? "Vorhersage" : "Abstimmung") + (sch.kennung === "team" ? " · je Team" : "") + " · Handy und Handzeichen"),
     el("p", { style: "margin:0 0 8px;font-weight:600" }, sch.frage || ""),
+    freigabeZeile,
     (sch.optionen || []).map((o) => el("div", { class: "zaehler-zeile" + (o === sch.loesung ? " loesung" : "") },
-      el("span", null, o),
+      el("span", null, o, online[o] ? el("span", { class: "online-zahl" }, " + " + online[o] + " 📱") : null),
       el("button", { class: "knopf", onclick: () => tun("stimme", { id: s.id, option: o, delta: -1 }) }, "−"),
       el("span", { class: "z" }, st[o] || 0),
       el("button", { class: "knopf", onclick: () => tun("stimme", { id: s.id, option: o, delta: 1 }) }, "+"))),

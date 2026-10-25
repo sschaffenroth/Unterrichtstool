@@ -6,7 +6,7 @@ function ergebnisBlock(id, mitLoesung) {
   const s = schrittNachId(id);
   const sch = s && s.schueler;
   if (!sch) return el("div", { class: "ergebnis-block" }, el("div", { class: "leer-hinweis" }, "Kein Schüler-Schritt „" + id + "“."));
-  const stimmen = Z.stimmen[id] || {};
+  const stimmen = stimmenVon(id);
   const optionen = sch.optionen || [];
   const max = Math.max(1, ...optionen.map((o) => stimmen[o] || 0));
   const summe = optionen.reduce((a, o) => a + (stimmen[o] || 0), 0);

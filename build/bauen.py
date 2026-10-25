@@ -30,8 +30,11 @@ from PIL import Image
 
 WURZEL = Path(__file__).resolve().parent.parent
 APP = WURZEL / "app"
+STANDARD_SERVER = "https://unterrichtstool.s-schaffenroth.workers.dev"
 JS_REIHENFOLGE = [
+    "lib/qrcode.js",
     "kern/zustand.js",
+    "kern/server.js",
     "bausteine/einfach.js",
     "bausteine/auftrag.js",
     "bausteine/code.js",
@@ -227,8 +230,8 @@ def baustein_aufbereiten(b: dict, ort: str, ctx: dict) -> dict:
             bericht.f(ort, f"{art} ohne optionen")
         if b.get("loesung") is not None and b["loesung"] not in (b.get("optionen") or []):
             bericht.f(ort, "loesung ist keine der optionen")
-        if b.get("kennung") == "team":
-            bericht.h(ort, "kennung: team, offline als Handzeichen je Team in der Regie")
+        if b.get("kennung") not in (None, "geraet", "team"):
+            bericht.w(ort, f"kennung `{b['kennung']}` unbekannt (geraet, team)")
     return b
 
 
@@ -250,7 +253,7 @@ def datei_finden(datei: str | None, ort: str, ctx: dict) -> Path | None:
 
 # ---------------------------------------------------------------------------------------------- Stunde
 
-def stunde_aufbereiten(roh: dict, ordner: Path, bericht: Bericht, bildbreite: int) -> tuple[dict, dict]:
+def stunde_aufbereiten(roh: dict, ordner: Path, bericht: Bericht, bildbreite: int, server: str = STANDARD_SERVER) -> tuple[dict, dict]:
     ctx = {"bericht": bericht, "ordner": ordner, "fachordner": ordner.parent.resolve(),
            "bilder": Bilder(bildbreite, round(bildbreite * 9 / 16)), "verweise": []}
     if roh.get("format") != "tafelstunde/0":
@@ -321,6 +324,7 @@ def stunde_aufbereiten(roh: dict, ordner: Path, bericht: Bericht, bildbreite: in
         bericht.h("Bilder", f"{len(ctx['bilder'].ids)} Bilder, {ctx['bilder'].bytes / 1e6:.1f} MB eingebettet")
 
     daten = {"format": roh.get("format"), "stunde": kopf, "anzeigen": anzeigen,
+             "server": roh.get("server", server),
              "ablaufleiste": bool(roh.get("ablaufleiste")), "schritte": schritte}
     return daten, ctx["bilder"].daten
 
@@ -347,11 +351,12 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("-o", "--ausgabe", type=Path)
     ap.add_argument("--bildbreite", type=int, default=1920)
     ap.add_argument("--nur-pruefen", action="store_true", help="nur prüfen, nichts schreiben")
+    ap.add_argument("--server", default=STANDARD_SERVER, help="Adresse des Workers für die Handys ('' = ohne)")
     a = ap.parse_args(argv)
 
     roh = yaml.safe_load(a.yaml.read_text(encoding="utf-8"))
     bericht = Bericht()
-    daten, bilder = stunde_aufbereiten(roh, a.yaml.parent.resolve(), bericht, a.bildbreite)
+    daten, bilder = stunde_aufbereiten(roh, a.yaml.parent.resolve(), bericht, a.bildbreite, a.server)
 
     for titel, liste in (("FEHLER", bericht.fehler), ("Warnung", bericht.warnungen), ("Hinweis", bericht.hinweise)):
         for z in liste:

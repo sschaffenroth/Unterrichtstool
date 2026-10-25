@@ -3,17 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Unterrichtstool</title>
+<title>Mitmachen</title>
 <style>
-  body { font-family: system-ui, sans-serif; margin: 0; min-height: 100vh; display: grid; place-items: center; background: #f6f5f2; color: #222; }
-  main { max-width: 32rem; padding: 2rem 1rem; }
-  h1 { margin: 0 0 .5rem; border-bottom: 4px solid #e8730c; padding-bottom: .3rem; }
+  body { font-family: "Segoe UI", system-ui, -apple-system, sans-serif; margin: 0; min-height: 100vh; display: grid; place-items: center; background: #f4f3ef; color: #1d1d1f; }
+  main { width: min(92vw, 360px); text-align: center; }
+  h1 { margin: 0 0 .3rem; border-bottom: 4px solid #e8730c; padding-bottom: .3rem; display: inline-block; }
+  p { color: #6b6b70; }
+  input { font: inherit; font-size: 40px; width: 100%; text-align: center; letter-spacing: .3em; padding: 10px; border: 2px solid #dcd9d2; border-radius: 12px; }
+  button { font: inherit; font-size: 18px; font-weight: 600; width: 100%; margin-top: 12px; padding: 14px; border: none; border-radius: 12px; background: #e8730c; color: #fff; }
 </style>
 </head>
 <body>
 <main>
-  <h1>Unterrichtstool</h1>
-  <p>Grundgerüst steht. Tafel, Auftrag und Regie folgen.</p>
+  <h1>Mitmachen</h1>
+  <p>Gib den Code von der Tafel ein.</p>
+  <form onsubmit="event.preventDefault(); const c = this.c.value.trim(); if (/^\d{4}$/.test(c)) location.href = '/' + c;">
+    <input name="c" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="1234" autofocus>
+    <button>Weiter</button>
+  </form>
 </main>
 </body>
 </html>

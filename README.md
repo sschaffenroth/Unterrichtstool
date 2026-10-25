@@ -5,8 +5,8 @@ Regie für die Lehrkraft und Schüler-Interaktion per QR-Code, für jede Stunde 
 
 **Stand:** erster Abspieler (Version 0.1). Aus einer `Tafel.yaml` entsteht eine HTML-Datei, die
 offline läuft: Regie, Board mit Ansichten geteilt/tafel/auftrag/extern/schwarz, Bausteine titel,
-bild, folie, qr, auftrag, code (mit Marken), zeichnen, ergebnis. Schüler-Handys noch nicht
-angebunden, Abstimmungen werden als Handzeichen in der Regie gezählt.
+bild, folie, qr, auftrag, code (mit Marken), zeichnen, ergebnis. Handys melden sich per
+QR-Code oder Link an (Worker unter `worker/`), Abstimmungen gehen zusätzlich per Handzeichen.
 
 ## Stunde bauen
 
@@ -27,9 +27,17 @@ Prüft die Datei und schreibt `Tafel.html` daneben. Nur prüfen: `--nur-pruefen`
 | weiter / zurück | Pfeiltasten, Bild↑/Bild↓ (Presenter), Leertaste, Knöpfe ‹ › |
 | Board schwarz | Taste B |
 | Vollbild | Taste F oder ⛶ |
+| Handys anmelden | „Stunde starten“ legt den Raum an, „Anmelde-QR aufs Board“ zeigt QR und Link groß |
+| Frage auf die Handys | in der Regie „Für Handys freigeben“, schließt beim Weitergehen |
 | Zeiten, Zähler, Stimmen sichern | „Zeiten sichern“ (JSON) |
 
 Der Zustand bleibt beim Neuladen erhalten (Browser-Speicher). „Zurücksetzen“ löscht ihn.
+
+## Server
+
+`worker/index.js` mit einem Durable Object je Raum (SQLite, Free-Plan). Push auf `main` veröffentlicht
+ihn unter `https://unterrichtstool.s-schaffenroth.workers.dev`. Lokal: `npx wrangler dev`.
+Andere Adresse beim Bauen: `--server URL`, ohne Handys: `--server ""`.
 
 ## Tests
 

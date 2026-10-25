@@ -8,6 +8,7 @@
   if (m) {
     const name = decodeURIComponent(m[1]);
     anzeigeStarten(name);
+    if (!window.opener) abholenStarten();   // Board läuft allein: es spricht selbst mit dem Server
     if (window.opener) {
       partnerVerbinden(window.opener);
       // erster Tipp aufs Board schaltet Vollbild ein (Browser verlangt eine Berührung)
@@ -15,5 +16,6 @@
     }
   } else {
     regieStarten();
+    abholenStarten();
   }
 })();

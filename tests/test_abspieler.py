@@ -19,7 +19,7 @@ BEISPIEL = WURZEL / "tests" / "beispiel" / "06_Stunde" / "Tafel.yaml"
 
 
 def bauen_beispiel(ziel: Path) -> None:
-    assert bauen.main([str(BEISPIEL), "-o", str(ziel)]) == 0
+    assert bauen.main([str(BEISPIEL), "-o", str(ziel), "--server", ""]) == 0
 
 
 def test_pruefung_findet_fehler(tmp_path: Path) -> None:

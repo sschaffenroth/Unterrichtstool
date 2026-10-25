@@ -41,6 +41,7 @@ BAUSTEINE.auftrag = (b, ctx) => {
       ctx.voll && b.dauer_min ? el("div", { class: "countdown", "data-countdown": ctx.schritt.id }, "") : null),
     !ctx.voll && b.dauer_min ? el("div", { class: "countdown", "data-countdown": ctx.schritt.id }, "") : null,
     el("div", { class: "text" }, b.text || ""),
+    ctx.schritt.schueler ? mitmachenKasten(ctx.schritt, false) : null,
     material.length ? el("div", { class: "material" }, material) : null,
     b.abgabe ? el("div", { class: "abgabe" }, el("b", null, "Abgabe: "), b.abgabe) : null);
 };

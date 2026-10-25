@@ -261,3 +261,24 @@ button { font: inherit; color: inherit; cursor: pointer; }
   .regie-rumpf { grid-template-columns: 1fr; }
   .ablauf { max-height: 320px; }
 }
+
+/* Mitmachen: QR und Link für die Handys */
+.mitmachen { display: flex; gap: .8em; align-items: center; background: #fff; border: .1em solid var(--orange); border-radius: .6em; padding: .6em .8em; }
+.mitmachen .qr { width: 7.5em; height: 7.5em; flex: none; }
+.mitmachen .qr svg { width: 100%; height: 100%; display: block; }
+.mitmachen .mm-titel { font-weight: 700; font-size: 1.15em; color: var(--orange); }
+.mitmachen .mm-adresse { font-size: 1em; word-break: break-all; margin-top: .2em; }
+.mitmachen .mm-code { font-size: 1.1em; margin-top: .2em; }
+.mitmachen .mm-code b { font-size: 1.4em; letter-spacing: .08em; }
+.mitmachen .mm-status { margin-top: .3em; color: var(--gruen); font-weight: 600; }
+.mitmachen.gross { flex-direction: row; gap: 3em; padding: 2.5em 3.5em; border-width: .2em; border-radius: 1em; }
+.mitmachen.gross .qr { width: 28em; height: 28em; }
+.mitmachen.gross .mm-titel { font-size: 2.6em; }
+.mitmachen.gross .mm-adresse { font-size: 2.2em; margin-top: .5em; }
+.mitmachen.gross .mm-code { font-size: 2.4em; margin-top: .4em; }
+.mitmachen.gross .mm-status { font-size: 1.8em; }
+.auftrag.voll .mitmachen { max-width: 40em; }
+.handys { display: inline-flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.raum-chip { padding: 4px 10px; border-radius: 20px; background: var(--gruen-hell); color: var(--gruen); font-weight: 600; }
+.raum-chip.fehler { background: var(--rot-hell); color: var(--rot); }
+.online-zahl { color: var(--blau); font-weight: 600; }

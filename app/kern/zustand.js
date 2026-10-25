@@ -43,6 +43,10 @@ function neuerZustand() {
     schrittBeginn: 0,  // Stundenzeit (ms) beim Betreten des aktuellen Schritts
     ist: {},           // schrittId -> ms
     countdown: null,   // { id, dauer, basis, seit }
+    raum: null,        // { code, token } Raum für die Handys auf dem Server
+    freigabe: null,    // schrittId, deren Frage gerade auf den Handys offen ist
+    online: { stimmen: {}, teilnehmer: {} },   // Antworten von den Handys
+    verbindung: null,  // "ok" | "fehler"
   };
 }
 
@@ -159,7 +163,11 @@ const AKTION = {
     else if (was === "minus") { c.dauer = Math.max(60000, c.dauer - 60000); }
     else if (was === "neu") { c.basis = 0; c.seit = jetzt(); }
   },
-  ruecksetzen(z) { Object.assign(z, neuerZustand()); },
+  ruecksetzen(z) { const raum = z.raum; Object.assign(z, neuerZustand()); z.raum = raum; },
+  raum(z, { raum }) { z.raum = raum; if (!raum) { z.freigabe = null; z.online = { stimmen: {}, teilnehmer: {} }; } },
+  freigabe(z, { id }) { z.freigabe = id; },
+  online(z, { daten }) { z.online = daten; },
+  verbindung(z, { wert }) { z.verbindung = wert; },
 };
 
 /* ------------------------------------------------------------------ Abgleich zwischen Fenstern */

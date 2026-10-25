@@ -22,7 +22,7 @@ Konzept: `claude/Tafelsystem_Konzept_und_Steckbrief_Vorlage.md` im Projekt
 | Anzeigen | `geteilt`, `tafel`, `auftrag`, `extern`, `schwarz`, Ablaufleiste. Zweites Fenster auf zweitem Bildschirm, abgeglichen ohne Netz |
 | Bausteine **fertig** | `titel`, `bild`, `folie`, `qr`, `uhr`, `schwarz`, `auftrag` (Countdown, Material mit QR), `code` (Marken, Teile), `zeichnen` (Raster/Bild, Stift, Rückgängig, PNG), `ergebnis` |
 | Bausteine **Platzhalter** | `zuordnen`, `beschriften`, `urteilen`, `codestreifen`, `testfaelle`, `partner`, `kette`, `grafik`, `brett`, `sql`, `neu`. `code`: `fehler`, `probelauf`, `nebeneinander` fehlen |
-| Schüler-Handys | **noch nicht angebunden.** `abstimmung` und `vorhersage` zählt die Lehrkraft als Handzeichen in der Regie, `ergebnis` zeigt die Balken |
+| Schüler-Handys | Worker im Repo (`worker/`): Raum mit 4-stelligem Code, Anmelde-QR und Link auf der Tafel (Auftragsleiste und groß), Schüler-Seite am Handy oder PC. `abstimmung` und `vorhersage` mit Freigabe aus der Regie, `mehrfach`, `kennung: team`. Handy-Stimmen und Handzeichen werden zusammengezählt. Raum löscht sich nach 4 Wochen. `formular`, `feedback`, `fragen` noch nicht |
 | Regie auf dem Handy | nur auf demselben Rechner wie das Board (kein Netz-Abgleich) |
 | Prototyp KIG ES 06 | läuft: Tafeldatei offline (Spielbrett, Kette, Zuordnen, Vorhersage, Formular, Zeitplan, PNG) + Abstimmungs-Worker auf Cloudflare (QR, `/lehrer`). Fachgebunden, noch nicht im Repo |
 | Tafel-Apps GP DS 05 bis 07 | laufen als einzelne HTML-Dateien in `Lernhilfen/`. Noch nicht im Repo |
