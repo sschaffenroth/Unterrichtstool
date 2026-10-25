@@ -45,8 +45,16 @@ function neuerZustand() {
     countdown: null,   // { id, dauer, basis, seit }
     raum: null,        // { code, token } Raum für die Handys auf dem Server
     freigabe: null,    // schrittId, deren Frage gerade auf den Handys offen ist
-    online: { stimmen: {}, teilnehmer: {} },   // Antworten von den Handys
+    online: { stimmen: {}, teilnehmer: {}, antworten: {}, meldungen: {}, versatz: 0 },   // Antworten und Meldungen von den Handys
     verbindung: null,  // "ok" | "fehler"
+    methoden: {},      // laufende Methoden: art -> Zustand (kern/methoden.js)
+    buehne: null,      // Methode, die gerade groß auf dem Board liegt
+    spontan: {},       // id -> Frage einer spontan gestarteten Handy-Methode (Wortwolke, Zielscheibe, Exit-Ticket)
+    einschuebe: [],    // Energizer usw.: { art, titel, ms, schritt } zählen nicht zur Schrittzeit
+    versteckt: {},     // Frage-id -> ausgeblendete Wörter der Wortwolke
+    markiert: {},      // Exit-Ticket: Frage-id + Text -> "richtig" | "falsch" | "aufgreifen"
+    sicherheit: {},    // Frage-id -> true: Abstimmung mit „sicher / geraten“
+    sql: {},           // schlüssel -> { verlauf: [Anweisungen], text }
   };
 }
 
@@ -58,8 +66,14 @@ function laden() {
     if (!roh) return null;
     const z = JSON.parse(roh);
     if (typeof z.schritt !== "number" || !SCHRITTE[z.schritt]) return null;
-    return Object.assign(neuerZustand(), z);
+    return auffuellen(z);
   } catch (e) { return null; }
+}
+/* gespeicherter oder empfangener Zustand: fehlende Felder (ältere Fassung) ergänzen */
+function auffuellen(z) {
+  const n = Object.assign(neuerZustand(), z);
+  n.online = Object.assign(neuerZustand().online, z.online || {});
+  return n;
 }
 function speichern() {
   try { localStorage.setItem(SPEICHER_SCHLUESSEL, JSON.stringify(Z)); } catch (e) { /* ohne Speicher weiter */ }
@@ -125,6 +139,7 @@ const AKTION = {
     const neu = SCHRITTE[index];
     const d = neu.auftrag && neu.auftrag.dauer_min;
     z.countdown = d ? { id: neu.id, dauer: d * 60000, basis: 0, seit: z.uhr.laeuft ? jetzt() : null } : null;
+    methodenBeimSchrittwechsel(z, alt, neu);
   },
   weiter(z) { AKTION.gehe(z, { index: naechsterIndex(1, z) }); },
   zurueck(z) { AKTION.gehe(z, { index: naechsterIndex(-1, z) }); },
@@ -154,7 +169,7 @@ const AKTION = {
   strich(z, { schluessel, strich }) { (z.striche[schluessel] = z.striche[schluessel] || []).push(strich); },
   strichZurueck(z, { schluessel }) { (z.striche[schluessel] || []).pop(); },
   striche_loeschen(z, { schluessel }) { z.striche[schluessel] = []; },
-  countdown(z, { was }) {
+  countdown(z, { was, ms }) {
     const c = z.countdown;
     if (!c) return;
     if (was === "pause" && c.seit) { c.basis += jetzt() - c.seit; c.seit = null; }
@@ -162,12 +177,28 @@ const AKTION = {
     else if (was === "plus") { c.dauer += 60000; }
     else if (was === "minus") { c.dauer = Math.max(60000, c.dauer - 60000); }
     else if (was === "neu") { c.basis = 0; c.seit = jetzt(); }
+    else if (was === "springen") { c.basis = Math.max(0, Math.min(c.dauer, ms)); if (c.seit) c.seit = jetzt(); }
   },
   ruecksetzen(z) { const raum = z.raum; Object.assign(z, neuerZustand()); z.raum = raum; },
-  raum(z, { raum }) { z.raum = raum; if (!raum) { z.freigabe = null; z.online = { stimmen: {}, teilnehmer: {} }; } },
+  raum(z, { raum }) { z.raum = raum; if (!raum) { z.freigabe = null; z.online = neuerZustand().online; } },
   freigabe(z, { id }) { z.freigabe = id; },
   online(z, { daten }) { z.online = daten; },
   verbindung(z, { wert }) { z.verbindung = wert; },
+  methode(z, { art, wert }) {
+    if (wert) z.methoden[art] = wert;
+    else { methodeBeenden(z, art); delete z.methoden[art]; if (z.buehne === art) z.buehne = null; }
+  },
+  methodeAendern(z, { art, teil }) { if (z.methoden[art]) Object.assign(z.methoden[art], teil); },
+  buehne(z, { art }) { z.buehne = art; },
+  spontan(z, { id, frage }) { z.spontan[id] = frage; },
+  verstecken(z, { id, wort, an }) {
+    const l = (z.versteckt[id] = z.versteckt[id] || []);
+    const i = l.indexOf(wort);
+    if (an && i < 0) l.push(wort); else if (!an && i >= 0) l.splice(i, 1);
+  },
+  markieren(z, { schluessel, wert }) { if (wert) z.markiert[schluessel] = wert; else delete z.markiert[schluessel]; },
+  sicherheit(z, { id, an }) { if (an) z.sicherheit[id] = true; else delete z.sicherheit[id]; },
+  sql(z, { schluessel, wert }) { z.sql[schluessel] = wert; },
 };
 
 /* ------------------------------------------------------------------ Abgleich zwischen Fenstern */
@@ -213,7 +244,7 @@ window.addEventListener("message", (e) => {
   } else if (d.tafelsystem === "zustand") {
     if (d.id && GESEHEN.has(d.id)) return;
     if (d.id) GESEHEN.add(d.id);
-    Z = Object.assign(neuerZustand(), d.z);
+    Z = auffuellen(d.z);
     speichern();
     for (const w of PARTNER) if (w !== e.source) { try { w.postMessage(d, "*"); } catch (x) { PARTNER.delete(w); } }
     neuZeichnen();

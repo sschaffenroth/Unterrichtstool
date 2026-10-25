@@ -47,16 +47,30 @@ async function raumLoeschen() {
   tun("raum", { raum: null });
 }
 
-async function freigeben(s) {
+async function freigeben(s) { await freigebenId(s.id); }
+
+/* Frage für die Handys freigeben: aus einem Schritt (id = Schritt-id) oder spontan (Z.spontan[id]) */
+async function freigebenId(id) {
   if (!Z.raum) await raumAnlegen();
   if (!Z.raum) return;
-  const sch = s.schueler;
+  const d = frageDef(id);
+  if (!d) return;
+  const frage = { schritt: id, baustein: d.baustein, frage: d.frage || "", kennung: d.kennung || "geraet" };
+  if (["abstimmung", "vorhersage", "exit"].includes(d.baustein)) {
+    Object.assign(frage, { optionen: d.optionen || [], mehrfach: !!d.mehrfach, sicherheit: !!(d.sicherheit || Z.sicherheit[id]) });
+  }
+  if (d.baustein === "exit") frage.offen = d.offen || "Was war heute am unklarsten?";
+  if (d.baustein === "wortwolke") frage.max_woerter = d.max_woerter || 1;
+  if (d.baustein === "zielscheibe") frage.dimensionen = d.dimensionen || ZIEL_DIMENSIONEN;
+  if (d.baustein === "ordnen") frage.zeilen = d.gemischt || [];
+  if (d.baustein === "fehlerzeile") frage.zeilen = d.zeilen || [];
   try {
-    await serverRufen("/api/raum/" + Z.raum.code + "/frage", {
-      token: Z.raum.token,
-      frage: { schritt: s.id, baustein: sch.baustein, frage: sch.frage, optionen: sch.optionen, mehrfach: !!sch.mehrfach, kennung: sch.kennung || "geraet" },
-    });
-    tun("freigabe", { id: s.id });
+    if (d.baustein === "hotspot" && d.handy_bild) {
+      await serverRufen("/api/raum/" + Z.raum.code + "/bild", { token: Z.raum.token, schritt: id, daten: d.handy_bild });
+      frage.bild = true;
+    }
+    await serverRufen("/api/raum/" + Z.raum.code + "/frage", { token: Z.raum.token, frage });
+    tun("freigabe", { id });
   } catch (e) { tun("verbindung", { wert: "fehler" }); alert("Freigabe nicht angekommen: " + e.message); }
 }
 
@@ -67,15 +81,19 @@ async function freigabeBeenden() {
 
 /* Antworten regelmäßig abholen. Verlässt die Regie den Schritt, wird die Freigabe beendet. */
 let abholenLaeuft = false;
-async function abholen() {
-  if (!FUEHREND || !Z.raum || abholenLaeuft) return;
+async function abholen(sofort) {
+  if (!FUEHREND || !Z.raum || (abholenLaeuft && !sofort)) return;
   abholenLaeuft = true;
   try {
-    if (Z.freigabe && Z.freigabe !== schritt().id) await freigabeBeenden();
+    // Fragen eines Schritts schließen beim Weitergehen, spontane Fragen bleiben offen, bis die Regie sie schließt
+    if (Z.freigabe && !Z.spontan[Z.freigabe] && Z.freigabe !== schritt().id) await freigabeBeenden();
     await statusSenden();
     const d = await serverRufen("/api/raum/" + Z.raum.code + "/ergebnis", { token: Z.raum.token });
-    const neu = { stimmen: d.stimmen || {}, teilnehmer: d.teilnehmer || {} };
-    if (JSON.stringify(neu) !== JSON.stringify(Z.online)) tun("online", { daten: neu });
+    const neu = { stimmen: d.stimmen || {}, teilnehmer: d.teilnehmer || {}, antworten: d.antworten || {}, meldungen: d.meldungen || {},
+      versatz: d.jetzt ? Math.round((d.jetzt - Date.now()) / 1000) * 1000 : 0 };
+    const vergleich = (o) => JSON.stringify([o.stimmen, o.teilnehmer, o.antworten, o.meldungen]);
+    if (vergleich(neu) !== vergleich(Z.online) || Math.abs((Z.online.versatz || 0) - neu.versatz) > 5000) tun("online", { daten: neu });
+    paareAktualisieren();
     if (Z.verbindung !== "ok") tun("verbindung", { wert: "ok" });
   } catch (e) {
     if (/kein Zugriff/.test(e.message)) tun("raum", { raum: null });       // Raum gelöscht oder abgelaufen
@@ -89,14 +107,14 @@ function begleitStatus() {
   const s = schritt();
   const a = s.auftrag;
   const rest = countdownRest();
-  return {
+  return methodenStatus({
     fach: STUNDE.stunde.fach, titel: s.titel, abschnitt: s.abschnitt || "",
     extern: alleAnzeigen().some((n) => ansichtVon(n) === "extern"),
     auftrag: a ? { text: a.text, sozialform: a.sozialform, dauer_min: a.dauer_min, abgabe: a.abgabe } : null,
     material: (a && a.material ? a.material : []).map((m) => ({ text: m.text, url: m.url || "", ort: m.ort || "", datei: m.datei || "" })),
     countdown: Z.countdown && rest != null ? { rest: Math.max(0, Math.round(rest)), laeuft: !!Z.countdown.seit } : null,
     tafel: tafelAlsText(s),
-  };
+  });
 }
 
 /* Was gerade auf der Tafel steht, als Text fürs Handy (keine Bilder, keine Notizen, Lösungen nur wenn aufgelöst) */
@@ -127,13 +145,14 @@ function tafelAlsText(s) {
       return { frage: sch.frage || q.titel, optionen: (sch.optionen || []).map((o) => ({ name: o, n: st[o] || 0, loesung: o === loesung })) };
     }).filter(Boolean) };
   }
+  if (b.baustein === "sql") return Object.assign({ art: "sql", reiter }, sqlAlsText(b, schluessel));
   if (b.baustein === "zeichnen") return { art: "hinweis", reiter, text: "An der Tafel wird gerechnet" + (b.hintergrund && b.hintergrund.titel ? ": " + b.hintergrund.titel : ".") };
   return { art: "hinweis", reiter, text: "An der Tafel: " + (b.titel || s.titel) };
 }
 async function statusSenden() {
   const st = begleitStatus();
   const c = Z.countdown;
-  const schluessel = JSON.stringify([st.titel, st.auftrag, st.material, st.extern, st.tafel, c && [c.id, c.dauer, c.basis, !!c.seit]]);
+  const schluessel = JSON.stringify([st.titel, st.auftrag, st.material, st.extern, st.tafel, st.methoden, st.countdown && st.countdown.laeuft, c && [c.id, c.dauer, c.basis, !!c.seit], zeitSchluessel(), JSON.stringify(Z.methoden.phasen || Z.methoden.energizer || null)]);
   if (schluessel === statusZuletzt && Date.now() - statusZeit < 30000) return;
   await serverRufen("/api/raum/" + Z.raum.code + "/status", { token: Z.raum.token, status: st });
   statusZuletzt = schluessel;

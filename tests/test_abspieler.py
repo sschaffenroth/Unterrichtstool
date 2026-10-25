@@ -128,8 +128,8 @@ def test_abspieler(tmp_path: Path) -> None:
         assert board.locator(".b-folie .verdeckt").count() == 2
         board.locator(".b-folie").click()
         board.wait_for_function("document.querySelectorAll('.b-folie .verdeckt').length === 1")
-        groesse = board.evaluate("parseFloat(getComputedStyle(document.querySelector('.b-folie .inhalt')).fontSize)")
-        assert groesse > 1400 / 100 * 1.9, groesse   # Schrift größer als die Grundgröße
+        # Schrift größer als die Grundgröße (Einpassen läuft im nächsten Bild)
+        board.wait_for_function("parseFloat(getComputedStyle(document.querySelector('.b-folie .inhalt')).fontSize) > innerWidth / 100 * 1.9")
         board.locator(".reiterleiste button", has_text="Alte App").click()
         rahmen = board.frame_locator("iframe.einbettung")
         rahmen.locator("#b").click()

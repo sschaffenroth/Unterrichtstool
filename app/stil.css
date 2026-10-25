@@ -177,7 +177,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .stundenkarte h1 { font-size: 3.6em; margin: .2em 0; }
 .stundenkarte p { color: var(--grau); font-size: 1.6em; margin: 0; }
 
-.overlay { position: absolute; inset: 0; background: rgba(255,255,255,.97); z-index: 5; display: flex; flex-direction: column; }
+.overlay { position: absolute; inset: 0; background: #fff; z-index: 5; display: flex; flex-direction: column; }
 .overlay .schliessen { position: absolute; right: 1em; top: 1em; font-size: 1.2em; border: .08em solid var(--linie); background: #fff; border-radius: .5em; padding: .4em 1em; z-index: 6; }
 
 /* Bedienknöpfe an der Tafel */
@@ -355,3 +355,157 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .einbett-ebene { z-index: 1; }
 .eckknoepfe { position: fixed; z-index: 10; }
 .vorschau-rahmen .eckknoepfe { display: none; }
+
+/* ------------------------------------------------------------------ Methoden: Board (em = 1 % der Bühnenbreite) */
+.methode-overlay { background: #fff; padding: 2.2em 3em 2em; gap: 1.2em; overflow: hidden; }
+.methode-overlay .schliessen { top: .8em; right: .8em; }
+.methode-gross { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 1.2em; position: relative; }
+.methode-kopf { display: flex; align-items: baseline; gap: 1.2em; flex-wrap: wrap; padding-right: 6em; }
+.methode-kopf h1 { font-size: 3em; margin: 0; line-height: 1.15; flex: 1; min-width: 10em; }
+.methode-art { font-size: 1.2em; font-weight: 700; color: #fff; background: var(--orange); padding: .25em .8em; border-radius: 2em; align-self: center; }
+.methode-uhr { font-size: 5.5em; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
+.methode-uhr.ende, [data-rest].ende { color: var(--rot); }
+.methode-uhr.pause, [data-rest].pause { color: var(--grau); }
+.methode-zahl { font-size: 1.6em; color: var(--gruen); font-weight: 700; }
+.methode-text { font-size: 2.3em; line-height: 1.4; font-weight: 500; }
+.methode-text.leise, .leise { color: var(--grau); }
+.methode-begriff { align-self: center; margin-top: auto; margin-bottom: auto; font-size: 6em; font-weight: 800; color: var(--blau); border: .06em solid var(--blau); border-radius: .2em; padding: .15em .6em; text-align: center; }
+.methode-begriff.klein { font-size: 3em; font-weight: 700; }
+.methode-qr { position: absolute; right: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; gap: .3em; font-size: 1em; color: var(--grau); background: #fff; padding: .5em; border: .08em solid var(--linie); border-radius: .5em; }
+.methode-qr .qr { width: 9em; height: 9em; }
+.methode-qr .qr svg { width: 100%; height: 100%; display: block; }
+.phasen-leiste { display: flex; gap: 1em; }
+.phasen-leiste .phase { flex: 1; display: flex; align-items: center; gap: .6em; padding: .7em 1em; border-radius: .6em; background: var(--flaeche); font-size: 1.4em; color: var(--grau); }
+.phasen-leiste .phase .pikto { width: 2.2em; height: 2.2em; opacity: .5; }
+.phasen-leiste .phase small { margin-left: auto; }
+.phasen-leiste .phase.aktiv { background: var(--orange-hell); color: var(--tinte); font-weight: 700; box-shadow: inset 0 0 0 .12em var(--orange); }
+.phasen-leiste .phase.aktiv .pikto { opacity: 1; }
+.phasen-leiste .phase.erledigt { opacity: .55; }
+.phase-jetzt { display: flex; gap: 2em; align-items: center; margin: auto 0; }
+.phase-jetzt .pikto { width: 12em; height: 12em; flex: none; }
+.phase-wort { font-size: 4em; font-weight: 800; }
+.phase-text { font-size: 2.4em; margin-top: .3em; }
+.rollen-namen { display: flex; gap: 2em; justify-content: center; margin: auto 0 0; }
+.rollen-namen span { font-size: 4em; font-weight: 800; padding: .3em .9em; border-radius: .3em; background: var(--orange-hell); }
+.rollen-namen span + span { background: #e5ecf7; }
+.m-rollen .methode-text { text-align: center; margin-bottom: auto; }
+.hilfe-liste { display: flex; flex-wrap: wrap; gap: 1em; }
+.hilfe-eintrag { display: flex; flex-direction: column; gap: .2em; padding: .8em 1.4em; border-radius: .6em; font-size: 2em; border: .1em solid; min-width: 7em; }
+.hilfe-eintrag.rot { border-color: var(--rot); background: var(--rot-hell); }
+.hilfe-eintrag.gelb { border-color: #d9a400; background: #fff5d6; }
+.hilfe-eintrag span { font-size: .6em; color: var(--grau); }
+.hilfe-eintrag .hilfe-helfer { color: var(--gruen); font-weight: 700; }
+.fortschritt-balken { display: flex; flex-direction: column; gap: 1em; max-width: 70em; }
+.fortschritt-balken .balken-zeile { font-size: 2em; grid-template-columns: 5em 1fr 4em; }
+.duett-liste { display: flex; flex-wrap: wrap; gap: 1em; }
+.duett-paar { display: flex; flex-direction: column; padding: .8em 1.4em; border-radius: .6em; background: var(--gruen-hell); font-size: 2em; }
+.duett-paar .haltestelle { font-size: .6em; color: var(--gruen); font-weight: 700; text-transform: uppercase; }
+.duett-wartend { font-size: 1.5em; color: var(--grau); }
+.m-frage .ergebnis-block, .m-frage .b-wolke, .m-frage .b-zielscheibe { flex: 1; min-height: 0; }
+.methoden-leiste { position: absolute; left: .8em; bottom: .8em; display: flex; gap: .5em; flex-wrap: wrap; z-index: 4; max-width: 70%; pointer-events: none; }
+.methode-chip { background: rgba(29,29,31,.86); color: #fff; border-radius: .6em; padding: .4em .8em; font-size: 1.05em; display: flex; gap: .5em; align-items: baseline; }
+.methode-chip b { color: #ffb36b; }
+.methode-chip [data-rest] { font-variant-numeric: tabular-nums; font-weight: 700; }
+.rollen-blitz { position: absolute; inset: 0; z-index: 8; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(232,115,12,.94); color: #fff; animation: blitz 1s ease-in-out infinite alternate; }
+.rollen-blitz div { font-size: 8em; font-weight: 800; }
+.rollen-blitz small { font-size: 2.4em; }
+@keyframes blitz { from { background: rgba(232,115,12,.94); } to { background: rgba(194,59,34,.94); } }
+.auftrag-phasen { display: flex; flex-direction: column; gap: .3em; font-size: 1.05em; }
+.auftrag-phasen .phase { padding: .3em .6em; border-radius: .4em; color: var(--grau); }
+.auftrag-phasen .phase.aktiv { background: #fff; color: var(--tinte); box-shadow: inset .25em 0 0 var(--orange); }
+.auftrag-phasen .phase.erledigt { text-decoration: line-through; }
+.rollen-hinweis { font-size: 1.1em; background: #fff; border-radius: .5em; padding: .5em .7em; }
+
+/* Ergebnisse der Handy-Fragen */
+.ergebnis-block.breit { flex: 1 1 100%; }
+.balken-zeile .balken { position: relative; overflow: hidden; }
+.sicher-anteil { position: absolute; left: 0; top: 0; bottom: 0; background: rgba(0,0,0,.35); }
+.b-wolke { flex: 1; display: flex; flex-wrap: wrap; justify-content: center; align-content: center; align-items: center; gap: .3em 1em; padding: 1em; line-height: 1.1; }
+.wolke-wort { font-weight: 700; }
+.b-zielscheibe { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; }
+.b-zielscheibe svg { flex: 1; min-height: 0; width: 100%; max-height: 100%; }
+.ziel-legende { color: var(--grau); font-size: 1.1em; }
+.b-hotspot { align-items: center; justify-content: center; gap: .6em; }
+.hotspot-flaeche { position: relative; max-width: 100%; max-height: calc(100% - 3em); display: inline-block; }
+.hotspot-flaeche img { display: block; max-width: 100%; max-height: 40em; }
+.hotspot-punkt { position: absolute; width: 1.4em; height: 1.4em; margin: -.7em 0 0 -.7em; border-radius: 50%; background: rgba(232,115,12,.55); border: .15em solid #fff; box-shadow: 0 0 0 .08em rgba(0,0,0,.3); }
+.hotspot-loesung { position: absolute; aspect-ratio: 1; transform: translate(-50%, -50%); border: .3em solid var(--gruen); border-radius: 50%; box-shadow: 0 0 0 .2em #fff; }
+.hotspot-zahl { font-size: 1.4em; color: var(--grau); }
+.b-ordnen { gap: .8em; padding: 1em 2em; font-size: 1.5em; }
+.ordnen-kopf { font-size: 1.8em; }
+.ordnen-zeilen { display: flex; flex-direction: column; gap: .4em; }
+.ordnen-zeile { display: grid; grid-template-columns: 2em 12em 4em 1fr; gap: .8em; align-items: center; font-size: 1.3em; }
+.ordnen-zeile .nr { color: var(--grau); text-align: right; }
+.ordnen-zeile .bahn { height: 1.2em; background: var(--flaeche); border-radius: .3em; overflow: hidden; }
+.ordnen-zeile .balken { height: 100%; background: #d9a400; }
+.ordnen-zeile .balken.gut { background: var(--gruen); }
+.ordnen-zeile .balken.schlecht { background: var(--rot); }
+.ordnen-zeile code { font: 1em Consolas, Menlo, monospace; white-space: pre; }
+.b-fehlerzeile { padding: 1em 2em; gap: .6em; }
+.fehler-kopf { font-size: 1.4em; color: var(--grau); }
+.fehler-code { font: 1.5em/1.45 Consolas, Menlo, monospace; background: var(--code-grund); border: .06em solid var(--linie); border-radius: .4em; padding: .4em 0; overflow: hidden; }
+.fehler-zeile { display: grid; grid-template-columns: 2.5em 1fr 2.5em; gap: .6em; padding: 0 .6em; background: rgba(194,59,34, calc(var(--anteil, 0) * .45)); white-space: pre; }
+.fehler-zeile .nr { color: var(--grau); text-align: right; }
+.fehler-zeile .zahl { text-align: right; font-weight: 700; color: var(--rot); }
+.fehler-zeile.loesung { box-shadow: inset .3em 0 0 var(--gruen); outline: .1em solid var(--gruen); }
+.b-exit { display: flex; flex-direction: column; gap: 1em; flex: 1; }
+
+/* SQL */
+.b-sql { padding: 1em 1.4em; gap: .7em; }
+.sql-oben { display: flex; gap: .7em; align-items: stretch; }
+.sql-eingabe { flex: 1; font: 1.8em/1.35 Consolas, Menlo, monospace; padding: .5em .7em; border: .1em solid var(--linie); border-radius: .4em; background: var(--code-grund); resize: none; }
+.sql-knoepfe { display: flex; flex-direction: column; gap: .5em; }
+.sql-knoepfe button, .sql-beispiele button, .sql-tabellen button { font-size: 1.15em; padding: .4em 1em; border: .08em solid var(--linie); border-radius: .4em; background: #fff; min-height: 2.4em; }
+.sql-knoepfe .sql-los { background: var(--orange); border-color: var(--orange); color: #fff; font-weight: 700; flex: 1; }
+.sql-beispiele, .sql-tabellen { display: flex; gap: .5em; flex-wrap: wrap; align-items: center; color: var(--grau); }
+.sql-ergebnis { flex: 1; min-height: 0; overflow: auto; }
+.sql-ergebnis table { border-collapse: collapse; font-size: 1.6em; }
+.sql-ergebnis th, .sql-ergebnis td { border: .06em solid var(--linie); padding: .25em .7em; text-align: left; }
+.sql-ergebnis th { background: var(--flaeche); position: sticky; top: 0; }
+.sql-ergebnis td.zahl { text-align: right; font-variant-numeric: tabular-nums; }
+.sql-ergebnis td.null { color: var(--grau-hell); font-style: italic; }
+.sql-anzahl { color: var(--grau); margin-top: .4em; font-size: 1.1em; }
+.sql-fehler { color: var(--rot); font-size: 1.4em; background: var(--rot-hell); border-radius: .4em; padding: .6em .9em; }
+
+/* ------------------------------------------------------------------ Methoden: Regie */
+.methoden-karte .methoden-menue { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+.methoden-gruppe { display: flex; gap: 8px; align-items: baseline; }
+.methoden-gruppe > .etikett { font-size: 12px; color: var(--grau); min-width: 74px; }
+.methoden-knoepfe { display: flex; flex-wrap: wrap; gap: 5px; }
+.methode-knopf { border: 1px solid var(--linie); background: #fff; border-radius: 16px; padding: 4px 11px; font-size: 13px; }
+.methode-knopf.aktiv { border-color: var(--tinte); font-weight: 600; }
+.methode-knopf.laeuft { background: var(--gruen-hell); border-color: var(--gruen); }
+.methode-einstellung { margin-top: 10px; padding: 10px; background: var(--flaeche); border-radius: 8px; display: flex; flex-direction: column; gap: 8px; }
+.methode-zeile .etikett { min-width: 74px; }
+.eingabe { font: inherit; font-size: 14px; padding: 5px 8px; border: 1px solid var(--linie); border-radius: 6px; background: #fff; }
+input.eingabe[type=number] { width: 64px; }
+textarea.eingabe { resize: vertical; }
+.phase-min { font-size: 13px; }
+.methode-vorschau { white-space: pre-line; margin: 0; }
+.methode-aktiv { border: 1px solid var(--gruen); background: #f6fbf7; border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 6px; }
+.methode-aktiv-kopf { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.methode-aktiv-kopf > b { margin-right: auto; }
+.methode-ansicht { display: inline-flex; gap: 3px; align-items: center; }
+.methode-ansicht .etikett { font-size: 12px; color: var(--grau); margin-right: 2px; }
+.methode-uhr-klein { font-size: 18px; font-variant-numeric: tabular-nums; }
+.hilfe-zeile { display: flex; gap: 8px; align-items: center; padding: 3px 0; }
+.hilfe-zeile > span:first-child { flex: 1; }
+.hilfe-zeile.rot { border-left: 4px solid var(--rot); padding-left: 6px; }
+.hilfe-zeile.gelb { border-left: 4px solid #d9a400; padding-left: 6px; }
+.balken-zeile.klein { font-size: 13px; grid-template-columns: 50px 1fr 46px; gap: 6px; }
+.balken-zeile.klein .bahn { height: 12px; }
+.methode-ergebnis-klein { font-size: 9px; max-height: 260px; overflow: hidden; display: flex; flex-direction: column; }
+.methode-ergebnis-klein .b-zielscheibe svg { max-height: 240px; }
+.wolke-regie { display: flex; flex-wrap: wrap; gap: 4px; }
+.knopf.durch { text-decoration: line-through; color: var(--grau-hell); }
+.exit-liste { display: flex; flex-direction: column; gap: 4px; max-height: 320px; overflow: auto; }
+.exit-text { display: flex; gap: 8px; align-items: flex-start; justify-content: space-between; border: 1px solid var(--linie); border-radius: 6px; padding: 5px 8px; background: #fff; font-size: 14px; }
+.exit-text.richtig { border-color: var(--gruen); background: var(--gruen-hell); }
+.exit-text.falsch { border-color: var(--rot); background: var(--rot-hell); }
+.exit-text.aufgreifen { border-color: var(--orange); background: var(--orange-hell); }
+.exit-marken { display: flex; gap: 2px; flex: none; }
+.handy-regler { display: flex; flex-direction: column; background: #fff; border: 1.5px solid var(--linie); border-radius: 8px; padding: 5px 8px; margin-bottom: 5px; }
+.handy-feld { border: 1.5px dashed var(--linie); border-radius: 8px; padding: 10px; color: var(--grau); text-align: center; margin-bottom: 6px; }
+.ampel-mini { display: inline-block; font-size: 11px; padding: 2px 6px; border-radius: 6px; margin: 2px 4px 2px 0; border: 1.5px solid; }
+.ampel-mini.gruen { border-color: var(--gruen); } .ampel-mini.gelb { border-color: #d9a400; } .ampel-mini.rot { border-color: var(--rot); }
+.ergebnis-block .anzahl span { display: block; margin-top: .2em; }

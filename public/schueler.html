@@ -59,12 +59,48 @@
   .balken.loesung span { color: var(--gruen); font-weight: 700; }
   .balken.loesung .bahn div { background: var(--gruen); }
   .material .ohne-link { padding: 10px 14px; background: #fff; border: 1px dashed var(--linie); border-radius: 10px; }
+  .auftrag .phase { font-size: 13px; color: var(--grau); margin-top: 2px; }
+  .sicher { display: flex; gap: 8px; margin: 4px 0 12px; }
+  .sicher button, .ampel button, .wahl { flex: 1; font: inherit; font-size: 16px; padding: 12px 6px; border: 2px solid var(--linie); border-radius: 10px; background: #fff; cursor: pointer; }
+  .sicher button.an { border-color: var(--orange); background: #fdf0e4; font-weight: 600; }
+  input.text, textarea.text { width: 100%; font: inherit; font-size: 17px; padding: 10px 12px; border: 2px solid var(--linie); border-radius: 10px; margin-bottom: 10px; }
+  .regler { margin-bottom: 14px; }
+  .regler .name { font-weight: 600; margin-bottom: 6px; }
+  .regler .stufen { display: flex; gap: 6px; }
+  .regler .stufen button { flex: 1; font: inherit; padding: 10px 0; border: 2px solid var(--linie); border-radius: 8px; background: #fff; cursor: pointer; }
+  .regler .stufen button.an { background: var(--orange); border-color: var(--orange); color: #fff; font-weight: 700; }
+  .regler .enden { display: flex; justify-content: space-between; font-size: 12px; color: var(--grau); margin-top: 3px; }
+  .hotspot { position: relative; margin-bottom: 12px; touch-action: manipulation; }
+  .hotspot img { width: 100%; display: block; border-radius: 8px; }
+  .hotspot .punkt { position: absolute; width: 26px; height: 26px; margin: -13px 0 0 -13px; border: 4px solid var(--orange); border-radius: 50%; background: rgba(232,115,12,.25); pointer-events: none; }
+  .codezeile { display: block; width: 100%; text-align: left; font: 14px Consolas, Menlo, monospace; white-space: pre; overflow-x: auto; padding: 9px 10px; margin-bottom: 6px; border: 2px solid var(--linie); border-radius: 8px; background: #fff; cursor: pointer; color: var(--tinte); }
+  .codezeile.an { border-color: var(--orange); background: #fdf0e4; }
+  .codezeile.platziert { color: var(--grau-hell, #a9a8a3); border-style: dashed; }
+  .codezeile .nr { color: var(--grau); margin-right: 8px; }
+  .geordnet { min-height: 40px; border: 2px dashed var(--linie); border-radius: 10px; padding: 6px; margin-bottom: 12px; }
+  .geordnet .codezeile { border-color: var(--orange); }
+  .klein { font-size: 13px; color: var(--grau); }
+  #praxis { margin-top: 14px; }
+  .platz { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .ampel { display: flex; gap: 8px; margin: 6px 0 10px; }
+  .ampel button.gruen.an { background: #e3f3e8; border-color: var(--gruen); font-weight: 700; }
+  .ampel button.gelb.an { background: #fff5d6; border-color: #d9a400; font-weight: 700; }
+  .ampel button.rot.an { background: #fbe7e3; border-color: var(--rot); font-weight: 700; }
+  .aufgaben { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 10px; }
+  .aufgaben label { display: flex; align-items: center; gap: 6px; padding: 10px 12px; border: 2px solid var(--linie); border-radius: 10px; font-size: 16px; }
+  .aufgaben label.an { border-color: var(--gruen); background: #e3f3e8; }
+  .aufgaben input { width: 20px; height: 20px; accent-color: var(--gruen); }
+  .partner { background: #e3f3e8; border-radius: 10px; padding: 12px; font-size: 17px; font-weight: 600; margin-top: 8px; }
+  .tafel-sql table { border-collapse: collapse; font-size: 13px; margin-top: 6px; }
+  .tafel-sql td, .tafel-sql th { border: 1px solid var(--linie); padding: 3px 6px; text-align: left; }
+  .tafel-sql th { background: var(--flaeche); }
 </style>
 </head>
 <body>
 <header><span><b>Mitmachen</b></span><span id="code"></span></header>
 <main><div class="karte frage-karte" id="inhalt" hidden></div>
 <div class="karte" id="begleitung"><div class="warten">Verbinde …</div></div>
+<div class="karte" id="praxis" hidden></div>
 <p class="hinweis">Gespeichert wird nur deine Antwort mit einer zufälligen Kennung dieses Geräts, keine Namen. Schreib bitte auch nirgends deinen Namen hinein.</p></main>
 <script>
 "use strict";
@@ -80,7 +116,6 @@ let geraet = merk("mitmachen:geraet");
 if (!geraet) { geraet = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()); merk("mitmachen:geraet", geraet); }
 
 let aktuelleFrage = null;      // Schlüssel der angezeigten Frage
-let auswahl = [];
 let gesendet = false;
 
 function el(tag, attrs, ...kinder) {
@@ -123,6 +158,7 @@ function begleiten(st, jetzt) {
     tafelText(st.tafel),
     a ? el("div", { class: "auftrag" },
       el("div", { class: "kopf" }, el("span", { class: "form" }, FORMEN[a.sozialform] || a.sozialform || "Auftrag"), c ? el("span", { class: "uhr", id: "uhr" }, "") : (a.dauer_min ? el("span", null, a.dauer_min + " min") : null)),
+      a.phase ? el("div", { class: "phase" }, a.phase) : null,
       el("div", { class: "satz" }, a.text),
       a.abgabe ? el("div", { class: "abgabe" }, el("b", null, "Abgabe: "), a.abgabe) : null)
       : st.tafel ? null : el("p", { class: "hinweis", style: "margin:0" }, st.extern ? "Gerade läuft ein Vortrag." : "Schaut nach vorn an die Tafel."),
@@ -144,6 +180,10 @@ function tafelText(t) {
   else if (t.art === "code") inhalt = [
     el("pre", { class: "tafel-code" }, (t.zeilen || []).map((z, i) => (String(i + 1).padStart(2, " ") + "  " + z)).join("\n")),
     (t.erklaerungen || []).map((e) => el("div", { class: "tafel-erkl" }, el("b", null, "Zeile " + e.zeile + " (" + e.label + "): "), e.text))];
+  else if (t.art === "sql") inhalt = [el("pre", { class: "tafel-code" }, t.text || ""),
+    t.fehler ? el("div", { class: "fehler" }, t.fehler) : null,
+    (t.spalten || []).length ? el("div", { class: "tafel-sql" }, el("table", null, el("tr", null, t.spalten.map((x) => el("th", null, x))), (t.zeilen || []).map((r) => el("tr", null, r.map((v) => el("td", null, v))))),
+      el("div", { class: "klein" }, t.anzahl + " Zeilen" + (t.anzahl > (t.zeilen || []).length ? ", gezeigt: " + t.zeilen.length : ""))) : null];
   else if (t.art === "ergebnis") inhalt = (t.bloecke || []).map((b) => {
     const max = Math.max(1, ...b.optionen.map((o) => o.n));
     return el("div", { class: "tafel-ergebnis" }, el("div", { style: "font-weight:700;margin-bottom:6px" }, b.frage),
@@ -165,26 +205,107 @@ function uhrZeigen() {
 }
 setInterval(uhrZeigen, 500);
 
+/* ------------------------------------------------------------------ Fragen */
 function zeigen(f) {
   const schluessel = f.schritt + ":" + f.seit;
   if (aktuelleFrage === schluessel) return;
-  aktuelleFrage = schluessel; auswahl = []; gesendet = false;
+  aktuelleFrage = schluessel; gesendet = false;
   inhalt.hidden = false;
   const teamFeld = f.kennung === "team" ? el("p", null, "Eure Teamnummer: ", el("input", { class: "team", type: "number", min: 1, max: 40, inputmode: "numeric", value: merk("mitmachen:team:" + code) || "" })) : null;
   const meldung = el("div");
   const knopf = el("button", { class: "senden", disabled: true, onclick: senden }, "Senden");
-  const optionen = f.optionen.map((o) => {
-    const eingabe = el("input", { type: f.mehrfach ? "checkbox" : "radio", name: "o", value: o });
-    const zeile = el("label", { class: "option" }, eingabe, el("span", null, o));
-    eingabe.addEventListener("change", () => {
-      auswahl = [...inhalt.querySelectorAll("input[name=o]:checked")].map((x) => x.value);
-      for (const z of inhalt.querySelectorAll(".option")) z.classList.toggle("gewaehlt", z.querySelector("input").checked);
-      knopf.disabled = !auswahl.length;
-      knopf.textContent = gesendet ? "Antwort ändern" : "Senden";
+  const antwort = {};                 // was gesendet wird
+  const pruefen = () => {
+    let ok = false;
+    const typ = f.baustein;
+    if (typ === "abstimmung" || typ === "vorhersage") ok = (antwort.auswahl || []).length > 0 && (!f.sicherheit || antwort.sicher != null);
+    else if (typ === "exit") ok = (!f.optionen.length || (antwort.auswahl || []).length > 0) && !!(antwort.text || "").trim() && (!f.sicherheit || antwort.sicher != null);
+    else if (typ === "wortwolke") ok = (antwort.woerter || []).some((w) => w.trim());
+    else if (typ === "zielscheibe") ok = (antwort.werte || []).filter((x) => x != null).length === f.dimensionen.length;
+    else if (typ === "hotspot") ok = antwort.x != null;
+    else if (typ === "ordnen") ok = (antwort.reihenfolge || []).length === f.zeilen.length;
+    else if (typ === "fehlerzeile") ok = antwort.zeile != null;
+    knopf.disabled = !ok;
+    knopf.textContent = gesendet ? "Antwort ändern" : "Senden";
+  };
+  const teile = [el("h1", null, f.baustein === "exit" && !f.frage ? f.offen : f.frage), teamFeld];
+  const typ = f.baustein;
+  if (typ === "abstimmung" || typ === "vorhersage" || (typ === "exit" && f.optionen.length)) {
+    if (f.mehrfach) teile.push(el("p", { class: "hinweis", style: "margin:0 0 10px" }, "Mehrere Antworten möglich."));
+    const box = el("div");
+    for (const o of f.optionen) {
+      const eingabe = el("input", { type: f.mehrfach ? "checkbox" : "radio", name: "o", value: o });
+      box.append(el("label", { class: "option" }, eingabe, el("span", null, o)));
+      eingabe.addEventListener("change", () => {
+        antwort.auswahl = [...box.querySelectorAll("input[name=o]:checked")].map((x) => x.value);
+        for (const z of box.querySelectorAll(".option")) z.classList.toggle("gewaehlt", z.querySelector("input").checked);
+        pruefen();
+      });
+    }
+    teile.push(box);
+  }
+  if (f.sicherheit) {
+    const wahl = (wert, text) => el("button", { onclick: (e) => { antwort.sicher = wert; for (const b of e.target.parentNode.children) b.classList.toggle("an", b === e.target); pruefen(); } }, text);
+    teile.push(el("p", { class: "hinweis", style: "margin:4px 0 4px" }, "Wie sicher bist du?"), el("div", { class: "sicher" }, wahl(true, "sicher"), wahl(false, "geraten")));
+  }
+  if (typ === "exit") {
+    if (f.frage) teile.push(el("h1", { style: "font-size:18px;margin-top:8px" }, f.offen));
+    const t = el("textarea", { class: "text", rows: 3, maxlength: 300, placeholder: "Deine Antwort, ohne Namen" });
+    t.addEventListener("input", () => { antwort.text = t.value; pruefen(); });
+    teile.push(t);
+  }
+  if (typ === "wortwolke") {
+    antwort.woerter = [];
+    for (let i = 0; i < f.max_woerter; i++) {
+      const t = el("input", { class: "text", maxlength: 30, placeholder: f.max_woerter > 1 ? "Wort " + (i + 1) : "Ein Wort", autocomplete: "off" });
+      t.addEventListener("input", () => { antwort.woerter[i] = t.value; pruefen(); });
+      teile.push(t);
+    }
+  }
+  if (typ === "zielscheibe") {
+    antwort.werte = f.dimensionen.map(() => null);
+    f.dimensionen.forEach((d, i) => {
+      const stufen = el("div", { class: "stufen" }, [0, 1, 2, 3, 4].map((w) => el("button", { onclick: (e) => {
+        antwort.werte[i] = w; for (const b of e.target.parentNode.children) b.classList.toggle("an", b === e.target); pruefen(); } }, String(w))));
+      teile.push(el("div", { class: "regler" }, el("div", { class: "name" }, d), stufen, el("div", { class: "enden" }, el("span", null, "trifft nicht zu"), el("span", null, "trifft voll zu"))));
     });
-    return zeile;
-  });
-  inhalt.replaceChildren(el("h1", null, f.frage), teamFeld || "", f.mehrfach ? el("p", { class: "hinweis", style: "margin:0 0 10px" }, "Mehrere Antworten möglich.") : "", ...optionen, knopf, meldung);
+  }
+  if (typ === "hotspot") {
+    const flaeche = el("div", { class: "hotspot" }, el("div", { class: "warten" }, "Bild lädt …"));
+    const punkt = el("div", { class: "punkt" });
+    fetch("/api/raum/" + code + "/bild", { cache: "no-store" }).then((r) => r.json()).then((d) => {
+      const img = el("img", { src: d.daten || "", alt: "Bild zur Frage" });
+      flaeche.replaceChildren(img);
+      img.addEventListener("click", (e) => {
+        const r = img.getBoundingClientRect();
+        antwort.x = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+        antwort.y = Math.max(0, Math.min(1, (e.clientY - r.top) / r.height));
+        punkt.style.left = antwort.x * 100 + "%"; punkt.style.top = antwort.y * 100 + "%";
+        flaeche.append(punkt);
+        pruefen();
+      });
+    }).catch(() => flaeche.replaceChildren(el("div", { class: "fehler" }, "Bild nicht geladen.")));
+    teile.push(el("p", { class: "hinweis", style: "margin:0 0 8px" }, "Tippe auf die Stelle im Bild."), flaeche);
+  }
+  if (typ === "ordnen") {
+    antwort.reihenfolge = [];
+    const oben = el("div", { class: "geordnet" });
+    const unten = el("div");
+    const zeichnen = () => {
+      oben.replaceChildren(...(antwort.reihenfolge.length ? antwort.reihenfolge.map((g, k) => el("button", { class: "codezeile", onclick: () => { antwort.reihenfolge.splice(k, 1); zeichnen(); } }, el("span", { class: "nr" }, String(k + 1)), f.zeilen[g])) : [el("div", { class: "klein", style: "padding:8px" }, "Hier entsteht deine Reihenfolge.")]));
+      unten.replaceChildren(...f.zeilen.map((z, g) => el("button", { class: "codezeile" + (antwort.reihenfolge.includes(g) ? " platziert" : ""), onclick: () => { if (!antwort.reihenfolge.includes(g)) { antwort.reihenfolge.push(g); zeichnen(); } } }, z)));
+      pruefen();
+    };
+    teile.push(el("p", { class: "hinweis", style: "margin:0 0 8px" }, "Tippe die Zeilen in der richtigen Reihenfolge an. Antippen oben nimmt eine Zeile zurück."), oben, unten);
+    zeichnen();
+  }
+  if (typ === "fehlerzeile") {
+    const box = el("div");
+    f.zeilen.forEach((z, i) => box.append(el("button", { class: "codezeile", onclick: (e) => {
+      antwort.zeile = i + 1; for (const b of box.children) b.classList.toggle("an", b === e.currentTarget); pruefen(); } }, el("span", { class: "nr" }, String(i + 1).padStart(2, " ")), z || " ")));
+    teile.push(el("p", { class: "hinweis", style: "margin:0 0 8px" }, "Tippe die Zeile mit dem Fehler an."), box);
+  }
+  inhalt.replaceChildren(...teile.filter(Boolean), knopf, meldung);
 
   async function senden() {
     meldung.className = ""; meldung.textContent = "";
@@ -193,17 +314,91 @@ function zeigen(f) {
     if (team) merk("mitmachen:team:" + code, team);
     knopf.disabled = true;
     try {
-      const r = await fetch("/api/raum/" + code + "/antwort", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ geraet, team, schritt: f.schritt, auswahl }) });
+      const r = await fetch("/api/raum/" + code + "/antwort", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(Object.assign({ geraet, team, schritt: f.schritt }, antwort)) });
       const d = await r.json();
       if (!r.ok) throw new Error(d.fehler || "Fehler");
       gesendet = true;
       meldung.className = "ok"; meldung.textContent = "Angekommen. Du kannst deine Antwort noch ändern.";
-      knopf.textContent = "Antwort ändern";
     } catch (e) {
       meldung.className = "fehler"; meldung.textContent = e.message || "Nicht angekommen. Nochmal versuchen.";
     }
-    knopf.disabled = false;
+    pruefen();
   }
+}
+
+/* ------------------------------------------------------------------ Praxisphase: Platz, Ampel, Aufgaben, Partner */
+const praxis = document.getElementById("praxis");
+let praxisSchluessel = "";
+function eigen() { try { return JSON.parse(merk("mitmachen:praxis:" + code) || "{}"); } catch (e) { return {}; } }
+function eigenSetzen(teil) { const e = Object.assign(eigen(), teil); merk("mitmachen:praxis:" + code, JSON.stringify(e)); return e; }
+async function melden(teil) {
+  const e = eigen();
+  if (!(e.platz >= 1 && e.platz <= 40)) return;
+  try {
+    const r = await fetch("/api/raum/" + code + "/melden", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(Object.assign({ geraet, platz: e.platz }, teil)) });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.fehler);
+    praxisMeldung("");
+  } catch (x) { praxisMeldung(x.message || "Nicht angekommen."); }
+}
+function praxisMeldung(t) { const m = document.getElementById("praxis-meldung"); if (m) { m.className = t ? "fehler" : ""; m.textContent = t; } }
+
+function praxisZeigen(m) {
+  const an = m && (m.hilfe || m.fortschritt);
+  if (!an) { praxis.hidden = true; praxisSchluessel = ""; return; }
+  const e = eigen();
+  const schluessel = JSON.stringify([m, e]);
+  if (schluessel === praxisSchluessel) return;
+  praxisSchluessel = schluessel;
+  praxis.hidden = false;
+  const aufgaben = (m.fortschritt && m.fortschritt.aufgaben) || [];
+  const platzFeld = el("input", { class: "team", type: "number", min: 1, max: 40, inputmode: "numeric", value: e.platz || "" });
+  platzFeld.addEventListener("change", () => {
+    const n = parseInt(platzFeld.value, 10);
+    if (n >= 1 && n <= 40) { eigenSetzen({ platz: n }); melden({ hilfe: m.hilfe ? { stufe: e.stufe || "gruen", aufgabe: e.aufgabe || "" } : undefined, erledigt: m.fortschritt ? e.erledigt || [] : undefined }); praxisSchluessel = ""; praxisZeigen(m); }
+  });
+  const teile = [el("div", { class: "platz" }, el("b", null, "Deine Platznummer"), platzFeld)];
+  if (!e.platz) teile.push(el("p", { class: "hinweis", style: "margin:0" }, "Die Nummer steht an deinem Platz. Keine Namen."));
+  else {
+    if (m.hilfe) {
+      const stufe = e.stufe || "gruen";
+      const knopf = (w, text) => el("button", { class: w + (stufe === w ? " an" : ""), onclick: () => { const neu = eigenSetzen({ stufe: w }); melden({ hilfe: { stufe: w, aufgabe: neu.aufgabe || "" } }); praxisSchluessel = ""; praxisZeigen(m); } }, text);
+      teile.push(el("div", { class: "abschnitt" }, "Wie läuft es?"), el("div", { class: "ampel" }, knopf("gruen", "läuft"), knopf("gelb", "Frage, kann warten"), knopf("rot", "hänge fest")));
+      if (aufgaben.length && stufe !== "gruen") {
+        const wahl = el("select", { class: "text" }, el("option", { value: "" }, "bei welcher Aufgabe?"), aufgaben.map((a) => el("option", { value: a, selected: a === e.aufgabe }, a)));
+        wahl.addEventListener("change", () => { eigenSetzen({ aufgabe: wahl.value }); melden({ hilfe: { stufe, aufgabe: wahl.value } }); });
+        teile.push(wahl);
+      }
+    }
+    if (aufgaben.length) {
+      const fertig = e.erledigt || [];
+      teile.push(el("div", { class: "abschnitt" }, "Fertig mit"), el("div", { class: "aufgaben" }, aufgaben.map((a) => {
+        const box = el("input", { type: "checkbox", checked: fertig.includes(a) });
+        box.addEventListener("change", () => {
+          const neu = box.checked ? [...new Set([...fertig, a])] : fertig.filter((x) => x !== a);
+          eigenSetzen({ erledigt: neu }); melden({ erledigt: neu }); praxisSchluessel = ""; praxisZeigen(m);
+        });
+        return el("label", { class: fertig.includes(a) ? "an" : "" }, box, a);
+      })));
+    }
+    if (m.helfer) {
+      const box = el("input", { type: "checkbox", checked: !!e.helfen });
+      box.addEventListener("change", () => { eigenSetzen({ helfen: box.checked }); melden({ helfen: box.checked }); praxisSchluessel = ""; praxisZeigen(m); });
+      teile.push(el("label", { class: "option" + (e.helfen ? " gewaehlt" : "") }, box, el("span", null, "Ich bin fertig und helfe gern.")));
+    }
+    for (const p of m.paare || []) {
+      if (p.a !== e.platz && p.b !== e.platz) continue;
+      const anderer = p.a === e.platz ? p.b : p.a;
+      if (p.art === "hilfe") teile.push(el("div", { class: "partner" }, p.a === e.platz ? "Platz " + p.b + " braucht Hilfe" + (p.aufgabe ? " bei " + p.aufgabe : "") + ". Geh bitte hin." : "Platz " + p.a + " kommt und hilft dir."));
+      else teile.push(el("div", { class: "partner" }, "Dein Partner: Platz " + anderer + ". Trefft euch an der Haltestelle " + p.aufgabe + " und vergleicht eure Lösungen."));
+    }
+    if (m.tempo && aufgaben.length && !(m.paare || []).some((p) => p.art === "duett" && (p.a === e.platz || p.b === e.platz)) && (e.erledigt || []).length) {
+      teile.push(el("p", { class: "hinweis" }, "Warte kurz an der Haltestelle, gleich bekommst du einen Partner. Oder fang schon die nächste Aufgabe an."));
+    }
+  }
+  if (m.hinweis) teile.push(el("p", { class: "hinweis" }, m.hinweis));
+  teile.push(el("div", { id: "praxis-meldung" }));
+  praxis.replaceChildren(...teile);
 }
 
 async function abfragen() {
@@ -214,7 +409,7 @@ async function abfragen() {
     if (!d.raum) warten("Raum " + code + " gibt es nicht (mehr). Code an der Tafel prüfen.");
     else {
       if (d.frage) zeigen(d.frage); else keineFrage();
-      if (d.status) begleiten(d.status, d.jetzt);
+      if (d.status) { begleiten(d.status, d.jetzt); praxisZeigen(d.status.methoden); }
       else if (!statusSchluessel) begleitung.replaceChildren(el("div", { class: "warten" }, el("p", null, "Angemeldet. Gleich geht es los …")));
     }
   } catch (e) {

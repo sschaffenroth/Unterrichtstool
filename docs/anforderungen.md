@@ -79,15 +79,17 @@ doppelt anlegen. Priorität: **H** unverzichtbar für den Start · **M** wäre s
 | B8 | `urteilen` | GP | M | 3 |
 | B9 | `testfaelle` mit Zähler in der Regie | GP | M | 3 |
 | B10 | `partner` (Namensliste nur lokal) | GP | M | 3 |
+| B25 | Methoden-Menü in der Regie: spontane Methoden starten, groß/klein/aus am Board, Befund | Lehrkraft 25.10.2026 | H | 3 ✓ |
+| B26 | Fach-Chats bauen ihre Tafel.html selbst und dürfen eigene Seiten für `einbetten` bauen (stand.md Teil 6) | Lehrkraft 25.10.2026 | H | 3 ✓ |
 | B11 | `folie` (Markdown) | KIG, GP | M | 2 |
-| B12 | `sql`: Abfrage live im Browser (sql.js), Ergebnis als Tabelle | KIG, DB, Ideen (vorgemerkt) | M | 3 |
+| B12 | `sql`: Abfrage live im Browser (sql.js), Ergebnis als Tabelle | KIG, DB, Ideen (vorgemerkt) | M | 3 ✓ |
 | B13 | `fragen`, `feedback` | GP | N | 4 |
 | B14 | `ergebnis`: Ergebnis früherer Schüler-Schritte auf der Tafel, mehrere nebeneinander | SYS | H | 2 |
 | B15 | `zeichnen`: Hintergrund Bild oder Zahlenraster (z. B. 3 × 3-Kern), Zellen beschreibbar, Freihand. In SYS Kurzarbeitsstoff (Faltung, Gewichtssumme) | SYS, GP | H | 2 |
 | B16 | `vorhersage`: Auflösung in einem späteren Schritt (`aufloesen_in`) | SYS | M | 2 |
-| B22 | Rollenwechsel beim Pair Programming (`rollenwechsel_min`), Signal an der Tafel | Ideen (vorgemerkt) | M | 3 |
-| B23 | `auftrag.phasen`: Sozialformen nacheinander (allein, zu zweit, zu viert, alle), Tafel wechselt Piktogramm und Countdown selbst | Ideen (vorgemerkt) | M | 3 |
-| B24 | Energizer-Knopf in der Regie: schiebt 1 bis 3 min ein (zählt nicht gegen den Plan), Anleitung und Countdown an der Tafel, Sammlung mitgeliefert, Begriffe aus `BEGRIFFE.md` | Ideen (vorgemerkt) | M | 3 |
+| B22 | Rollenwechsel beim Pair Programming (`rollenwechsel_min`), Signal an der Tafel | Ideen (vorgemerkt) | M | 3 ✓ |
+| B23 | `auftrag.phasen`: Sozialformen nacheinander (allein, zu zweit, zu viert, alle), Tafel wechselt Piktogramm und Countdown selbst | Ideen (vorgemerkt) | M | 3 ✓ |
+| B24 | Energizer-Knopf in der Regie: schiebt 1 bis 3 min ein (zählt nicht gegen den Plan), Anleitung und Countdown an der Tafel, Sammlung mitgeliefert, Begriffe aus `BEGRIFFE.md` | Ideen (vorgemerkt) | M | 3 ✓ |
 | B17 | `einbetten`: vorhandene HTML-Datei als Reiter, Zustand bleibt (Übergang) | GP | H | 2 ✓ |
 | B18 | `folie`: Schrift passt sich an, `aufdecken` Absatz für Absatz | GP | H | 2 ✓ |
 | B19 | `code.marken als: zeile` (Docstring/Kommentar als Codezeile), Schrift füllt die Fläche | GP | H | 2 ✓ |
@@ -99,20 +101,20 @@ doppelt anlegen. Priorität: **H** unverzichtbar für den Start · **M** wäre s
 | ID | Anforderung | Quelle | Prio | Stufe |
 |---|---|---|---|---|
 | I1 | QR-Abstimmung, Zuordnen, Formular am Handy oder PC-Browser (wie ES 06) | KIG, SYS | H | 1 |
-| I5 | `abstimmung` mit Mehrfachauswahl, Balken je Option | SYS | H | 2 |
-| I6 | Team-Kennung ohne Namen (`kennung: team`): eine Stimme je Team, neue ersetzt alte. Gleiche Technik für Platznummer bei I4 | SYS, GP | M | 2 |
-| I7 | Fortschritt melden: Teams haken Aufgaben/Testfälle am Handy ab, Regie zeigt Balken, Zahlen für Befund und Notausstieg | Ideen (vorgemerkt) | M | 3 |
-| I8 | Hilfe-Ampel mit Platznummer, Warteschlange in der Regie | Ideen (vorgemerkt) | M | 3 |
-| I9 | Sicherheit zur Antwort („sicher“/„geraten“), Regie zeigt „falsch, aber sicher“ | Ideen (vorgemerkt) | M | 3 |
-| I10 | Hotspot: auf dem Bild tippen, Punktwolke an der Tafel | SYS, Ideen (vorgemerkt) | M | 3 |
-| I11 | Codezeilen ordnen am Handy (Parsons, ohne Ablenkzeilen) | GP, ET1, Ideen (vorgemerkt) | M | 3 |
-| I12 | `wortwolke`: 1 bis 3 Wörter je Handy, Tafel nach Häufigkeit, Regie blendet einzelne aus | Ideen (vorgemerkt) | M | 3 |
-| I13 | Lerntempoduett und Helfersystem: wer fertig ist oder helfen kann, meldet sich, Tafel bildet Paare über Platznummern (baut auf I7, I8) | Ideen (vorgemerkt) | M | 3 |
-| I14 | Fehlerzeile antippen: Handy zeigt Code, jeder tippt die Fehlerzeile, Tafel färbt Zeilen nach Anzahl | GP, ET1, DB, Ideen (vorgemerkt) | M | 3 |
-| I15 | Zielscheibe: Regler je Dimension am Handy, Punkte auf der Zielscheibe an der Tafel, ohne Namen | Ideen (vorgemerkt) | M | 3 |
+| I5 | `abstimmung` mit Mehrfachauswahl, Balken je Option | SYS | H | 2 ✓ |
+| I6 | Team-Kennung ohne Namen (`kennung: team`): eine Stimme je Team, neue ersetzt alte. Gleiche Technik für Platznummer bei I4 | SYS, GP | M | 2 ✓ |
+| I7 | Fortschritt melden: Teams haken Aufgaben/Testfälle am Handy ab, Regie zeigt Balken, Zahlen für Befund und Notausstieg | Ideen (vorgemerkt) | M | 3 ✓ |
+| I8 | Hilfe-Ampel mit Platznummer, Warteschlange in der Regie | Ideen (vorgemerkt) | M | 3 ✓ |
+| I9 | Sicherheit zur Antwort („sicher“/„geraten“), Regie zeigt „falsch, aber sicher“ | Ideen (vorgemerkt) | M | 3 ✓ |
+| I10 | Hotspot: auf dem Bild tippen, Punktwolke an der Tafel | SYS, Ideen (vorgemerkt) | M | 3 ✓ |
+| I11 | Codezeilen ordnen am Handy (Parsons, ohne Ablenkzeilen) | GP, ET1, Ideen (vorgemerkt) | M | 3 ✓ |
+| I12 | `wortwolke`: 1 bis 3 Wörter je Handy, Tafel nach Häufigkeit, Regie blendet einzelne aus | Ideen (vorgemerkt) | M | 3 ✓ |
+| I13 | Lerntempoduett und Helfersystem: wer fertig ist oder helfen kann, meldet sich, Tafel bildet Paare über Platznummern (baut auf I7, I8) | Ideen (vorgemerkt) | M | 3 ✓ |
+| I14 | Fehlerzeile antippen: Handy zeigt Code, jeder tippt die Fehlerzeile, Tafel färbt Zeilen nach Anzahl | GP, ET1, DB, Ideen (vorgemerkt) | M | 3 ✓ |
+| I15 | Zielscheibe: Regler je Dimension am Handy, Punkte auf der Zielscheibe an der Tafel, ohne Namen | Ideen (vorgemerkt) | M | 3 ✓ |
 | I2 | Vorhersage per Handy, gesammelt an der Tafel | GP | M | 3 |
-| I3 | Exit-Ticket am Handy mit Muddiest Point, nur Regie, Lehrkraft markiert richtig/falsch | GP, Ideen (vorgemerkt) | M | 3 |
-| I4 | Hilfe melden mit Platznummer | GP | N | 4 |
+| I3 | Exit-Ticket am Handy mit Muddiest Point, nur Regie, Lehrkraft markiert richtig/falsch | GP, Ideen (vorgemerkt) | M | 3 ✓ |
+| I4 | Hilfe melden mit Platznummer | GP | N | 4 ✓ (über I8) |
 
 ## Auswertung
 

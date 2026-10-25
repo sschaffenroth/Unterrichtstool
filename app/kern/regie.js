@@ -66,6 +66,7 @@ function regieInhalt(modus) {
     el("div", { class: "schritt-steuerung" },
       el("button", { class: "knopf", onclick: () => tun("zurueck") }, "‹ Zurück"),
       el("button", { class: "knopf haupt weiter", onclick: () => tun("weiter") }, naechster ? "Weiter: " + ein(naechster.titel) + " ›" : "Ende der Stunde")),
+    methodenKarte(),
     ueberwachenKarte(),
     steuerKarte(s),
     modus !== "schublade" ? fensterKarte() : null,
@@ -143,19 +144,19 @@ function handyTafel(t) {
 
 /* Was die Schüler am Handy sehen, nachgebaut aus dem Zustand (wie public/schueler.html) */
 function handyVorschau(gross) {
-  const s = Z.freigabe ? schrittNachId(Z.freigabe) : null;
-  const sch = s && s.schueler;
-  const online = sch ? ((Z.online.stimmen || {})[s.id] || {}) : {};
-  const antworten = sch ? ((Z.online.teilnehmer || {})[s.id] || 0) : 0;
+  const id = Z.freigabe;
+  const sch = frageDef(id);
+  const online = sch ? ((Z.online.stimmen || {})[id] || {}) : {};
+  const antworten = sch ? teilnehmerVon(id) : 0;
   let bildschirm;
   if (!Z.raum) {
     bildschirm = el("div", { class: "handy-warten" }, "Noch kein Raum. „Handys verbinden“ oder „Stunde starten“ legt ihn an.");
   } else {
     const frage = sch ? el("div", { class: "handy-frage-karte" },
-      el("div", { class: "handy-frage" }, sch.frage || s.titel),
+      el("div", { class: "handy-frage" }, sch.baustein === "exit" ? (sch.frage || sch.offen) : sch.frage || frageTitel(id)),
       sch.kennung === "team" ? el("div", { class: "handy-klein" }, "Eure Teamnummer: [  ]") : null,
       sch.mehrfach ? el("div", { class: "handy-klein" }, "Mehrere Antworten möglich.") : null,
-      (sch.optionen || []).map((o) => el("div", { class: "handy-option" }, el("span", { class: "handy-kreis" + (sch.mehrfach ? " eckig" : "") }), el("span", null, o), el("b", { class: "handy-zahl" }, online[o] || ""))),
+      handyFrageVorschau(sch, online),
       el("div", { class: "handy-knopf" }, "Senden"),
       el("div", { class: "handy-klein", style: "margin-top:6px;color:#2f8f4e;font-weight:600" }, antworten + (sch.kennung === "team" ? " Teams" : " Handys") + " haben geantwortet")) : null;
     const st = begleitStatus();
@@ -167,14 +168,16 @@ function handyVorschau(gross) {
       handyTafel(st.tafel),
       a ? el("div", { class: "handy-auftrag" },
         el("div", { class: "handy-auftrag-kopf" }, el("b", null, FORM[a.sozialform] || a.sozialform || "Auftrag"),
-          Z.countdown ? el("b", { class: "handy-uhr", "data-countdown": schritt().id }, "") : null),
+          st.countdown ? el("b", { class: "handy-uhr" }, formatMinSek(st.countdown.rest)) : null),
+        a.phase ? el("div", { class: "handy-klein" }, a.phase) : null,
         el("div", { class: "handy-satz" }, a.text),
         a.abgabe ? el("div", { class: "handy-klein" }, el("b", null, "Abgabe: "), a.abgabe) : null)
         : st.tafel ? null : el("div", { class: "handy-klein" }, st.extern ? "Gerade läuft ein Vortrag." : "Schaut nach vorn an die Tafel."),
       st.material.map((m) => el("div", { class: "handy-material" + (m.url ? "" : " ohne-link") },
         el("div", { style: "font-weight:600" }, m.text, m.url ? el("span", { style: "color:var(--orange)" }, " ↗") : null),
         m.ort ? el("div", { class: "handy-klein" }, "Ort: " + m.ort) : null,
-        m.datei ? el("code", null, m.datei) : null)));
+        m.datei ? el("code", null, m.datei) : null)),
+      handyMethodenVorschau(st.methoden));
     bildschirm = el("div", null, frage, begleitung);
   }
   const handy = el("div", { class: "handy" + (gross ? " gross" : "") },
@@ -189,6 +192,29 @@ function handyVorschau(gross) {
       el("a", { href: anmeldeAdresse(), target: "_blank", rel: "noopener" }, "Schüler-Seite öffnen"),
       Z.verbindung === "fehler" ? el("div", { style: "color:var(--rot);font-weight:600" }, "Server nicht erreichbar") : null)) : null;
   return el("div", { class: "handy-bereich" + (gross ? " gross" : "") }, handy, gross ? anmeldung : (anmeldung ? el("div", { class: "handy-klein" }, anmeldeKurz()) : null));
+}
+
+/* Fragetypen in der Handy-Vorschau, wie public/schueler.html sie zeigt */
+function handyFrageVorschau(sch, online) {
+  const typ = sch.baustein;
+  if (typ === "wortwolke") return el("div", { class: "handy-option" }, el("span", { class: "handy-klein" }, sch.max_woerter > 1 ? "bis " + sch.max_woerter + " Wörter eintippen" : "ein Wort eintippen"));
+  if (typ === "zielscheibe") return (sch.dimensionen || ZIEL_DIMENSIONEN).map((d) => el("div", { class: "handy-regler" }, el("span", null, d), el("span", { class: "handy-klein" }, "trifft nicht zu ○○○○○ trifft voll zu")));
+  if (typ === "exit") return [(sch.optionen || []).map((o) => el("div", { class: "handy-option" }, el("span", { class: "handy-kreis" }), el("span", null, o))),
+    sch.frage ? el("div", { class: "handy-frage", style: "margin-top:6px" }, sch.offen || "") : null, el("div", { class: "handy-feld" }, "Textfeld")];
+  if (typ === "hotspot") return el("div", { class: "handy-feld" }, "Bild: auf die Stelle tippen");
+  if (typ === "ordnen") return [el("div", { class: "handy-klein" }, "Zeilen in der richtigen Reihenfolge antippen:"), (sch.gemischt || []).map((z) => el("pre", { class: "handy-code" }, z))];
+  if (typ === "fehlerzeile") return [el("div", { class: "handy-klein" }, "Zeile mit dem Fehler antippen:"), el("pre", { class: "handy-code" }, (sch.zeilen || []).map((z, i) => String(i + 1).padStart(2) + "  " + z).join("\n"))];
+  return [(sch.optionen || []).map((o) => el("div", { class: "handy-option" }, el("span", { class: "handy-kreis" + (sch.mehrfach ? " eckig" : "") }), el("span", null, o), el("b", { class: "handy-zahl" }, online[o] || ""))),
+    sch.sicherheit || Z.sicherheit[Z.freigabe] ? el("div", { class: "handy-klein" }, "Wie sicher? [sicher] [geraten]") : null];
+}
+function handyMethodenVorschau(m) {
+  if (!m || !(m.hilfe || m.fortschritt)) return null;
+  return el("div", { class: "handy-auftrag", style: "margin-top:8px;background:#fff;border:1px solid var(--linie)" },
+    el("div", { class: "handy-klein" }, "Platz [  ]"),
+    m.hilfe ? el("div", null, el("span", { class: "ampel-mini gruen" }, "läuft"), el("span", { class: "ampel-mini gelb" }, "Frage"), el("span", { class: "ampel-mini rot" }, "hänge fest")) : null,
+    m.fortschritt ? el("div", { class: "handy-klein" }, "Fertig: " + m.fortschritt.aufgaben.map((a) => "☐ " + a).join("  ")) : null,
+    m.helfer ? el("div", { class: "handy-klein" }, "☐ Ich bin fertig und helfe gern") : null,
+    (m.paare || []).length ? el("div", { class: "handy-klein" }, "Paare: " + m.paare.map((p) => p.a + (p.art === "hilfe" ? " hilft " : " + ") + p.b).join(", ")) : null);
 }
 
 function anzeigeKarte(name) {
@@ -237,16 +263,32 @@ function steuerKarte(s) {
       el("button", { class: "knopf klein", onclick: () => tun("countdown", { was: "minus" }) }, "−1 min"),
       el("button", { class: "knopf klein", onclick: () => tun("countdown", { was: "plus" }) }, "+1 min"),
       el("button", { class: "knopf klein", onclick: () => tun("countdown", { was: "neu" }) }, "neu starten")));
+    const ap = auftragPhase(s);
+    if (ap) teile.push(el("div", { class: "zeile" }, el("span", { class: "etikett" }, "Phase " + (ap.stand.i + 1) + "/" + ap.phasen.length),
+      el("b", { "data-rest": "auftragphase" }, ""),
+      el("span", null, (SOZIALFORM[ap.phasen[ap.stand.i].sozialform] || {}).wort || ""),
+      ap.stand.i < ap.phasen.length - 1 ? el("button", { class: "knopf klein haupt", onclick: () => tun("countdown", { was: "springen", ms: phasenBeginn(ap.phasen, ap.stand.i + 1) }) }, "nächste Phase") : null));
   }
   // Ergebnisse früherer Schüler-Schritte auf das Board legen
-  const quellen = SCHRITTE.filter((x) => x.schueler && ["abstimmung", "vorhersage"].includes(x.schueler.baustein) && SCHRITTE.indexOf(x) <= Z.schritt);
-  if (quellen.length) {
+  const quellen = SCHRITTE.filter((x) => x.schueler && SCHRITTE.indexOf(x) <= Z.schritt);
+  const spontan = Object.keys(Z.spontan);
+  if (quellen.length || spontan.length) {
     teile.push(el("div", { class: "zeile" }, el("span", { class: "etikett" }, "Ergebnis zeigen"),
       quellen.map((x) => {
-        const an = Z.overlay && Z.overlay.von.includes(x.id);
+        const an = Z.overlay && Z.overlay.von && Z.overlay.von.includes(x.id);
         const mitLoesung = vorhersageAufgeloest(x.id, schritt());
-        return el("button", { class: "knopf klein" + (an ? " aktiv" : ""), onclick: () => tun("overlay", { wert: an ? null : { von: [x.id], loesung: mitLoesung } }) }, ein(x.titel) + (x.schueler.baustein === "vorhersage" && mitLoesung ? " (mit Lösung)" : ""));
+        return el("button", { class: "knopf klein" + (an ? " aktiv" : ""), onclick: () => tun("overlay", { wert: an ? null : { von: [x.id], loesung: mitLoesung } }) }, ein(x.titel) + (SPAETE_LOESUNG.includes(x.schueler.baustein) && mitLoesung ? " (mit Lösung)" : ""));
+      }),
+      spontan.map((id) => {
+        const an = Z.overlay && Z.overlay.von && Z.overlay.von.includes(id);
+        const f = Z.spontan[id];
+        return el("button", { class: "knopf klein" + (an ? " aktiv" : ""), onclick: () => tun("overlay", { wert: an ? null : { von: [id], loesung: true } }) }, f.titel + " " + (f.zeit || "").slice(11, 16));
       })));
+    if (Z.overlay && Z.overlay.von) {
+      const d = frageDef(Z.overlay.von[0]);
+      if (d && d.loesung != null) teile.push(el("div", { class: "zeile" }, el("span", { class: "etikett" }, "Lösung"),
+        el("button", { class: "knopf klein" + (Z.overlay.loesung ? " aktiv" : ""), onclick: () => tun("overlay", { wert: Object.assign({}, Z.overlay, { loesung: !Z.overlay.loesung }) }) }, Z.overlay.loesung ? "Lösung ausblenden" : "Lösung zeigen")));
+    }
   }
   if (!teile.length) return null;
   return el("div", { class: "karte" }, el("h2", null, "Steuerung"), teile.map((t) => el("div", { style: "margin-bottom:8px" }, t)));
@@ -265,14 +307,21 @@ function handyKnoepfe() {
 
 function handzeichenKarte(s) {
   const sch = s.schueler;
-  if (!sch || !["abstimmung", "vorhersage"].includes(sch.baustein)) return null;
+  if (!sch) return null;
+  if (!["abstimmung", "vorhersage"].includes(sch.baustein)) {
+    return el("div", { class: "karte" }, el("h2", null, (TITEL[sch.baustein] || BAUSTEIN_TITEL[sch.baustein] || sch.baustein) + " am Handy"),
+      el("p", { style: "margin:0 0 8px;font-weight:600" }, sch.frage || sch.offen || ""), frageRegie(s.id));
+  }
   const st = Z.stimmen[s.id] || {};
   const online = (Z.online.stimmen || {})[s.id] || {};
   const antworten = (Z.online.teilnehmer || {})[s.id] || 0;
   const offen = Z.freigabe === s.id;
   const freigabeZeile = SERVER ? el("div", { class: "zeile", style: "margin-bottom:10px" },
     el("button", { class: "knopf" + (offen ? " aktiv" : " haupt"), onclick: () => (offen ? freigabeBeenden() : freigeben(s)) }, offen ? "Handys schließen" : "Für Handys freigeben"),
-    el("span", { class: "naechster" }, Z.raum ? antworten + (sch.kennung === "team" ? " Teams" : " Handys") + " geantwortet" + (Z.verbindung === "fehler" ? ", Server nicht erreichbar" : "") : "noch kein Raum")) : null;
+    el("span", { class: "naechster" }, Z.raum ? antworten + (sch.kennung === "team" ? " Teams" : " Handys") + " geantwortet" + (Z.verbindung === "fehler" ? ", Server nicht erreichbar" : "") : "noch kein Raum"),
+    sch.sicherheit ? el("span", { class: "naechster" }, "mit „sicher / geraten“") : el("label", { class: "naechster", title: "Handys fragen zusätzlich: sicher oder geraten? Gilt ab der nächsten Freigabe." },
+      el("input", { type: "checkbox", checked: !!Z.sicherheit[s.id], onchange: (e) => tun("sicherheit", { id: s.id, an: e.target.checked }) }), " sicher / geraten fragen")) : null;
+  const si = sicherheitZahlen(s.id);
   return el("div", { class: "karte" },
     el("h2", null, (sch.baustein === "vorhersage" ? "Vorhersage" : "Abstimmung") + (sch.kennung === "team" ? " je Team" : "") + ": Handy und Handzeichen"),
     el("p", { style: "margin:0 0 8px;font-weight:600" }, sch.frage || ""),
@@ -282,6 +331,7 @@ function handzeichenKarte(s) {
       el("button", { class: "knopf", onclick: () => tun("stimme", { id: s.id, option: o, delta: -1 }) }, "−"),
       el("span", { class: "z" }, st[o] || 0),
       el("button", { class: "knopf", onclick: () => tun("stimme", { id: s.id, option: o, delta: 1 }) }, "+"))),
+    si.mit ? el("p", { class: "naechster", style: "margin:4px 0 0" }, "Sicher: " + Object.values(si.sicher).reduce((a, b) => a + b, 0) + ", geraten: " + Object.values(si.geraten).reduce((a, b) => a + b, 0) + (sch.loesung != null ? ", falsch, aber sicher: " : ""), sch.loesung != null ? el("b", { style: "color:var(--rot)" }, si.falschSicher) : null) : null,
     sch.mehrfach ? el("p", { class: "naechster", style: "margin:4px 0 0" }, "Mehrfachauswahl: je Option zählen.") : null,
     sch.aufloesen_in ? el("p", { class: "naechster", style: "margin:4px 0 0" }, "Auflösung in: " + (schrittNachId(sch.aufloesen_in) || {}).titel) : null);
 }
@@ -313,6 +363,7 @@ function regieTakt(wurzel) {
   set("[data-schrittzeit]", formatMinSek(t), (e) => e.classList.toggle("ueber", t > soll));
   set("[data-ist='" + s.id + "']", formatMinSek(t), (e) => e.classList.toggle("ueber", t > soll));
   countdownsAktualisieren(wurzel);
+  if (wurzel === document.getElementById("app")) methodenTakt();
   if (Z.uhr.laeuft && t >= soll && !signalisiert[s.id + ":" + Z.schrittBeginn]) {
     signalisiert[s.id + ":" + Z.schrittBeginn] = true;
     const k = wurzel.querySelector("[data-schrittkarte]");
@@ -326,7 +377,13 @@ function regieZeichnen(ziel, modus) {
   const ablauf = ziel.querySelector(".ablauf");
   const scroll = ablauf ? ablauf.scrollTop : null;
   const seite = ziel.scrollTop;
+  const fokus = document.activeElement && ziel.contains(document.activeElement) && document.activeElement.getAttribute("data-feld");
+  const auswahl = fokus && "selectionStart" in document.activeElement ? [document.activeElement.selectionStart, document.activeElement.selectionEnd] : null;
   ziel.replaceChildren(regieInhalt(modus));
+  if (fokus) {
+    const e = ziel.querySelector('[data-feld="' + fokus + '"]');
+    if (e) { e.focus(); try { if (auswahl) e.setSelectionRange(auswahl[0], auswahl[1]); } catch (x) { /* Zahlenfeld */ } }
+  }
   if (scroll != null) ziel.querySelector(".ablauf").scrollTop = scroll;
   else { const a = ziel.querySelector(".eintrag.aktiv"); if (a) a.scrollIntoView({ block: "center" }); }
   ziel.scrollTop = seite;
@@ -368,6 +425,10 @@ function befundExport() {
     stunde: STUNDE.stunde, exportiert: new Date().toISOString(), stundenzeit_min: +(t / 60000).toFixed(1),
     schritte: SCHRITTE.map((x) => ({ id: x.id, titel: x.titel, soll_min: x.soll_min, ist_min: +(schrittzeit(x.id) / 60000).toFixed(1), aktiv: istAktiv(x) })),
     zaehler: Z.zaehler, stimmen: Z.stimmen,
+    handys: { stimmen: Z.online.stimmen, teilnehmer: Z.online.teilnehmer, antworten: Z.online.antworten },
+    spontan: Z.spontan, einschuebe: Z.einschuebe.map((e) => Object.assign({}, e, { min: +(e.ms / 60000).toFixed(1) })),
+    markiert: Object.entries(Z.markiert).map(([k, w]) => ({ frage: k.split("|")[0], text: k.slice(k.indexOf("|") + 1), marke: w })),
+    praxisphase: { meldungen: Z.online.meldungen, fortschritt: fortschrittZahlen(), duett_paare_fertig: (Z.methoden.tempo || {}).fertig || 0 },
   };
   herunterladen("Befund_" + STUNDE.stunde.fach + "_" + STUNDE.stunde.nr + "_" + (STUNDE.stunde.datum || datumHeute()) + ".json", JSON.stringify(daten, null, 2), "application/json");
 }

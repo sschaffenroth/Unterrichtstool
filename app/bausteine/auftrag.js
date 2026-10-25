@@ -29,7 +29,9 @@ function piktogramm(form) {
 }
 
 BAUSTEINE.auftrag = (b, ctx) => {
-  const f = SOZIALFORM[b.sozialform] || { wort: b.sozialform || "" };
+  const ap = b.phasen && b.phasen.length ? auftragPhase(ctx.schritt) : null;
+  const form = ap ? ap.phasen[ap.stand.i].sozialform : b.sozialform;
+  const f = SOZIALFORM[form] || { wort: form || "" };
   const material = (b.material || []).map((m) =>
     el("div", { class: "material-eintrag" },
       m.svg ? el("div", { class: "qr", html: m.svg }) : null,
@@ -37,13 +39,22 @@ BAUSTEINE.auftrag = (b, ctx) => {
         el("div", { class: "m-text" }, m.text),
         m.ort ? el("div", { class: "m-ort" }, m.ort) : null,
         m.datei ? el("div", { class: "m-datei" }, m.datei) : null)));
+  // mit Phasen zählt der Countdown die aktuelle Phase herunter
+  const uhr = ap ? el("div", { class: "countdown", "data-rest": "auftragphase" }, "") : b.dauer_min ? el("div", { class: "countdown", "data-countdown": ctx.schritt.id }, "") : null;
+  const rollen = b.rollenwechsel_min && Z.methoden.rollen ? el("div", { class: "rollen-hinweis" },
+    (Z.methoden.rollen.namen || ["Fahrer", "Navigator"]).join(" und ") + " tauschen alle " + b.rollenwechsel_min + " min", el("br"),
+    "nächster Wechsel in ", el("b", { "data-rest": "rollen" }, "")) : null;
   return el("div", { class: "auftrag" + (ctx.voll ? " voll" : "") },
     el("div", { class: "kopf" },
-      piktogramm(b.sozialform),
-      el("div", null, el("div", { class: "sozialform" }, f.wort), b.dauer_min ? el("div", { class: "dauer" }, b.dauer_min + " Minuten") : null),
-      ctx.voll && b.dauer_min ? el("div", { class: "countdown", "data-countdown": ctx.schritt.id }, "") : null),
-    !ctx.voll && b.dauer_min ? el("div", { class: "countdown", "data-countdown": ctx.schritt.id }, "") : null,
+      piktogramm(form),
+      el("div", null, el("div", { class: "sozialform" }, f.wort),
+        ap ? el("div", { class: "dauer" }, "Phase " + (ap.stand.i + 1) + " von " + ap.phasen.length) : b.dauer_min ? el("div", { class: "dauer" }, b.dauer_min + " Minuten") : null),
+      ctx.voll ? uhr : null),
+    !ctx.voll ? uhr : null,
+    ap ? el("div", { class: "auftrag-phasen" }, ap.phasen.map((p, i) => el("div", { class: "phase" + (i === ap.stand.i ? " aktiv" : i < ap.stand.i ? " erledigt" : "") },
+      el("b", null, (SOZIALFORM[p.sozialform] || { wort: p.sozialform }).wort), " " + p.min + " min", p.text && i === ap.stand.i ? el("div", null, p.text) : null))) : null,
     el("div", { class: "text" }, b.text || ""),
+    rollen,
     ctx.schritt.schueler ? mitmachenKasten(ctx.schritt, false) : null,
     material.length ? el("div", { class: "material" }, material) : null,
     b.abgabe ? el("div", { class: "abgabe" }, el("b", null, "Abgabe: "), b.abgabe) : null);
@@ -59,4 +70,5 @@ function countdownsAktualisieren(wurzel) {
     e.classList.toggle("ende", rest <= 0);
     e.classList.toggle("pause", !c.seit && rest > 0);
   }
+  methodenUhren(wurzel);
 }

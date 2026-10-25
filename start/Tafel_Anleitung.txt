@@ -35,6 +35,10 @@ In der Stunde
 - Taste B: Tafel schwarz.  Taste S oder Kamera am Board: Ansicht als PNG sichern.
 - Abstimmung: in der Regie "Für Handys freigeben". Handzeichen kann man zusätzlich zählen.
 - Karte "Überwachen": was Board und Handys gerade zeigen.
+- Karte "Methoden": spontan starten, z. B. Energizer, Think-Pair-Share, Rollenwechsel,
+  Hilfe-Ampel, Fortschritt, Lerntempoduett, Helfersystem, Wortwolke, Zielscheibe, Exit-Ticket.
+  Je Methode: "groß" aufs Board, "klein" in die Leiste unten links, "aus", "Beenden".
+  Handy-Methoden fragen einmal nach der Platznummer, nie nach Namen.
 
 
 Nach der Stunde

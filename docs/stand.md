@@ -1,19 +1,22 @@
 # Tafelsystem: Stand und Auftrag „Stunde schreiben“
 
-Stand 25.10.2026, Änderung 2 (Meldung GP), Abspieler 0.2 · Stundenformat `tafelstunde/0` (Entwurf) · Repo `sschaffenroth/Unterrichtstool`
+Stand 25.10.2026, Änderung 3 (Methoden-Menü, Fach-Chats bauen selbst), Abspieler 0.3
+Stundenformat `tafelstunde/0` (Entwurf), Repo `sschaffenroth/Unterrichtstool`
 Was sich geändert hat und die Antworten auf Meldungen: **Teil 4**.
 Konzept: `claude/Tafelsystem_Konzept_und_Steckbrief_Vorlage.md` im Projekt
 
-> **Für den Fach-Chat:** Du schreibst eine Stunde im Format aus Teil 2. Du baust **keinen Code am
-> Werkzeug**. Das macht der Werkzeug-Chat. Lies zuerst Teil 1, damit du weißt, was es schon gibt
-> und was nicht.
+> **Für den Fach-Chat:** Du schreibst eine Stunde im Format aus Teil 2 und **baust die `Tafel.html`
+> selbst** (Teil 6): Du weißt am besten, was die Stunde braucht und wie es aussehen soll. Am Code des
+> Werkzeugs (`app/`, `worker/`, `build/`) änderst du nichts; fehlt ein Baustein, baust du ihn als eigene
+> Seite für `einbetten` (Teil 6.3) und meldest ihn (Teil 3). Lies zuerst Teil 1, damit du weißt, was es
+> schon gibt.
 
 ---
 
 ## Teil 1 · Was das Werkzeug heute kann
 
-**Erster Abspieler (Version 0.1, 25.10.2026).** Aus `Tafel.yaml` baut der Werkzeug-Chat eine
-`Tafel.html` daneben. Sie läuft offline in Chrome oder Edge.
+**Abspieler 0.3 (25.10.2026).** Aus `Tafel.yaml` baut das Bauskript eine `Tafel.html` daneben
+(Teil 6). Sie läuft offline in Chrome oder Edge.
 
 | Was | Stand |
 |---|---|
@@ -22,15 +25,15 @@ Konzept: `claude/Tafelsystem_Konzept_und_Steckbrief_Vorlage.md` im Projekt
 | Anzeigen | `geteilt`, `tafel`, `auftrag`, `extern`, `schwarz`, Ablaufleiste. Zweites Fenster auf zweitem Bildschirm, abgeglichen ohne Netz |
 | Fenster und Monitore | Regie zeigt, welche Fenster offen sind, öffnet/schließt/verschiebt sie. Monitor fest zuordnen (Chrome/Edge, gilt je Laptop für alle Stunden). Board geht ohne Antippen ins Vollbild auf seinem Monitor (Hauptfenster), Regie dann als eigenes Fenster. Karte „Überwachen“ mit allen Ansichten und der Handy-Sicht |
 | Sicherung | aktuelle Ansicht als PNG (Regie, 📷 am Board), alle Folien als PNG oder PDF, lokal in einem gewählten Ordner oder im Download-Ordner |
-| Bausteine **fertig** | `titel`, `bild`, `folie`, `qr`, `uhr`, `schwarz`, `auftrag` (Countdown, Material mit QR), `code` (Marken neben der Zeile oder als Codezeile, Teile, Schrift füllt die Fläche), `folie` (aufdecken, Schrift passt sich an), `zeichnen` (Raster/Bild, Stift, Rückgängig, PNG), `ergebnis`, `einbetten` (alte Tafel-Apps als Reiter) |
-| Bausteine **Platzhalter** | `zuordnen`, `beschriften`, `urteilen`, `codestreifen`, `testfaelle`, `partner`, `kette`, `grafik`, `brett`, `sql`, `neu`. `code`: `fehler`, `probelauf`, `nebeneinander` fehlen |
-| Schüler-Handys | Worker im Repo (`worker/`): Raum mit 4-stelligem Code, Anmelde-QR und Link auf der Tafel (Auftragsleiste und groß), Schüler-Seite am Handy oder PC. `abstimmung` und `vorhersage` mit Freigabe aus der Regie, `mehrfach`, `kennung: team`. Handy-Stimmen und Handzeichen werden zusammengezählt. Raum löscht sich nach 4 Wochen. `formular`, `feedback`, `fragen` noch nicht |
+| Bausteine **fertig** | `titel`, `bild`, `folie`, `qr`, `uhr`, `schwarz`, `auftrag` (Countdown, Material mit QR, **Phasen**, **Rollenwechsel**, **Aufgabenliste**), `code` (Marken neben der Zeile oder als Codezeile, Teile, Schrift füllt die Fläche), `folie` (aufdecken, Schrift passt sich an), `zeichnen` (Raster/Bild, Stift, Rückgängig, PNG), `ergebnis` (für alle Schüler-Bausteine), `einbetten` (eigene HTML-Seiten als Reiter), **`sql`** (SQLite live an der Tafel, offline) |
+| Bausteine **Platzhalter** | `zuordnen`, `beschriften`, `urteilen`, `codestreifen`, `testfaelle`, `partner`, `kette`, `grafik`, `brett`, `neu`. `code`: `fehler`, `probelauf`, `nebeneinander` fehlen |
+| Schüler-Handys | Worker im Repo (`worker/`): Raum mit 4-stelligem Code, Anmelde-QR und Link auf der Tafel, Schüler-Seite am Handy oder PC. Freigabe aus der Regie. Fertig: `abstimmung` und `vorhersage` (`mehrfach`, `kennung: team`, **`sicherheit`**), **`wortwolke`**, **`zielscheibe`**, **`exit`**, **`hotspot`**, **`ordnen`**, **`fehlerzeile`**. Handy-Stimmen und Handzeichen werden zusammengezählt. Raum löscht sich nach 4 Wochen. `formular`, `feedback`, `fragen` noch nicht |
+| **Methoden-Menü** | Karte „Methoden“ in der Regie, spontan startbar: Energizer, Think-Pair-Share, 1-2-4-Alle, Rollenwechsel, Hilfe-Ampel, Fortschritt, Lerntempoduett, Helfersystem, Wortwolke, Zielscheibe, Exit-Ticket. Je Methode: groß aufs Board, klein in die Leiste unten links oder aus. Siehe 2.5 |
 | Handy-Begleitseite | zeigt immer den aktuellen Schritt: Abschnitt, Titel, Auftrag mit Countdown, Material mit Ort, Dateiname und Link. Freigegebene Frage erscheint obendrüber. Nie Notizen oder Lösungen |
 | Start | `Tafel starten.bat` + `tafel_server.ps1` im Fachordner: lokaler Server auf localhost, Stundenauswahl. Nötig in Edge für Monitor-Zuordnung |
 | Regie auf dem Handy | nur auf demselben Rechner wie das Board (kein Netz-Abgleich) |
 | Prototyp KIG ES 06 | läuft: Tafeldatei offline (Spielbrett, Kette, Zuordnen, Vorhersage, Formular, Zeitplan, PNG) + Abstimmungs-Worker auf Cloudflare (QR, `/lehrer`). Fachgebunden, noch nicht im Repo |
 | Tafel-Apps GP DS 05 bis 07 | laufen als einzelne HTML-Dateien in `Lernhilfen/`. Noch nicht im Repo |
-| Schüler-Handy | nur über den ES-06-Worker (Abstimmung, Zuordnen, Formular) |
 | Stunden im Format | SYS DS 06 (27.10.), `KI_Systementwicklung\06_2026-10-27_Merkmale_vor_DeepLearning\Tafel.yaml` |
 
 **Was das für dich heißt:**
@@ -38,8 +41,9 @@ Konzept: `claude/Tafelsystem_Konzept_und_Steckbrief_Vorlage.md` im Projekt
 - Stunden aus den fertigen Bausteinen laufen. Wo ein Platzhalter steht, bleibt die bisherige
   Lösung (PowerPoint, Tafel-App) als Rückfall bereit.
 - Die PowerPoint bleibt vorerst Notfallfassung. Probelauf am Board vor der ersten echten Stunde.
-- Bauen lässt du die Stunde vom Werkzeug-Chat („Tafel.yaml für DS xx ist fertig“). Die Prüfmeldungen
-  des Bauskripts bekommst du zurück.
+- Du baust die Stunde selbst (Teil 6) und legst sie ab (Teil 5). Fehler im Prüfbericht behebst du in
+  der `Tafel.yaml`; was das Werkzeug nicht kann, meldest du (Teil 3).
+- Methoden aus dem Menü (2.5) musst du nicht planen. Planst du eine fest ein, nimm die Felder aus 2.2 und 2.3.
 
 ---
 
@@ -82,6 +86,15 @@ ablaufleiste: false        # true = schmale Leiste mit den Abschnitten, aktuelle
 
 Hat ein Schritt nur `tafel` oder nur `auftrag`, zeigt `geteilt` einfach diesen einen Teil groß.
 
+Zusätzlich im Kopf (beides freiwillig):
+
+```yaml
+begriffe:                  # für die Energizer „Wer bin ich?“ und „Begriffe-Blitz“
+  - { begriff: Maske, erklaerung: "Bild aus zwei Werten" }   # ohne Angabe: BEGRIFFE.md im Stundenordner
+energizer:                 # eigene Energizer, stehen im Menü vor den mitgelieferten
+  - { titel: "Pixel-Pantomime", text: "…", dauer: 2, begriff: true }
+```
+
 ### 2.2 Schritte
 
 ```yaml
@@ -100,6 +113,9 @@ schritte:
     tafel:    { baustein: …, … }   # was die Touch-Tafel zeigt (oder weglassen)
     auftrag:  { baustein: …, … }   # was die Auftragsansicht zeigt
     schueler: { baustein: …, … }   # was die Handys tun (oder weglassen)
+    methoden: [hilfe, tempo]   # Methoden, die mit dem Schritt starten und enden: hilfe (Ampel),
+                               # fortschritt (abhaken), tempo (Lerntempoduett), helfer (Helfersystem).
+                               # Aufgaben kommen aus auftrag.aufgaben
     regie:
       notiz: "…"
       erwartet: "…"                # erwartete Antwort
@@ -149,7 +165,7 @@ Fachs bleibt, z. B. `../05_2026-10-20_…/grafiken/kanten.png`. Das Bauskript be
 
 | Baustein | Felder |
 |---|---|
-| `auftrag` | `text` (genau **ein** Satz, kein Code), `sozialform` (EA, PA, GA, Plenum), `dauer_min`, `material` (Liste: Text oder `{text, url, ort, datei, qr}`. Bei GitHub-Links werden `ort` (Repository › Ordner) und `datei` automatisch abgeleitet und angezeigt. QR-Code nur mit `qr: true`. Die Handy-Begleitseite zeigt die Links anklickbar), `abgabe` |
+| `auftrag` | `text` (genau **ein** Satz, kein Code), `sozialform` (EA, PA, GA, Plenum), `dauer_min`, `material` (Liste: Text oder `{text, url, ort, datei, qr}`. Bei GitHub-Links werden `ort` (Repository, Ordner) und `datei` automatisch abgeleitet und angezeigt. QR-Code nur mit `qr: true`. Die Handy-Begleitseite zeigt die Links anklickbar), `abgabe`, `phasen` (Liste `{sozialform, min, text}`: Sozialformen nacheinander, z. B. Think-Pair-Share; Countdown und Piktogramm wechseln von selbst, Signal beim Wechsel, `dauer_min` ist dann die Summe), `rollenwechsel_min` (Pair Programming: Board ruft alle n Minuten „Rollen tauschen!“), `rollen` (Standard `[Fahrer, Navigator]`), `aufgaben` (z. B. `[A1, A2, A3]`, zum Abhaken am Handy bei `methoden: [fortschritt]`, `tempo`, `helfer`) |
 
 **Tafel-Bausteine**
 
@@ -163,14 +179,21 @@ Fachs bleibt, z. B. `../05_2026-10-20_…/grafiken/kanten.png`. Das Bauskript be
 | `testfaelle` | `faelle` (`{id, eingabe, erwartet}`) |
 | `partner` | `modus` (paare, gruppen). Namen kommen lokal vom Board, nicht aus der Datei |
 | `zeichnen` | `hintergrund` (`{bild: datei}` oder `{raster: [[1,0,-1],[2,0,-2],[1,0,-1]], titel: "Kern"}`, auch als Liste mehrerer Raster nebeneinander), `raster_zellen_beschreibbar` (true = in Zellen tippen und Zahl schreiben). Freihand-Stift, Rückgängig und PNG-Sicherung hat jeder Baustein |
+| `sql` | `datenbank` (SQLite-Datei im Fachordner, wird eingebettet) oder `schema` (SQL-Text, der die Tabellen anlegt und füllt), `abfrage` (steht beim Start im Eingabefeld), `beispiele` (Liste `{titel, abfrage}`: Knöpfe, die eine Abfrage laden und ausführen), `max_zeilen` (Standard 50). An der Tafel tippen und „Ausführen“ (Strg + Enter); Tabellen-Knöpfe zeigen `SELECT *`. „Zurücksetzen“ stellt die Datenbank wieder her. Die Handys sehen Abfrage und Ergebnis als Text |
 | `kette`, `grafik`, `brett` | wie im Prototyp ES 06. Felder noch nicht festgelegt: Inhalt unter `entwurf:` frei beschreiben |
 
 **Schüler-Bausteine** (unter `schueler:`)
 
 | Baustein | Felder |
 |---|---|
-| `abstimmung` | `frage`, `optionen`, `mehrfach` (true = mehrere Optionen wählbar, Balken je Option), `kennung` (`geraet` Standard, oder `team`: die Seite fragt einmal nach der Teamnummer, eine Stimme je Team, neue Stimme ersetzt die alte) |
-| `vorhersage` | `frage`, `optionen`, `loesung`, `aufloesen_in` (Schritt-ID, in der aufgelöst wird; ohne Angabe im selben Schritt), `kennung` wie oben |
+| `abstimmung` | `frage`, `optionen`, `loesung` (freiwillig), `mehrfach` (true = mehrere Optionen wählbar, Balken je Option), `kennung` (`geraet` Standard, oder `team`: die Seite fragt einmal nach der Teamnummer, eine Stimme je Team, neue Stimme ersetzt die alte), `sicherheit` (true = Handy fragt zusätzlich „sicher“ oder „geraten“; Balken zeigen den sicheren Anteil dunkel, die Regie „falsch, aber sicher“. Ohne das Feld kann die Regie es vor der Freigabe ankreuzen) |
+| `vorhersage` | `frage`, `optionen`, `loesung`, `aufloesen_in` (Schritt-ID, in der aufgelöst wird; ohne Angabe im selben Schritt), `kennung`, `sicherheit` wie oben |
+| `wortwolke` | `frage`, `max_woerter` (1 bis 3). Tafel: Wörter nach Häufigkeit; die Regie blendet einzelne Wörter aus |
+| `zielscheibe` | `frage` (freiwillig), `dimensionen` (bis 6 Aussagen, Standard: verstanden, allein anwenden, Tempo, mitgemacht). Handy: je Aussage 0 bis 4. Tafel: Punkte und Mittelwert, Mitte heißt „trifft voll zu“ |
+| `exit` | `offen` (Standard „Was war heute am unklarsten?“), dazu freiwillig eine Kontrollfrage: `frage`, `optionen`, `loesung`. Tafel zeigt nur die Zahl der Abgaben; die Texte sieht nur die Regie, die Lehrkraft markiert sie (richtig, falsch, nächste Stunde aufgreifen). Alles landet im Befund |
+| `hotspot` | `frage`, `bild` (Datei; ohne Angabe das Bild aus `tafel` desselben Schritts), `loesung` (`{x, y, r}` als Anteil von Breite/Höhe, `r` Radius als Anteil der Breite), `aufloesen_in`. Handy: auf die Stelle tippen. Tafel: Punktwolke über dem Bild, Lösungskreis erst auf Knopfdruck oder in `aufloesen_in` |
+| `ordnen` | `frage`, `quelltext` (Zeilen in **richtiger** Reihenfolge, leere Zeilen fallen weg) oder `zeilen` (Liste), `aufloesen_in`. 3 bis 20 Zeilen, ohne Ablenkzeilen. Das Bauskript mischt. Handy: Zeilen der Reihe nach antippen. Tafel: wie viele ganz richtig, je Platz der Anteil richtig, mit Lösung die Zeilen |
+| `fehlerzeile` | `frage`, `quelltext` oder `datei`, `sprache`, `loesung` (Zeilennummer oder Liste), `aufloesen_in`. Handy: Zeile antippen. Tafel: Code mit Häufigkeit je Zeile, Lösungszeile grün auf Knopfdruck |
 | `formular` | `fragen` (Liste), Hinweis „ohne Namen“ kommt automatisch |
 | `feedback` | `skala` (z. B. 1–5), `freitext` (ja/nein) |
 | `fragen` | – |
@@ -186,6 +209,28 @@ Fachs bleibt, z. B. `../05_2026-10-20_…/grafiken/kanten.png`. Das Bauskript be
 ```
 
 Und in die Meldung (Teil 3) eintragen.
+
+Ergebnisse aller Schüler-Bausteine zeigt die Regie unter „Steuerung, Ergebnis zeigen“ groß auf dem Board
+oder ein Reiter `ergebnis` mit `von:`. Lösungen von `vorhersage`, `hotspot`, `ordnen` und `fehlerzeile` erscheinen
+erst in `aufloesen_in` (ohne Angabe: in späteren Schritten) oder wenn die Lehrkraft „Lösung zeigen“ tippt.
+
+### 2.5 Methoden-Menü (spontan, nicht in der Datei)
+
+Die Regie hat eine Karte „Methoden“. Alles darin läuft ohne Eintrag in der `Tafel.yaml`. Plane es nur ein, wenn
+es fester Teil der Stunde ist (dann mit den Feldern oben).
+
+| Methode | was passiert | Handy |
+|---|---|---|
+| Energizer | 1 bis 3 min Bewegung oder Spiel mit Anleitung und Countdown; zählt nicht zur Schrittzeit. Mit Begriff aus `BEGRIFFE.md` („Wer bin ich?“) oder Code-Golf-Aufgabe | nein |
+| Think-Pair-Share, 1-2-4-Alle | Frage eintippen, Phasen laufen mit Countdown und Signal ab | Begleitseite zeigt die Phase |
+| Rollenwechsel | alle n Minuten „Rollen tauschen!“ groß am Board | nein |
+| Hilfe-Ampel | Handy: Platznummer, grün „läuft“, gelb „Frage“, rot „hänge fest“, dazu die Aufgabe. Regie: Warteschlange mit Wartezeit, „erledigt“ | ja |
+| Fortschritt | Handy: Aufgaben abhaken. Regie und Board: Balken je Aufgabe | ja |
+| Lerntempoduett | wer eine Aufgabe abhakt, bekommt den nächsten mit derselben Aufgabe als Partner (Tafel und Handy zeigen „Platz 3 und Platz 7, Haltestelle A1“) | ja |
+| Helfersystem | wer fertig ist, setzt „ich helfe gern“; wer rot oder gelb meldet, bekommt einen Helfer, der die Aufgabe schon hat | ja |
+| Wortwolke, Zielscheibe, Exit-Ticket | wie die Schüler-Bausteine oben, Frage spontan eintippen; Exit-Ticket kann eine Abstimmung der Stunde als Kontrollfrage übernehmen | ja |
+
+Platznummern stehen am Platz, Namen gibt es nirgends.
 
 ### 2.4 Regeln (gelten in allen Fächern)
 
@@ -237,7 +282,62 @@ Was du nicht weißt, schreibst du als Frage. Erfinde keine Felder stillschweigen
 
 ---
 
+## Teil 6 · Selbst bauen (Fach-Chat)
+
+### 6.1 Werkzeug holen und bauen
+
+```bash
+git clone https://github.com/sschaffenroth/Unterrichtstool.git    # einmal je Sitzung; danach: git pull
+pip install pyyaml pillow pygments segno
+python Unterrichtstool/build/bauen.py PFAD/ZUM/Stundenordner/Tafel.yaml
+```
+
+- Das Bauskript braucht den **ganzen Stundenordner** (Bilder, Code-Dateien, `BEGRIFFE.md`, Datenbanken) und den
+  Fachordner darüber, wenn Pfade mit `../` darauf zeigen. Arbeitest du im Cloud-Container, hole diese Dateien vom
+  Laptop, baue dort und lege die `Tafel.html` zurück.
+- Ohne Fehler schreibt es `Tafel.html` neben die `Tafel.yaml`. Bei Fehlern schreibt es nichts: Prüfbericht lesen,
+  `Tafel.yaml` verbessern, neu bauen. Warnungen und Hinweise prüfen und, wo nötig, beheben.
+- Nur prüfen: `--nur-pruefen`. Ohne Handys: `--server ""`.
+
+### 6.2 Prüfen, ablegen, melden
+
+1. `Tafel.html` im Browser öffnen (Regie), einmal durch alle Schritte klicken, Board-Vorschau ansehen.
+2. Ablage nach Teil 5: Stundenordner lokal **und** Teams; Startdateien aus `start/` des Repos in Fachordner und
+   Teams-Wurzel. An beiden Orten nachsehen.
+3. Was fehlte oder hakte: Meldung (Teil 3).
+
+### 6.3 Eigene Seiten für `einbetten`
+
+Braucht die Stunde eine Ansicht, die es als Baustein nicht gibt, baust du sie als **eine** HTML-Datei (z. B.
+`Lernhilfen/<Name>.html` oder im Stundenordner) und bindest sie mit `{ baustein: einbetten, datei: … }` als
+Reiter ein. Regeln dafür:
+
+- eine Datei, offline, ohne Nachladen aus dem Netz (Bibliotheken einbetten), läuft in Edge und Chrome;
+- für Touch gebaut: große Schaltflächen, Schrift mindestens 20 pt auf dem Board, nichts nur per Maus-Hover;
+- keine Namen, keine Lösung sichtbar, bevor die Lehrkraft sie aufdeckt;
+- keine Trennpunkte „·“ und keine Gedankenstriche „—“;
+- ihr Zustand bleibt erhalten, solange die Stunde läuft; die Regie sieht nur einen Platzhalter, die PNG-Sicherung
+  nicht den Inhalt.
+
+Bewährt sich so eine Seite, in die Meldung schreiben: Dann wird daraus ein Baustein für alle Fächer.
+
+---
+
 ## Teil 4 · Änderungen und Antworten auf Meldungen
+
+### Änderung 3 · 25.10.2026 · Methoden-Menü, neue Handy-Bausteine, Fach-Chats bauen selbst
+
+- **Fach-Chats bauen ihre `Tafel.html` selbst** (Teil 6) und dürfen eigene Seiten für `einbetten` bauen (6.3).
+  Der Werkzeug-Chat ändert nur noch das Werkzeug.
+- **Methoden-Menü** in der Regie (2.5): Energizer, Think-Pair-Share, 1-2-4-Alle, Rollenwechsel, Hilfe-Ampel,
+  Fortschritt, Lerntempoduett, Helfersystem, Wortwolke, Zielscheibe, Exit-Ticket.
+- **Neue Felder:** Schritt `methoden`; `auftrag.phasen`, `auftrag.rollenwechsel_min`, `auftrag.rollen`,
+  `auftrag.aufgaben`; Kopf `begriffe`, `energizer`.
+- **Neue Schüler-Bausteine:** `wortwolke`, `zielscheibe`, `exit`, `hotspot`, `ordnen`, `fehlerzeile`;
+  `abstimmung`/`vorhersage` mit `sicherheit`.
+- **`sql` ist fertig:** SQLite im Browser, Datenbank eingebettet, Beispiel-Knöpfe.
+- Der Befund („Zeiten sichern“) enthält jetzt auch Handy-Antworten, Exit-Texte mit Markierung, Energizer und
+  die Meldungen der Praxisphase.
 
 ### Änderung 2 · 25.10.2026 · Meldung GP (DS 07)
 

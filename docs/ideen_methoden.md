@@ -66,6 +66,9 @@ Muster anbieten, damit die Fach-Chats die Bausteine danach anordnen.
 
 ## 5. Vorgemerkt (Entscheidung Lehrkraft, 25.10.2026)
 
+**Alle umgesetzt am 25.10.2026** (Abspieler 0.3): spontan über die Karte „Methoden“ in der Regie, fest über die
+Felder in `docs/stand.md` Teil 2. Tests: `tests/test_methoden.py`.
+
 | Nr | Idee | für | ID |
 |---|---|---|---|
 | 1 | Fortschritt melden und Hilfe-Ampel | alle Praxisphasen | I7, I8 |

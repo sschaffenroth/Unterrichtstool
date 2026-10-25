@@ -73,7 +73,16 @@ function anzeigeInhalt(name, rolle) {
     flaeche.append(el("div", { class: "overlay" },
       el("button", { class: "schliessen", onclick: () => tun("overlay", { wert: null }) }, "Schließen"),
       el("div", { class: "baustein b-ergebnis" }, Z.overlay.von.map((id) => ergebnisBlock(id, Z.overlay.loesung)))));
+  } else if (Z.buehne && Z.methoden[Z.buehne]) {
+    const art = Z.buehne;
+    flaeche.append(el("div", { class: "overlay methode-overlay" },
+      el("button", { class: "schliessen", onclick: () => tun("buehne", { art: null }) }, "Klein"),
+      methodeGross(art)));
   }
+  const leiste = methodenLeiste();
+  if (leiste) flaeche.append(leiste);
+  const blitz = rollenBlitz();
+  if (blitz) flaeche.append(blitz);
   buehne.append(flaeche);
   return buehne;
 }
@@ -86,7 +95,8 @@ function einpassen(buehne, breite, hoehe) {
 }
 
 function anzeigeSchluessel(name) {
-  return JSON.stringify([name, Z.schritt, Z.reiter, Z.ansicht, Z.marken, Z.codeteil, Z.stimmen, Z.striche, Z.overlay, Z.aktiv, Z.countdown && Z.countdown.id, Z.raum && Z.raum.code, Z.freigabe, Z.online]);
+  return JSON.stringify([name, Z.schritt, Z.reiter, Z.ansicht, Z.marken, Z.codeteil, Z.stimmen, Z.striche, Z.overlay, Z.aktiv, Z.countdown && Z.countdown.id, Z.raum && Z.raum.code, Z.freigabe, Z.online,
+    Z.methoden, Z.buehne, Z.spontan, Z.versteckt, Z.sql, zeitSchluessel()]);
 }
 
 /* Vollbild-Anzeige (eigenes Fenster oder dieses Fenster). Kann mehrmals aufgerufen werden:
@@ -105,7 +115,7 @@ function anzeigeStarten(name) {
     anzeigeEingerichtet = true;
     beobachten(() => { if (ROLLE === "anzeige") anzeigeZeichnen(); });
     addEventListener("resize", () => { if (ROLLE === "anzeige") anzeigeZeichnen(); });
-    setInterval(() => { if (ROLLE === "anzeige") countdownsAktualisieren(anzeigeRahmen); }, 250);
+    setInterval(() => { if (ROLLE === "anzeige") { anzeigeZeichnen(); countdownsAktualisieren(anzeigeRahmen); } }, 250);
   }
   anzeigeZeichnen(true);
 }
@@ -116,6 +126,8 @@ function anzeigeZeichnen(erzwingen) {
   if (k !== anzeigeLetzter || erzwingen || !anzeigeBuehne) {
     anzeigeLetzter = k;
     const alt = anzeigeBuehne;
+    const fokus = document.activeElement && document.activeElement.getAttribute && document.activeElement.getAttribute("data-feld");
+    const auswahl = fokus && "selectionStart" in document.activeElement ? [document.activeElement.selectionStart, document.activeElement.selectionEnd] : null;
     anzeigeBuehne = anzeigeInhalt(name, "anzeige");
     anzeigeBuehne.append(el("div", { class: "eckknoepfe" },
       el("button", { title: "Zurück (←)", onclick: () => tun("zurueck") }, "‹"),
@@ -127,6 +139,10 @@ function anzeigeZeichnen(erzwingen) {
     if (alt && alt.parentNode === anzeigeRahmen) alt.replaceWith(anzeigeBuehne);
     else anzeigeRahmen.prepend(anzeigeBuehne);
     if (einbettEbene.parentNode !== anzeigeRahmen) anzeigeRahmen.append(einbettEbene);
+    if (fokus) {
+      const e = anzeigeBuehne.querySelector('[data-feld="' + fokus + '"]');
+      if (e) { e.focus(); try { if (auswahl) e.setSelectionRange(auswahl[0], auswahl[1]); } catch (x) { /* kein Textfeld */ } }
+    }
   }
   einpassen(anzeigeBuehne, innerWidth, innerHeight);
   countdownsAktualisieren(anzeigeRahmen);
@@ -144,7 +160,7 @@ function einbettBaustein(schluessel) {
 }
 function einbettungenLegen() {
   if (ROLLE !== "anzeige" || !anzeigeBuehne) return;
-  const platz = Z.overlay ? null : anzeigeBuehne.querySelector("[data-einbetten]");   // Ergebnis oder QR liegen obendrauf
+  const platz = Z.overlay || (Z.buehne && Z.methoden[Z.buehne]) || rollenBlitz() ? null : anzeigeBuehne.querySelector("[data-einbetten]");   // Ergebnis, QR oder Methode liegen obendrauf
   const ziel = platz ? platz.getAttribute("data-einbetten") : null;
   if (ziel && !EINBETTUNGEN[ziel]) {
     const b = einbettBaustein(ziel);

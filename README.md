@@ -3,10 +3,14 @@
 Tafelsystem für den Unterricht an der Technikerschule: Touch-Tafel, Auftragsansicht,
 Regie für die Lehrkraft und Schüler-Interaktion per QR-Code, für jede Stunde jedes Fachs.
 
-**Stand:** erster Abspieler (Version 0.1). Aus einer `Tafel.yaml` entsteht eine HTML-Datei, die
-offline läuft: Regie, Board mit Ansichten geteilt/tafel/auftrag/extern/schwarz, Bausteine titel,
-bild, folie, qr, auftrag, code (mit Marken), zeichnen, ergebnis. Handys melden sich per
-QR-Code oder Link an (Worker unter `worker/`), Abstimmungen gehen zusätzlich per Handzeichen.
+**Stand:** Abspieler 0.3. Aus einer `Tafel.yaml` entsteht eine HTML-Datei, die offline läuft: Regie, Board
+mit Ansichten geteilt/tafel/auftrag/extern/schwarz, Bausteine titel, bild, folie, qr, auftrag (mit Phasen und
+Rollenwechsel), code (mit Marken), zeichnen, ergebnis, einbetten, sql. Handys melden sich per QR-Code oder Link an
+(Worker unter `worker/`): Abstimmung, Vorhersage (mit „sicher / geraten“), Wortwolke, Zielscheibe, Exit-Ticket,
+Hotspot, Codezeilen ordnen, Fehlerzeile. Methoden-Menü in der Regie: Energizer, Think-Pair-Share, 1-2-4-Alle,
+Rollenwechsel, Hilfe-Ampel, Fortschritt, Lerntempoduett, Helfersystem, Wortwolke, Zielscheibe, Exit-Ticket.
+
+Stunden bauen die Fach-Chats selbst (`docs/stand.md` Teil 6).
 
 ## Stunde bauen
 
@@ -37,7 +41,9 @@ Prüft die Datei und schreibt `Tafel.html` daneben. Nur prüfen: `--nur-pruefen`
 | Ansicht sichern | „Diese Ansicht als PNG“ in der Regie, 📷 oder Taste S am Board |
 | alle Folien sichern | „Alle Folien als PNG“ (Unterordner `Folien_…`) oder „Alle Folien als PDF“ (Druckfenster) |
 | Ablageordner | „Ordner wählen“, z. B. den Stundenordner. Ohne Ordner: Download-Ordner |
-| Zeiten, Zähler, Stimmen sichern | „Zeiten sichern“ (JSON) |
+| Zeiten, Zähler, Stimmen sichern | „Zeiten sichern“ (JSON, mit Handy-Antworten, Exit-Texten, Energizern, Praxisphase) |
+| Methode spontan starten | Karte „Methoden“: Methode antippen, Einstellungen, „Starten“. Laufende Methode: Board groß, klein (Leiste unten links) oder aus, „Beenden“ |
+| SQL an der Tafel | Abfrage tippen, „Ausführen“ oder Strg + Enter, Beispiel- und Tabellen-Knöpfe, „Zurücksetzen“ |
 
 Der Zustand bleibt beim Neuladen erhalten (Browser-Speicher). „Zurücksetzen“ löscht ihn.
 
@@ -54,6 +60,9 @@ pip install pytest playwright && python -m playwright install chromium
 python -m pytest tests/
 ```
 
+`tests/test_methoden.py` braucht Node.js: `tests/testserver.mjs` führt den Worker lokal mit nachgebautem Speicher
+aus, die Handys sind echte Browser-Seiten.
+
 ## Dokumente
 
 | Datei | Inhalt |
@@ -68,7 +77,8 @@ python -m pytest tests/
 ## Aufbau
 
 ```
-app/kern/        Zustand, Nachrichten, Synchronisation
+app/kern/        Zustand, Nachrichten, Synchronisation, Methoden (methoden.js)
+app/lib/         qrcode, html-to-image, sql.js (MIT, nur eingebettet, wenn eine Stunde `sql` nutzt)
 app/bausteine/   je Baustein: Darstellung + Schüler-Teil
 worker/          Cloudflare Worker: API, Abstimmung, Echtzeit-Raum
 build/           Bauskript: Stunde → Einzeldatei (offline) oder Web-Fassung

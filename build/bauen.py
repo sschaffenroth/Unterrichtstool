@@ -44,6 +44,9 @@ JS_REIHENFOLGE = [
     "bausteine/code.js",
     "bausteine/zeichnen.js",
     "bausteine/ergebnis.js",
+    "bausteine/interaktion.js",
+    "bausteine/sql.js",
+    "kern/methoden.js",
     "kern/anzeige.js",
     "kern/regie.js",
     "kern/start.js",
@@ -52,8 +55,12 @@ JS_REIHENFOLGE = [
 TAFEL_BAUSTEINE = {"titel", "bild", "folie", "qr", "schwarz", "uhr", "code", "zeichnen", "ergebnis",
                    "zuordnen", "beschriften", "urteilen", "codestreifen", "testfaelle", "partner",
                    "kette", "grafik", "brett", "sql", "neu", "einbetten"}
-UMGESETZT = {"titel", "bild", "folie", "qr", "schwarz", "uhr", "code", "zeichnen", "ergebnis", "auftrag", "einbetten"}
-SCHUELER_BAUSTEINE = {"abstimmung", "vorhersage", "formular", "feedback", "fragen"}
+UMGESETZT = {"titel", "bild", "folie", "qr", "schwarz", "uhr", "code", "zeichnen", "ergebnis", "auftrag", "einbetten", "sql"}
+SCHUELER_BAUSTEINE = {"abstimmung", "vorhersage", "wortwolke", "zielscheibe", "exit", "hotspot", "ordnen", "fehlerzeile",
+                      "formular", "feedback", "fragen"}
+SCHUELER_UMGESETZT = {"abstimmung", "vorhersage", "wortwolke", "zielscheibe", "exit", "hotspot", "ordnen", "fehlerzeile"}
+SCHRITT_METHODEN = {"hilfe", "fortschritt", "tempo", "helfer"}
+ZIEL_DIMENSIONEN = ["Ich habe es verstanden", "Ich kann es allein anwenden", "Das Tempo passte", "Ich habe mitgemacht"]
 ANSICHTEN = {"tafel", "auftrag", "geteilt", "extern", "schwarz"}
 SOZIALFORMEN = {"EA", "PA", "GA", "Plenum"}
 
@@ -102,8 +109,9 @@ def inline(text: str) -> str:
 # Trennpunkte und Gedankenstriche in Texten der Stunde werden zu Zeilenumbrüchen (Wunsch der Lehrkraft:
 # „·“ und „—“ irritieren an der Tafel). Code, Links, Dateinamen und Kennungen bleiben unberührt.
 NICHT_UMBRECHEN = {"quelltext", "url", "datei", "id", "baustein", "sozialform", "von", "aufloesen_in", "kennung", "sprache", "format", "datum",
-                   "erwartet", "eingabe", "eingaben", "probelauf", "fehler", "faelle", "fachordner", "ort"}
-NICHT_UMBRECHEN_BAUSTEINE = {"code", "testfaelle", "codestreifen", "beschriften", "urteilen", "einbetten"}   # Programmtext bleibt wörtlich
+                   "erwartet", "eingabe", "eingaben", "probelauf", "fehler", "faelle", "fachordner", "ort", "methoden"}
+NICHT_UMBRECHEN_BAUSTEINE = {"code", "testfaelle", "codestreifen", "beschriften", "urteilen", "einbetten",
+                             "ordnen", "fehlerzeile", "sql"}   # Programmtext bleibt wörtlich
 TRENNER = re.compile(r"\s+[·—–]\s+")
 TRENNER_ENDE = re.compile(r"\s+[·—–]\s*$")
 
@@ -283,8 +291,69 @@ def baustein_aufbereiten(b: dict, ort: str, ctx: dict) -> dict:
         von = b.get("von")
         b["von"] = von if isinstance(von, list) else [von]
         ctx["verweise"].append((ort, "ergebnis.von", b["von"]))
-    elif art == "vorhersage" and b.get("aufloesen_in"):
+    elif art == "sql":
+        if b.get("datenbank"):
+            pfad = datei_finden(b["datenbank"], ort, ctx)
+            if pfad:
+                roh = pfad.read_bytes()
+                if not roh.startswith(b"SQLite format 3\x00"):
+                    bericht.f(ort, f"sql: {b['datenbank']} ist keine SQLite-Datenbank")
+                else:
+                    b["db_b64"] = base64.b64encode(roh).decode("ascii")
+                    if len(roh) > 5_000_000:
+                        bericht.w(ort, f"sql: Datenbank ist {len(roh) / 1e6:.1f} MB groß")
+        elif not b.get("schema"):
+            bericht.w(ort, "sql ohne datenbank und schema: leere Datenbank")
+        b["beispiele"] = [x if isinstance(x, dict) else {"abfrage": str(x)} for x in (b.get("beispiele") or [])]
+        for x in b["beispiele"]:
+            if not x.get("abfrage"):
+                bericht.f(ort, "sql.beispiele: Eintrag ohne abfrage")
+        ctx["sql"] = True
+    if art in ("vorhersage", "hotspot", "ordnen", "fehlerzeile") and b.get("aufloesen_in"):
         ctx["verweise"].append((ort, "aufloesen_in", [b["aufloesen_in"]]))
+    if art == "auftrag":
+        auftrag_methoden(b, ort, bericht)
+    if art in SCHUELER_BAUSTEINE and art not in SCHUELER_UMGESETZT:
+        bericht.h(ort, f"Schüler-Baustein `{art}` noch nicht umgesetzt")
+    if art == "wortwolke":
+        if not b.get("frage"):
+            bericht.f(ort, "wortwolke ohne frage")
+        b["max_woerter"] = max(1, min(3, int(b.get("max_woerter") or 1)))
+    elif art == "zielscheibe":
+        dim = b.get("dimensionen") or ZIEL_DIMENSIONEN
+        if len(dim) > 6:
+            bericht.w(ort, "zielscheibe: höchstens 6 dimensionen, der Rest fällt weg")
+        b["dimensionen"] = [str(x) for x in dim[:6]]
+    elif art == "exit":
+        b.setdefault("offen", "Was war heute am unklarsten?")
+        b["optionen"] = b.get("optionen") or []
+        if b["optionen"] and not b.get("frage"):
+            bericht.f(ort, "exit mit optionen, aber ohne frage")
+        if b.get("loesung") is not None and b["loesung"] not in b["optionen"]:
+            bericht.f(ort, "loesung ist keine der optionen")
+    elif art == "hotspot":
+        hotspot_aufbereiten(b, ort, ctx)
+    elif art == "ordnen":
+        ordnen_aufbereiten(b, ort, ctx)
+    elif art == "fehlerzeile":
+        quelltext = b.get("quelltext")
+        if quelltext is None and b.get("datei"):
+            pfad = datei_finden(b["datei"], ort, ctx)
+            quelltext = pfad.read_text(encoding="utf-8") if pfad else ""
+        zeilen = (quelltext or "").rstrip("\n").split("\n")
+        if not quelltext:
+            bericht.f(ort, "fehlerzeile ohne quelltext")
+        b["zeilen"] = [z[:160] for z in zeilen]
+        b["zeilen_html"] = code_zeilen(quelltext or "", b.get("sprache", "python"))
+        if len(zeilen) > 40:
+            bericht.f(ort, "fehlerzeile: höchstens 40 Zeilen")
+        loesung = b.get("loesung")
+        for z in ([loesung] if isinstance(loesung, int) else loesung or []):
+            if not isinstance(z, int) or not 1 <= z <= len(zeilen):
+                bericht.f(ort, f"fehlerzeile.loesung: Zeile {z} gibt es nicht")
+        if loesung is None:
+            bericht.w(ort, "fehlerzeile ohne loesung (Zeilennummer)")
+        b.pop("quelltext", None)
     if art in ("abstimmung", "vorhersage"):
         if not b.get("optionen"):
             bericht.f(ort, f"{art} ohne optionen")
@@ -292,7 +361,114 @@ def baustein_aufbereiten(b: dict, ort: str, ctx: dict) -> dict:
             bericht.f(ort, "loesung ist keine der optionen")
         if b.get("kennung") not in (None, "geraet", "team"):
             bericht.w(ort, f"kennung `{b['kennung']}` unbekannt (geraet, team)")
+        if "sicherheit" in b and not isinstance(b["sicherheit"], bool):
+            bericht.w(ort, "sicherheit: true oder false")
     return b
+
+
+def auftrag_methoden(b: dict, ort: str, bericht: Bericht) -> None:
+    """auftrag.phasen (Sozialformen nacheinander), auftrag.rollenwechsel_min, auftrag.aufgaben"""
+    phasen = b.get("phasen")
+    if phasen:
+        sauber = []
+        for i, p in enumerate(phasen):
+            if not isinstance(p, dict) or p.get("sozialform") not in SOZIALFORMEN:
+                bericht.f(ort, f"phasen[{i + 1}]: sozialform EA, PA, GA oder Plenum fehlt")
+                continue
+            if not isinstance(p.get("min"), (int, float)) or p["min"] <= 0:
+                bericht.f(ort, f"phasen[{i + 1}]: min fehlt")
+                continue
+            sauber.append({"sozialform": p["sozialform"], "min": p["min"], "text": p.get("text", "")})
+        b["phasen"] = sauber
+        summe = sum(p["min"] for p in sauber)
+        if b.get("dauer_min") and b["dauer_min"] != summe:
+            bericht.w(ort, f"dauer_min {b['dauer_min']} passt nicht zur Summe der Phasen ({summe}): Summe gilt")
+        b["dauer_min"] = summe
+    if b.get("rollenwechsel_min") is not None and not isinstance(b["rollenwechsel_min"], (int, float)):
+        bericht.f(ort, "rollenwechsel_min muss eine Zahl sein")
+    if b.get("aufgaben") is not None:
+        if not isinstance(b["aufgaben"], list) or not b["aufgaben"]:
+            bericht.f(ort, "aufgaben: Liste, z. B. [A1, A2, A3]")
+        else:
+            b["aufgaben"] = [str(a)[:30] for a in b["aufgaben"][:12]]
+
+
+def hotspot_aufbereiten(b: dict, ort: str, ctx: dict) -> None:
+    """Bild fürs Board (eingebettet wie bild) und kleiner fürs Handy (geht beim Freigeben an den Server)."""
+    bericht: Bericht = ctx["bericht"]
+    if not b.get("frage"):
+        bericht.f(ort, "hotspot ohne frage")
+    datei = b.get("bild") or ctx.get("schritt_bild")
+    if not datei:
+        bericht.f(ort, "hotspot ohne bild (oder Bild im tafel-Baustein desselben Schritts)")
+        return
+    pfad = datei_finden(datei, ort, ctx)
+    if not pfad:
+        return
+    b["bild_id"] = ctx["bilder"].einbetten(pfad)
+    bild = Image.open(pfad)
+    bild.load()
+    b["verhaeltnis"] = round(bild.height / bild.width, 4)
+    if bild.mode not in ("RGB", "RGBA"):
+        bild = bild.convert("RGB")
+    bild.thumbnail((900, 900), Image.LANCZOS)
+    for qualitaet in (75, 60, 45):
+        puffer = io.BytesIO()
+        bild.save(puffer, "WEBP", quality=qualitaet, method=5)
+        if len(puffer.getvalue()) < 450_000:
+            break
+    b["handy_bild"] = "data:image/webp;base64," + base64.b64encode(puffer.getvalue()).decode("ascii")
+    l = b.get("loesung")
+    if l is not None:
+        if not isinstance(l, dict) or not all(isinstance(l.get(k), (int, float)) and 0 <= l[k] <= 1 for k in ("x", "y")):
+            bericht.f(ort, "hotspot.loesung: {x: 0..1, y: 0..1, r: 0..1} (Anteil der Bildbreite)")
+        else:
+            l.setdefault("r", 0.06)
+            l["verhaeltnis"] = b["verhaeltnis"]
+
+
+def ordnen_aufbereiten(b: dict, ort: str, ctx: dict) -> None:
+    """Zeilen in richtiger Reihenfolge → gemischt fürs Handy. mischung[k] = Platz der k-ten gemischten Zeile im Original."""
+    import random
+    bericht: Bericht = ctx["bericht"]
+    zeilen = b.get("zeilen")
+    if zeilen is None and b.get("quelltext"):
+        zeilen = [z for z in b["quelltext"].rstrip("\n").split("\n") if z.strip()]
+    zeilen = [str(z).rstrip() for z in (zeilen or [])]
+    if len(zeilen) < 3:
+        bericht.f(ort, "ordnen: mindestens 3 Zeilen (zeilen: oder quelltext:)")
+    if len(zeilen) > 20:
+        bericht.f(ort, "ordnen: höchstens 20 Zeilen")
+    if len(set(zeilen)) != len(zeilen):
+        bericht.w(ort, "ordnen: gleiche Zeilen kommen doppelt vor, dann zählt nur eine Reihenfolge als richtig")
+    mischung = list(range(len(zeilen)))
+    zufall = random.Random("ordnen:" + str(ctx.get("schritt_id", "")))
+    for _ in range(20):
+        zufall.shuffle(mischung)
+        if len(zeilen) < 2 or mischung != sorted(mischung):
+            break
+    b["zeilen"] = zeilen
+    b["mischung"] = mischung
+    b["gemischt"] = [zeilen[i] for i in mischung]
+    b.pop("quelltext", None)
+
+
+def begriffe_lesen(ordner: Path) -> list[dict]:
+    """BEGRIFFE.md im Stundenordner: Zeilen „- **Begriff** (englisch) — Erklärung“, Folgezeilen eingerückt."""
+    datei = ordner / "BEGRIFFE.md"
+    if not datei.exists():
+        return []
+    eintraege = []
+    for zeile in datei.read_text(encoding="utf-8").splitlines():
+        m = re.match(r"^\s*[-*]\s+\*\*(.+?)\*\*\s*(\([^)]*\))?\s*[—–:-]?\s*(.*)$", zeile)
+        if m:
+            begriff = m.group(1).replace("`", "").strip()
+            eintraege.append({"begriff": begriff, "erklaerung": m.group(3).strip()})
+        elif eintraege and zeile.startswith(("  ", "\t")) and zeile.strip():
+            eintraege[-1]["erklaerung"] += " " + zeile.strip()
+    for e in eintraege:
+        e["erklaerung"] = TRENNER.sub(", ", e["erklaerung"]).replace("`", "")
+    return eintraege
 
 
 def datei_finden(datei: str | None, ort: str, ctx: dict) -> Path | None:
@@ -351,7 +527,16 @@ def stunde_aufbereiten(roh: dict, ordner: Path, bericht: Bericht, bildbreite: in
         ids.add(s.get("id"))
         if not isinstance(s.get("soll_min"), (int, float)):
             bericht.f(ort, "soll_min fehlt oder ist keine Zahl")
-        n = {k: s.get(k) for k in ("id", "titel", "abschnitt", "soll_min", "ausgeblendet", "pruefpunkt", "kuerzen", "bei_wegfall", "zeige", "regie")}
+        n = {k: s.get(k) for k in ("id", "titel", "abschnitt", "soll_min", "ausgeblendet", "pruefpunkt", "kuerzen", "bei_wegfall", "zeige", "regie", "methoden")}
+        if n["methoden"] is not None:
+            liste = n["methoden"] if isinstance(n["methoden"], list) else list(n["methoden"])
+            for x in liste:
+                if x not in SCHRITT_METHODEN:
+                    bericht.f(ort, f"methoden: `{x}` unbekannt ({', '.join(sorted(SCHRITT_METHODEN))})")
+            n["methoden"] = [x for x in liste if x in SCHRITT_METHODEN]
+        ctx["schritt_id"] = s.get("id", "")
+        t0 = s.get("tafel")
+        ctx["schritt_bild"] = t0.get("datei") if isinstance(t0, dict) and t0.get("baustein") == "bild" else None
         n["titel"] = n["titel"] or n["id"]
         n["soll_min"] = n["soll_min"] or 0
         n["regie"] = n["regie"] or {}
@@ -371,7 +556,7 @@ def stunde_aufbereiten(roh: dict, ordner: Path, bericht: Bericht, bildbreite: in
             n["auftrag"] = baustein_aufbereiten(s["auftrag"], f"{ort} auftrag", ctx)
         if s.get("schueler"):
             n["schueler"] = baustein_aufbereiten(s["schueler"], f"{ort} schueler", ctx)
-        unbekannt = set(s) - set(n) - {"tafel", "auftrag", "schueler"}
+        unbekannt = set(s) - set(n) - {"tafel", "auftrag", "schueler", "schritt_id"}
         for k in unbekannt:
             bericht.w(ort, f"Feld `{k}` unbekannt, wird ignoriert")
         if not s.get("tafel") and not s.get("auftrag") and not any(v == "extern" for v in (n["zeige"] or {}).values()):
@@ -394,9 +579,22 @@ def stunde_aufbereiten(roh: dict, ordner: Path, bericht: Bericht, bildbreite: in
     if ctx["bilder"].bytes:
         bericht.h("Bilder", f"{len(ctx['bilder'].ids)} Bilder, {ctx['bilder'].bytes / 1e6:.1f} MB eingebettet")
 
+    begriffe = roh.get("begriffe") or begriffe_lesen(ordner)
+    if isinstance(begriffe, list):
+        begriffe = [x if isinstance(x, dict) else {"begriff": str(x), "erklaerung": ""} for x in begriffe]
+    if begriffe:
+        bericht.h("Begriffe", f"{len(begriffe)} Begriffe für Energizer (Wer bin ich?, Begriffe-Blitz)")
+    energizer = []
+    for i, e in enumerate(roh.get("energizer") or []):
+        if not isinstance(e, dict) or not e.get("titel") or not e.get("text"):
+            bericht.f("energizer", f"Eintrag {i + 1}: titel und text nötig")
+            continue
+        energizer.append({"titel": e["titel"], "text": e["text"], "dauer": e.get("dauer", 2), "begriff": bool(e.get("begriff"))})
+
     daten = {"format": roh.get("format"), "stunde": kopf, "anzeigen": anzeigen,
              "server": roh.get("server", server),
-             "ablaufleiste": bool(roh.get("ablaufleiste")), "schritte": schritte}
+             "ablaufleiste": bool(roh.get("ablaufleiste")), "schritte": schritte,
+             "begriffe": begriffe, "energizer": energizer, "mit_sql": bool(ctx.get("sql"))}
     return daten, ctx["bilder"].daten
 
 
@@ -409,6 +607,12 @@ def html_bauen(daten: dict, bilder: dict) -> str:
         return json.dumps(obj, ensure_ascii=False, default=str).replace("</", "<\\/")
 
     titel = f"{daten['stunde'].get('fach', '')} {daten['stunde'].get('nr', '')}: {daten['stunde'].get('titel', '')}".replace("\n", " ")
+    zusatz = ""
+    if daten.get("mit_sql"):   # sql.js nur, wenn die Stunde einen sql-Baustein hat (rund 1 MB)
+        wasm = base64.b64encode((APP / "lib" / "sql-wasm.wasm").read_bytes()).decode("ascii")
+        zusatz = ("<script>\n" + (APP / "lib" / "sql-wasm.js").read_text(encoding="utf-8").replace("</script", "<\\/script") + "\n</script>\n"
+                  + '<script id="sql-wasm" type="application/json">"' + wasm + '"</script>\n')
+    vorlage = vorlage.replace("<!--__ZUSATZ__-->", zusatz)
     return (vorlage.replace("__TITEL__", html.escape(titel))
             .replace("/*__CSS__*/", css)
             .replace("__DATEN__", json_sicher(daten))

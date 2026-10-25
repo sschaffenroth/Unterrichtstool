@@ -1,0 +1,78 @@
+# Beispielstunde für die Methoden-Tests. Erfundene Inhalte.
+format: tafelstunde/0
+stunde: { fach: TEST, nr: 2, titel: "Methoden", datum: 2026-01-02, dauer: 20, klasse: Testklasse }
+anzeigen: { Board: geteilt }
+schritte:
+  - id: einstieg
+    titel: Einstieg
+    soll_min: 1
+    tafel: { baustein: titel, text: "Methoden" }
+    schueler: { baustein: wortwolke, frage: "Ein Wort zur Bildverarbeitung", max_woerter: 2 }
+  - id: abst
+    titel: Abstimmung
+    soll_min: 1
+    tafel: { baustein: titel, text: "Abstimmen" }
+    schueler: { baustein: abstimmung, frage: "Wie viele Kanäle hat RGB?", optionen: ["1", "3", "4"], loesung: "3", sicherheit: true }
+  - id: bild
+    titel: Hotspot
+    soll_min: 1
+    tafel: { baustein: bild, datei: bild.png }
+    schueler: { baustein: hotspot, frage: "Wo ist die Kante?", loesung: { x: 0.5, y: 0.5, r: 0.1 } }
+  - id: praxis
+    titel: Praxisphase
+    soll_min: 7
+    methoden: [hilfe, tempo]
+    tafel: { baustein: titel, text: "Arbeiten" }
+    auftrag:
+      baustein: auftrag
+      text: "Löst die Aufgaben."
+      aufgaben: [A1, A2]
+      rollenwechsel_min: 3
+      phasen:
+        - { sozialform: EA, min: 2, text: "Allein lesen." }
+        - { sozialform: PA, min: 3, text: "Zu zweit lösen." }
+        - { sozialform: Plenum, min: 2 }
+  - id: ordnen
+    titel: Ordnen
+    soll_min: 2
+    tafel: { baustein: titel, text: "Ordnen" }
+    schueler:
+      baustein: ordnen
+      frage: "Bringt die Zeilen in die richtige Reihenfolge."
+      quelltext: |
+        summe = 0
+        for x in [1, 2, 3]:
+            summe = summe + x
+        print(summe)
+  - id: fehler
+    titel: Fehler
+    soll_min: 2
+    tafel: { baustein: titel, text: "Fehler finden" }
+    schueler:
+      baustein: fehlerzeile
+      frage: "Welche Zeile ist falsch?"
+      loesung: 2
+      quelltext: |
+        alter = int(input())
+        if alter > 18
+            print("volljährig")
+  - id: sql
+    titel: SQL
+    soll_min: 4
+    tafel:
+      baustein: sql
+      datenbank: tiere.db
+      abfrage: "SELECT name FROM tier WHERE art = 'Hund';"
+      beispiele:
+        - { titel: "Alle Tiere", abfrage: "SELECT * FROM tier;" }
+        - { titel: "Zählen", abfrage: "SELECT art, COUNT(*) AS anzahl FROM tier GROUP BY art;" }
+  - id: ziel
+    titel: Zielscheibe
+    soll_min: 1
+    tafel: { baustein: titel, text: "Rückblick" }
+    schueler: { baustein: zielscheibe, dimensionen: ["verstanden", "Tempo"] }
+  - id: exit
+    titel: Exit
+    soll_min: 1
+    tafel: { baustein: ergebnis, von: [einstieg, ziel] }
+    schueler: { baustein: exit, frage: "Wie viele Kanäle hat RGB?", optionen: ["1", "3"], loesung: "3" }
