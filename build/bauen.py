@@ -98,6 +98,22 @@ def inline(text: str) -> str:
     return t
 
 
+def ort_und_datei(url: str) -> tuple[str, str]:
+    """Aus einem GitHub-Link Ort und Dateiname machen: Repository › Ordner, Datei."""
+    from urllib.parse import unquote, urlparse
+    if not url:
+        return "", ""
+    u = urlparse(url)
+    teile = [unquote(t) for t in u.path.strip("/").split("/") if t]
+    if u.netloc.endswith("github.com") and len(teile) >= 2:
+        repo = teile[1]
+        rest = teile[4:] if len(teile) > 4 and teile[2] in ("blob", "tree") else []
+        if teile[2:3] == ["blob"] and rest:
+            return " › ".join(["Repository " + repo] + rest[:-1]), rest[-1]
+        return " › ".join(["Repository " + repo] + rest), ""
+    return u.netloc, unquote(teile[-1]) if teile else ""
+
+
 def qr_svg(url: str) -> str:
     import segno
     return segno.make(url, error="m").svg_inline(omitsize=True, border=1, dark="#1d1d1f")
@@ -217,9 +233,13 @@ def baustein_aufbereiten(b: dict, ort: str, ctx: dict) -> dict:
                 material.append({"text": m})
             else:
                 eintrag = {"text": m.get("text", m.get("url", ""))}
+                ort, datei = ort_und_datei(m.get("url", ""))
+                eintrag["ort"] = m.get("ort", ort)
+                eintrag["datei"] = m.get("datei", datei)
                 if m.get("url"):
                     eintrag["url"] = m["url"]
-                    eintrag["svg"] = qr_svg(m["url"])
+                    if m.get("qr"):
+                        eintrag["svg"] = qr_svg(m["url"])
                 material.append(eintrag)
         b["material"] = material
     elif art == "ergebnis":

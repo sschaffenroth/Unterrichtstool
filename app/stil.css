@@ -317,3 +317,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .handy-anmeldung .qr svg { width: 100%; height: 100%; display: block; }
 .handy-anmeldung a { color: var(--blau); font-size: 13px; }
 .hinweis-kasten { margin: 8px 0 0; padding: 8px 10px; background: #fff6d6; border-radius: 8px; font-size: 13px; line-height: 1.4; }
+
+/* Material im Auftrag: wo es liegt, wie die Datei heißt */
+.auftrag .m-text { font-weight: 600; }
+.auftrag .m-ort { color: var(--grau); font-size: .9em; margin-top: .15em; }
+.auftrag .m-ort::before { content: "Ort: "; }
+.auftrag .m-datei { font-family: Consolas, "Cascadia Mono", Menlo, monospace; font-size: .95em; background: #fff; display: inline-block; padding: .1em .4em; border-radius: .25em; margin-top: .2em; }

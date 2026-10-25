@@ -25,6 +25,8 @@ Konzept: `claude/Tafelsystem_Konzept_und_Steckbrief_Vorlage.md` im Projekt
 | Bausteine **fertig** | `titel`, `bild`, `folie`, `qr`, `uhr`, `schwarz`, `auftrag` (Countdown, Material mit QR), `code` (Marken, Teile), `zeichnen` (Raster/Bild, Stift, Rückgängig, PNG), `ergebnis` |
 | Bausteine **Platzhalter** | `zuordnen`, `beschriften`, `urteilen`, `codestreifen`, `testfaelle`, `partner`, `kette`, `grafik`, `brett`, `sql`, `neu`. `code`: `fehler`, `probelauf`, `nebeneinander` fehlen |
 | Schüler-Handys | Worker im Repo (`worker/`): Raum mit 4-stelligem Code, Anmelde-QR und Link auf der Tafel (Auftragsleiste und groß), Schüler-Seite am Handy oder PC. `abstimmung` und `vorhersage` mit Freigabe aus der Regie, `mehrfach`, `kennung: team`. Handy-Stimmen und Handzeichen werden zusammengezählt. Raum löscht sich nach 4 Wochen. `formular`, `feedback`, `fragen` noch nicht |
+| Handy-Begleitseite | zeigt immer den aktuellen Schritt: Abschnitt, Titel, Auftrag mit Countdown, Material mit Ort, Dateiname und Link. Freigegebene Frage erscheint obendrüber. Nie Notizen oder Lösungen |
+| Start | `Tafel starten.bat` + `tafel_server.ps1` im Fachordner: lokaler Server auf localhost, Stundenauswahl. Nötig in Edge für Monitor-Zuordnung |
 | Regie auf dem Handy | nur auf demselben Rechner wie das Board (kein Netz-Abgleich) |
 | Prototyp KIG ES 06 | läuft: Tafeldatei offline (Spielbrett, Kette, Zuordnen, Vorhersage, Formular, Zeitplan, PNG) + Abstimmungs-Worker auf Cloudflare (QR, `/lehrer`). Fachgebunden, noch nicht im Repo |
 | Tafel-Apps GP DS 05 bis 07 | laufen als einzelne HTML-Dateien in `Lernhilfen/`. Noch nicht im Repo |
@@ -142,7 +144,7 @@ Fachs bleibt, z. B. `../05_2026-10-20_…/grafiken/kanten.png`. Das Bauskript be
 
 | Baustein | Felder |
 |---|---|
-| `auftrag` | `text` (genau **ein** Satz, kein Code), `sozialform` (EA, PA, GA, Plenum), `dauer_min`, `material` (Liste: Text oder `{text, url}`. Mit `url` erzeugt die Ansicht einen QR-Code), `abgabe` |
+| `auftrag` | `text` (genau **ein** Satz, kein Code), `sozialform` (EA, PA, GA, Plenum), `dauer_min`, `material` (Liste: Text oder `{text, url, ort, datei, qr}`. Bei GitHub-Links werden `ort` (Repository › Ordner) und `datei` automatisch abgeleitet und angezeigt. QR-Code nur mit `qr: true`. Die Handy-Begleitseite zeigt die Links anklickbar), `abgabe` |
 
 **Tafel-Bausteine**
 

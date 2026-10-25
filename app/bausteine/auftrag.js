@@ -33,7 +33,10 @@ BAUSTEINE.auftrag = (b, ctx) => {
   const material = (b.material || []).map((m) =>
     el("div", { class: "material-eintrag" },
       m.svg ? el("div", { class: "qr", html: m.svg }) : null,
-      el("span", null, m.text)));
+      el("div", null,
+        el("div", { class: "m-text" }, m.text),
+        m.ort ? el("div", { class: "m-ort" }, m.ort) : null,
+        m.datei ? el("div", { class: "m-datei" }, m.datei) : null)));
   return el("div", { class: "auftrag" + (ctx.voll ? " voll" : "") },
     el("div", { class: "kopf" },
       piktogramm(b.sozialform),

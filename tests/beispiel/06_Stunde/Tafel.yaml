@@ -21,7 +21,7 @@ schritte:
     abschnitt: "Anfang"
     soll_min: 1
     tafel: { baustein: bild, datei: bild.png, frage: "Was ist das?", untertitel: "Zweite Zeile" }
-    auftrag: { baustein: auftrag, text: "Tippt eine Antwort.", sozialform: EA, dauer_min: 1, material: [{ text: "Link", url: "https://example.org" }, "Heft"] }
+    auftrag: { baustein: auftrag, text: "Tippt eine Antwort.", sozialform: EA, dauer_min: 1, material: [{ text: "Arbeitsblatt", url: "https://github.com/x/klasse/blob/main/06_Stunde/02_Arbeitsblatt.md" }, { text: "Link", url: "https://example.org", qr: true }, "Heft"] }
     schueler: { baustein: vorhersage, frage: "Farbe?", optionen: [orange, blau], loesung: orange, aufloesen_in: code }
     regie: { notiz: "Notiz zum Tipp", zaehler: ["Meldungen"] }
   - id: extern

@@ -58,7 +58,9 @@ def test_abspieler(tmp_path: Path) -> None:
         regie.locator(".schritt-steuerung .weiter").click()
         board.wait_for_selector(".flaeche.geteilt")
         assert board.locator(".b-bild .z1").text_content() == "Was ist das?"
-        assert board.locator(".auftrag .material-eintrag .qr svg").count() == 1
+        assert board.locator(".auftrag .material-eintrag .qr svg").count() == 1   # nur mit qr: true
+        assert board.locator(".auftrag .m-datei").first.text_content() == "02_Arbeitsblatt.md"
+        assert "Repository klasse › 06_Stunde" in board.locator(".auftrag .m-ort").first.text_content()
         board.wait_for_function("document.querySelector('.auftrag .countdown').textContent.startsWith('0:5')")
 
         # Handzeichen in der Regie zählen

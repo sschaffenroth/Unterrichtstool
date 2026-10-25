@@ -9,6 +9,8 @@
      GET  /api/raum/CODE/aktuell             → { frage | null }        für die Schüler-Seite
      POST /api/raum/CODE/antwort  {geraet, team?, schritt, auswahl[]}
      POST /api/raum/CODE/frage    {token, frage | null}   Frage freigeben oder schließen
+     POST /api/raum/CODE/status   {token, status}         aktueller Schritt für die Begleitseite
+                                  (Titel, Arbeitsauftrag, Countdown, Material-Links; nie Notizen oder Lösungen)
      POST /api/raum/CODE/ergebnis {token}     → { stimmen, teilnehmer, geraete }
      POST /api/raum/CODE/loeschen {token}
    Seiten: /  (Code eingeben), /1234 (Schüler-Seite für Raum 1234) */
@@ -40,7 +42,7 @@ export default {
       return json({ fehler: "kein freier Code" }, 503);
     }
 
-    const api = url.pathname.match(/^\/api\/raum\/(\d{4})\/(aktuell|antwort|frage|ergebnis|loeschen)$/);
+    const api = url.pathname.match(/^\/api\/raum\/(\d{4})\/(aktuell|antwort|frage|status|ergebnis|loeschen)$/);
     if (api) {
       const raum = env.RAUM.get(env.RAUM.idFromName(api[1]));
       const was = api[2];
@@ -82,7 +84,37 @@ export class Raum extends DurableObject {
     const s = this.ctx.storage;
     if (!(await s.get("token"))) return { raum: false };
     const f = await s.get("frage");
-    return { raum: true, frage: f || null };
+    const st = await s.get("status");
+    return { raum: true, frage: f || null, status: st || null, jetzt: Date.now() };
+  }
+
+  async status({ token, status }) {
+    if (!(await this.pruefen(token))) return { fehler: "kein Zugriff", status: 403 };
+    if (!status) { await this.ctx.storage.put("status", null); return { ok: true }; }
+    const text = (v, n) => String(v == null ? "" : v).slice(0, n);
+    const a = status.auftrag || null;
+    const sauber = {
+      fach: text(status.fach, 40),
+      titel: text(status.titel, 200),
+      abschnitt: text(status.abschnitt, 200),
+      auftrag: a ? {
+        text: text(a.text, 600),
+        sozialform: text(a.sozialform, 20),
+        dauer_min: Number(a.dauer_min) || 0,
+        abgabe: text(a.abgabe, 300),
+      } : null,
+      material: (status.material || []).slice(0, 8).map((m) => ({
+        text: text(m.text, 200),
+        ort: text(m.ort, 300),
+        datei: text(m.datei, 200),
+        url: /^https?:\/\//.test(String(m.url || "")) ? text(m.url, 500) : "",
+      })),
+      countdown: status.countdown ? { rest: Math.max(0, Number(status.countdown.rest) || 0), laeuft: !!status.countdown.laeuft } : null,
+      extern: !!status.extern,
+      gesendet: Date.now(),
+    };
+    await this.ctx.storage.put("status", sauber);
+    return { ok: true };
   }
 
   async frage({ token, frage }) {

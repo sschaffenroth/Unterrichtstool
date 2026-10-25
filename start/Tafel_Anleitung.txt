@@ -1,0 +1,54 @@
+﻿TAFEL STARTEN - KURZANLEITUNG
+=============================
+
+Was hier liegt
+--------------
+  Tafel starten.bat     Doppelklick zum Starten
+  tafel_server.ps1      kleiner Server, nur auf diesem Rechner (http://localhost:8765)
+  NN_Datum_Thema\Tafel.html   je Stunde die Tafel mit Regie, Board und Handy-Anbindung
+
+Die Tafel.html enthält Notizen und Lösungen der Lehrkraft. Nicht in Schülerordner legen.
+
+
+Vor der Stunde
+--------------
+1. Laptop an die Tafel anschließen.
+2. Doppelklick auf "Tafel starten". Ein kleines PowerShell-Fenster geht auf (minimiert)
+   und Edge zeigt die Stundenauswahl. Die nächste Stunde ist orange markiert.
+   Das PowerShell-Fenster während der Stunde offen lassen.
+3. Stunde anklicken. Das ist die Regie.
+
+Nur beim ersten Mal auf einem Laptop:
+   - "Monitore erkennen" klicken, Edge fragt nach "Fensterverwaltung": Zulassen.
+   - In "Fenster und Monitore" beim Board den Monitor der Tafel wählen.
+   - Bei Pop-up-Warnung: Pop-ups für localhost erlauben.
+   Kommt beim Doppelklick "Der Computer wurde durch Windows geschützt":
+   "Weitere Informationen" -> "Trotzdem ausführen".
+
+
+In der Stunde
+-------------
+- "Stunde starten": Board geht im Vollbild auf die Tafel, Regie öffnet sich auf dem Laptop,
+  Raum für die Handys wird angelegt.
+- "Anmelde-QR aufs Board": QR-Code und Link für die Handys groß auf der Tafel.
+- Weiter/zurück: Pfeiltasten, Presenter oder Knöpfe in der Regie.
+- Taste B: Tafel schwarz.  Taste S oder Kamera am Board: Ansicht als PNG sichern.
+- Abstimmung: in der Regie "Für Handys freigeben". Handzeichen kann man zusätzlich zählen.
+- Karte "Überwachen": was Board und Handys gerade zeigen.
+
+
+Nach der Stunde
+---------------
+- "Alle Folien als PNG" oder "als PDF" sichern (Ordner wählen, z. B. den Stundenordner).
+- "Zeiten sichern" für den Befund.
+- "Raum löschen" entfernt die Handy-Antworten sofort (sonst nach 4 Wochen automatisch).
+- PowerShell-Fenster schließen.
+
+
+Wenn etwas nicht geht
+---------------------
+- Board landet auf dem falschen Monitor: in "Fenster und Monitore" auf "Diagnose",
+  Text kopieren und an Claude schicken.
+- Tafel.html direkt per Doppelklick geöffnet: läuft, aber ohne Monitor-Zuordnung.
+  Besser über "Tafel starten".
+- Kein Netz: Alles läuft weiter, Abstimmungen dann per Handzeichen in der Regie zählen.

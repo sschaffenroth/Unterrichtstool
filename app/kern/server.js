@@ -72,6 +72,7 @@ async function abholen() {
   abholenLaeuft = true;
   try {
     if (Z.freigabe && Z.freigabe !== schritt().id) await freigabeBeenden();
+    await statusSenden();
     const d = await serverRufen("/api/raum/" + Z.raum.code + "/ergebnis", { token: Z.raum.token });
     const neu = { stimmen: d.stimmen || {}, teilnehmer: d.teilnehmer || {} };
     if (JSON.stringify(neu) !== JSON.stringify(Z.online)) tun("online", { daten: neu });
@@ -82,6 +83,30 @@ async function abholen() {
   }
   abholenLaeuft = false;
 }
+/* Begleitseite der Handys: aktueller Schritt, Auftrag, Countdown, Material-Links (nie Notizen oder Lösungen) */
+let statusZuletzt = "", statusZeit = 0;
+function begleitStatus() {
+  const s = schritt();
+  const a = s.auftrag;
+  const rest = countdownRest();
+  return {
+    fach: STUNDE.stunde.fach, titel: s.titel, abschnitt: s.abschnitt || "",
+    extern: alleAnzeigen().some((n) => ansichtVon(n) === "extern"),
+    auftrag: a ? { text: a.text, sozialform: a.sozialform, dauer_min: a.dauer_min, abgabe: a.abgabe } : null,
+    material: (a && a.material ? a.material : []).map((m) => ({ text: m.text, url: m.url || "", ort: m.ort || "", datei: m.datei || "" })),
+    countdown: Z.countdown && rest != null ? { rest: Math.max(0, Math.round(rest)), laeuft: !!Z.countdown.seit } : null,
+  };
+}
+async function statusSenden() {
+  const st = begleitStatus();
+  const c = Z.countdown;
+  const schluessel = JSON.stringify([st.titel, st.auftrag, st.material, st.extern, c && [c.id, c.dauer, c.basis, !!c.seit]]);
+  if (schluessel === statusZuletzt && Date.now() - statusZeit < 30000) return;
+  await serverRufen("/api/raum/" + Z.raum.code + "/status", { token: Z.raum.token, status: st });
+  statusZuletzt = schluessel;
+  statusZeit = Date.now();
+}
+
 function abholenStarten() { FUEHREND = true; setInterval(abholen, 2000); }
 
 /* Stimmen eines Schritts: Handzeichen + Handys */

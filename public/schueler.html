@@ -27,17 +27,40 @@
   @keyframes p { 50% { opacity: .2; } }
   input.team { font: inherit; font-size: 22px; width: 100px; padding: 8px; border: 2px solid var(--linie); border-radius: 8px; text-align: center; }
   a { color: var(--grau); }
+  .frage-karte { border: 2px solid var(--orange); margin-bottom: 14px; }
+  .abschnitt { color: var(--orange); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+  .schritt { font-size: 20px; font-weight: 700; margin: 2px 0 12px; }
+  .auftrag { background: #fdf0e4; border-radius: 10px; padding: 12px; }
+  .auftrag .kopf { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .auftrag .form { font-weight: 700; }
+  .auftrag .uhr { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .auftrag .uhr.ende { color: var(--rot); }
+  .auftrag .uhr.pause { color: var(--grau); }
+  .auftrag .satz { font-size: 17px; font-weight: 600; margin-top: 8px; line-height: 1.35; }
+  .auftrag .abgabe { margin-top: 8px; font-size: 14px; }
+  .material { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .material a { display: block; padding: 12px 14px; background: #fff; border: 1px solid var(--linie); border-radius: 10px; color: var(--tinte); text-decoration: none; font-weight: 600; }
+  .material a::after { content: " ↗"; color: var(--orange); }
+  .material span { color: var(--grau); font-size: 14px; }
+  .material .ort { font-weight: 400; color: var(--grau); font-size: 13px; margin-top: 4px; }
+  .material code { display: inline-block; margin-top: 4px; font-size: 13px; background: var(--flaeche); padding: 1px 6px; border-radius: 4px; font-weight: 400; }
+  .material .ohne-link { padding: 10px 14px; background: #fff; border: 1px dashed var(--linie); border-radius: 10px; }
 </style>
 </head>
 <body>
 <header><span><b>Mitmachen</b> · ohne Namen</span><span id="code"></span></header>
-<main><div class="karte" id="inhalt"><div class="warten">Verbinde …</div></div>
+<main><div class="karte frage-karte" id="inhalt" hidden></div>
+<div class="karte" id="begleitung"><div class="warten">Verbinde …</div></div>
 <p class="hinweis">Gespeichert wird nur deine Antwort mit einer zufälligen Kennung dieses Geräts, keine Namen. Schreib bitte auch nirgends deinen Namen hinein.</p></main>
 <script>
 "use strict";
 const code = (location.pathname.match(/(\d{4})\/?$/) || [])[1];
 document.getElementById("code").textContent = code ? "Raum " + code : "";
 const inhalt = document.getElementById("inhalt");
+const begleitung = document.getElementById("begleitung");
+let statusSchluessel = "";
+let uhrEnde = null, uhrRest = null, uhrLaeuft = false;
+const FORMEN = { EA: "Einzelarbeit", PA: "Partnerarbeit", GA: "Gruppenarbeit", Plenum: "Plenum" };
 const merk = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } };
 let geraet = merk("mitmachen:geraet");
 if (!geraet) { geraet = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()); merk("mitmachen:geraet", geraet); }
@@ -57,13 +80,56 @@ function el(tag, attrs, ...kinder) {
 
 function warten(text) {
   aktuelleFrage = null;
-  inhalt.replaceChildren(el("div", { class: "warten" }, el("div", null, el("span", { class: "punkt" }), el("span", { class: "punkt" }), el("span", { class: "punkt" })), el("p", null, text)));
+  inhalt.hidden = true;
+  statusSchluessel = "";
+  begleitung.replaceChildren(el("div", { class: "warten" }, el("div", null, el("span", { class: "punkt" }), el("span", { class: "punkt" }), el("span", { class: "punkt" })), el("p", null, text)));
 }
+function keineFrage() { aktuelleFrage = null; inhalt.hidden = true; }
+
+/* Begleitung: der aktuelle Schritt mit Auftrag, Countdown und Material */
+function begleiten(st, jetzt) {
+  const c = st.countdown;
+  if (c) {
+    const rest = c.rest - Math.max(0, (jetzt || st.gesendet) - st.gesendet);
+    uhrLaeuft = c.laeuft;
+    uhrRest = rest;
+    uhrEnde = c.laeuft ? Date.now() + rest : null;
+  } else { uhrEnde = null; uhrRest = null; }
+  const schluessel = JSON.stringify([st.titel, st.abschnitt, st.auftrag, st.material, st.extern, !!c]);
+  if (schluessel === statusSchluessel) { uhrZeigen(); return; }
+  statusSchluessel = schluessel;
+  const a = st.auftrag;
+  begleitung.replaceChildren(
+    st.abschnitt ? el("div", { class: "abschnitt" }, st.abschnitt) : null,
+    el("div", { class: "schritt" }, st.titel || ""),
+    a ? el("div", { class: "auftrag" },
+      el("div", { class: "kopf" }, el("span", { class: "form" }, FORMEN[a.sozialform] || a.sozialform || "Auftrag"), c ? el("span", { class: "uhr", id: "uhr" }, "") : (a.dauer_min ? el("span", null, a.dauer_min + " min") : null)),
+      el("div", { class: "satz" }, a.text),
+      a.abgabe ? el("div", { class: "abgabe" }, el("b", null, "Abgabe: "), a.abgabe) : null)
+      : el("p", { class: "hinweis", style: "margin:0" }, st.extern ? "Gerade läuft ein Vortrag." : "Schaut nach vorn an die Tafel."),
+    (st.material || []).length ? el("div", { class: "material" }, st.material.map((m) => {
+      const zusatz = [m.ort ? el("div", { class: "ort" }, "Ort: " + m.ort) : null, m.datei ? el("code", null, m.datei) : null];
+      return m.url ? el("a", { href: m.url, target: "_blank", rel: "noopener" }, m.text || m.url, ...zusatz)
+        : el("div", { class: "ohne-link" }, el("span", null, m.text), ...zusatz);
+    })) : null);
+  uhrZeigen();
+}
+function uhrZeigen() {
+  const e = document.getElementById("uhr");
+  if (!e || uhrRest == null) return;
+  const rest = uhrEnde ? uhrEnde - Date.now() : uhrRest;
+  const s = Math.max(0, Math.floor(rest / 1000));
+  e.textContent = Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+  e.classList.toggle("ende", rest <= 0);
+  e.classList.toggle("pause", !uhrLaeuft);
+}
+setInterval(uhrZeigen, 500);
 
 function zeigen(f) {
   const schluessel = f.schritt + ":" + f.seit;
   if (aktuelleFrage === schluessel) return;
   aktuelleFrage = schluessel; auswahl = []; gesendet = false;
+  inhalt.hidden = false;
   const teamFeld = f.kennung === "team" ? el("p", null, "Eure Teamnummer: ", el("input", { class: "team", type: "number", min: 1, max: 40, inputmode: "numeric", value: merk("mitmachen:team:" + code) || "" })) : null;
   const meldung = el("div");
   const knopf = el("button", { class: "senden", disabled: true, onclick: senden }, "Senden");
@@ -106,10 +172,13 @@ async function abfragen() {
     const r = await fetch("/api/raum/" + code + "/aktuell", { cache: "no-store" });
     const d = await r.json();
     if (!d.raum) warten("Raum " + code + " gibt es nicht (mehr). Code an der Tafel prüfen.");
-    else if (!d.frage) warten("Angemeldet. Warte auf die nächste Frage …");
-    else zeigen(d.frage);
+    else {
+      if (d.frage) zeigen(d.frage); else keineFrage();
+      if (d.status) begleiten(d.status, d.jetzt);
+      else if (!statusSchluessel) begleitung.replaceChildren(el("div", { class: "warten" }, el("p", null, "Angemeldet. Gleich geht es los …")));
+    }
   } catch (e) {
-    if (!aktuelleFrage) warten("Keine Verbindung. Ich versuche es weiter …");
+    if (!aktuelleFrage && !statusSchluessel) warten("Keine Verbindung. Ich versuche es weiter …");
   }
   setTimeout(abfragen, 2000);
 }
