@@ -60,6 +60,7 @@ python -m pytest tests/
 |---|---|
 | [`docs/konzept.md`](docs/konzept.md) | Konzept (Teil A) und Steckbrief-Vorlage für weitere Fächer (Teil B) |
 | [`docs/stand.md`](docs/stand.md) | aktueller Stand und Stundenformat `tafelstunde/0` für Fach-Chats |
+| [`docs/ideen_methoden.md`](docs/ideen_methoden.md) | Ideensammlung: digitale Methoden, die noch passen würden |
 | [`docs/anforderungen.md`](docs/anforderungen.md) | alle Anforderungen mit ID, Quelle, Priorität und Stufe |
 | [`docs/steckbriefe/`](docs/steckbriefe/) | Steckbriefe je Fach |
 | [`docs/konzept_tafelsteuerung_v0.md`](docs/konzept_tafelsteuerung_v0.md) | erster Entwurf zur Tafelsteuerung (Prototyp ES 06) |
