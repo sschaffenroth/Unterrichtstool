@@ -47,7 +47,7 @@ def test_abspieler(tmp_path: Path) -> None:
 
         # Board aus der Regie öffnen: neues Fenster, verbunden über postMessage
         with regie.expect_popup() as info:
-            regie.get_by_role("button", name="Board öffnen").click()
+            regie.get_by_role("button", name="Fenster öffnen").click()
         board = info.value
         board.on("pageerror", lambda e: fehler.append(f"board: {e}"))
         board.wait_for_selector(".buehne")
@@ -104,6 +104,34 @@ def test_abspieler(tmp_path: Path) -> None:
         # Schwarz per Taste B
         board.keyboard.press("b")
         board.wait_for_selector(".buehne.schwarz")
+
+        # Fensterverwaltung: Board steht als offen in der Liste
+        regie.wait_for_selector(".fenster-zeile .fenster-status.offen")
+
+        # Sicherung: diese Ansicht als PNG (ohne Ordner → Download)
+        board.keyboard.press("b")
+        board.wait_for_selector(".buehne:not(.schwarz)")
+        with regie.expect_download() as d:
+            regie.get_by_role("button", name="Diese Ansicht als PNG").click()
+        einzel = d.value
+        assert einzel.suggested_filename.startswith("Sicherung_") and einzel.suggested_filename.endswith(".png")
+        png = tmp_path / einzel.suggested_filename
+        einzel.save_as(png)
+        from PIL import Image
+        assert Image.open(png).size == (1920, 1080)
+
+        # alle Folien: Start, Tipp, Code (3 Reiter), Ende (3 Reiter); Referat ist extern, Reserve aus
+        dateien = []
+        regie.on("download", lambda dl: dateien.append(dl.suggested_filename))
+        regie.get_by_role("button", name="Alle Folien als PNG").click()
+        regie.wait_for_function("document.querySelector('[data-sicherung]').textContent.includes('Folien gesichert')", timeout=60000)
+        regie.wait_for_timeout(500)
+        assert len(dateien) == 8, dateien
+        assert dateien[0] == "01_Start.png", dateien
+
+        # Fenster schließen aus der Regie
+        regie.locator(".fenster-zeile").get_by_role("button", name="Schließen").click()
+        regie.wait_for_selector(".fenster-zeile .fenster-status:not(.offen)")
 
         # Zustand übersteht Neuladen
         regie.reload()

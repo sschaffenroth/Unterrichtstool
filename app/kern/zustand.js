@@ -192,8 +192,16 @@ function senden() {
 window.addEventListener("message", (e) => {
   const d = e.data;
   if (!d || !d.tafelsystem || d.schluessel !== SPEICHER_SCHLUESSEL) return;
+  if (d.tafelsystem === "tschuess") {
+    if (e.source) PARTNER.delete(e.source);
+    if (d.name && FENSTER[d.name] === e.source) { delete FENSTER[d.name]; setTimeout(neuZeichnen, 100); }
+    return;
+  }
+  if (d.tafelsystem === "schliessen") { window.close(); return; }
+  const neu = e.source && !PARTNER.has(e.source);
   if (e.source) PARTNER.add(e.source);
-  if (d.tafelsystem === "hallo") {
+  if (d.name && e.source && FENSTER[d.name] !== e.source) { FENSTER[d.name] = e.source; neuZeichnen(); }
+  if (d.tafelsystem === "hallo" || (d.tafelsystem === "da" && neu)) {
     e.source.postMessage({ tafelsystem: "zustand", schluessel: SPEICHER_SCHLUESSEL, z: Z }, "*");
   } else if (d.tafelsystem === "zustand") {
     Z = Object.assign(neuerZustand(), d.z);
@@ -201,10 +209,10 @@ window.addEventListener("message", (e) => {
     neuZeichnen();
   }
 });
-function partnerVerbinden(w) {
+function partnerVerbinden(w, name) {
   if (!w) return;
   PARTNER.add(w);
-  try { w.postMessage({ tafelsystem: "hallo", schluessel: SPEICHER_SCHLUESSEL }, "*"); } catch (e) { /* noch nicht geladen */ }
+  try { w.postMessage({ tafelsystem: "hallo", schluessel: SPEICHER_SCHLUESSEL, name }, "*"); } catch (e) { /* noch nicht geladen */ }
 }
 function hatPartner() { for (const w of PARTNER) if (!w.closed) return true; return false; }
 

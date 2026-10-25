@@ -20,11 +20,12 @@ function regieInhalt(modus) {
     el("div", { class: "rechts" },
       el("button", { class: "knopf" + (laeuft ? "" : " haupt"), onclick: () => {
         tun(laeuft ? "uhrPause" : "uhrStart");
+        if (!laeuft && modus === "fenster" && geraet().autoStart !== false) alleFensterOeffnen();
         if (!laeuft && !Z.raum && SERVER && SCHRITTE.some((x) => x.schueler)) raumAnlegen();
       } }, laeuft ? "Uhr anhalten" : Z.uhr.basis ? "Uhr weiter" : "Stunde starten"),
       handyKnoepfe(),
-      modus === "fenster" ? ANZEIGEN.map((n) => el("button", { class: "knopf", onclick: () => anzeigeOeffnen(n) }, n + " öffnen")) : null,
-      modus === "fenster" ? el("button", { class: "knopf", title: "Dieses Fenster zeigt das Board, die Regie liegt dann hinter ☰", onclick: () => { location.hash = "anzeige=" + ANZEIGEN[0]; location.reload(); } }, "Hier " + ANZEIGEN[0] + " zeigen") : null,
+      modus === "fenster" ? el("button", { class: "knopf", title: "alle Anzeige-Fenster öffnen und auf ihre Monitore legen", onclick: alleFensterOeffnen }, "Fenster öffnen") : null,
+      modus === "fenster" ? el("button", { class: "knopf", title: "Dieses Fenster zeigt das Board, die Regie liegt dann hinter ☰", onclick: () => { location.hash = "anzeige=" + alleAnzeigen()[0]; location.reload(); } }, "Hier " + alleAnzeigen()[0] + " zeigen") : null,
       el("select", { class: "knopf", title: "Ton bei Soll-Ende", onchange: (e) => { tonEinstellung = e.target.value; try { localStorage.setItem("tafelsystem:ton", tonEinstellung); } catch (x) {} } },
         [["extern", "Ton: nur bei Extern"], ["alle", "Ton: jeder Schritt"], ["aus", "Ton: aus"]].map(([w, t]) => el("option", { value: w, selected: w === tonEinstellung }, t))),
       el("button", { class: "knopf", onclick: befundExport }, "Zeiten sichern"),
@@ -65,8 +66,10 @@ function regieInhalt(modus) {
     el("div", { class: "schritt-steuerung" },
       el("button", { class: "knopf", onclick: () => tun("zurueck") }, "‹ Zurück"),
       el("button", { class: "knopf haupt weiter", onclick: () => tun("weiter") }, naechster ? "Weiter: " + naechster.titel + " ›" : "Ende der Stunde")),
-    ANZEIGEN.map((n) => anzeigeKarte(n)),
-    steuerKarte(s));
+    alleAnzeigen().map((n) => anzeigeKarte(n)),
+    steuerKarte(s),
+    modus === "fenster" ? fensterKarte() : null,
+    sicherungKarte());
 
   /* Spalte 3: Notizen, Handzeichen, Zähler */
   const r = s.regie || {};
@@ -205,7 +208,7 @@ function regieTakt(wurzel) {
     signalisiert[s.id + ":" + Z.schrittBeginn] = true;
     const k = wurzel.querySelector("[data-schrittkarte]");
     if (k) { k.classList.remove("signal"); void k.offsetWidth; k.classList.add("signal"); }
-    const extern = ANZEIGEN.some((n) => ansichtVon(n) === "extern");
+    const extern = alleAnzeigen().some((n) => ansichtVon(n) === "extern");
     if (tonEinstellung === "alle" || (tonEinstellung === "extern" && extern)) signalTon();
   }
 }
@@ -242,21 +245,6 @@ function regieSchublade() {
   beobachten(zeichnen);
   const takt = setInterval(() => { if (!document.body.contains(schublade)) clearInterval(takt); else regieTakt(innen); }, 500);
   zeichnen();
-}
-
-async function anzeigeOeffnen(name) {
-  const url = location.href.split("#")[0] + "#anzeige=" + encodeURIComponent(name);
-  let merkmale = "popup,width=1280,height=720";
-  try {
-    if ("getScreenDetails" in window) {
-      const d = await window.getScreenDetails();
-      const fremd = d.screens.find((sc) => sc !== d.currentScreen) || d.currentScreen;
-      merkmale = `popup,left=${fremd.availLeft},top=${fremd.availTop},width=${fremd.availWidth},height=${fremd.availHeight}`;
-    }
-  } catch (e) { /* ohne Fensterverwaltung: normales Fenster, von Hand verschieben */ }
-  const w = window.open(url, "anzeige-" + name, merkmale);
-  if (!w) { alert("Der Browser hat das Fenster blockiert. Bitte Pop-ups für diese Datei erlauben."); return; }
-  partnerVerbinden(w);
 }
 
 function befundExport() {

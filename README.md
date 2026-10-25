@@ -22,13 +22,18 @@ Prüft die Datei und schreibt `Tafel.html` daneben. Nur prüfen: `--nur-pruefen`
 | Was | Wie |
 |---|---|
 | Regie | `Tafel.html` in Chrome oder Edge öffnen |
-| Board als zweiter Bildschirm | in der Regie „Board öffnen“, Fenster auf das Board, einmal antippen = Vollbild |
+| Fenster öffnen | „Fenster öffnen“ (oder automatisch bei „Stunde starten“), Liste „Fenster und Monitore“ zeigt, was offen ist |
+| Fenster fest einem Monitor zuordnen | „Monitore erkennen“, einmal „Fensterverwaltung“ erlauben, je Fenster Monitor wählen. Gilt auf diesem Laptop für alle Stunden |
+| zusätzliches Fenster | „+ Fenster“, z. B. „Monitor 2“ mit Ansicht auftrag |
 | nur ein Rechner am Board | „Hier Board zeigen“, Regie dann hinter ☰ (oder Taste R) |
 | weiter / zurück | Pfeiltasten, Bild↑/Bild↓ (Presenter), Leertaste, Knöpfe ‹ › |
 | Board schwarz | Taste B |
 | Vollbild | Taste F oder ⛶ |
 | Handys anmelden | „Stunde starten“ legt den Raum an, „Anmelde-QR aufs Board“ zeigt QR und Link groß |
 | Frage auf die Handys | in der Regie „Für Handys freigeben“, schließt beim Weitergehen |
+| Ansicht sichern | „Diese Ansicht als PNG“ in der Regie, 📷 oder Taste S am Board |
+| alle Folien sichern | „Alle Folien als PNG“ (Unterordner `Folien_…`) oder „Alle Folien als PDF“ (Druckfenster) |
+| Ablageordner | „Ordner wählen“, z. B. den Stundenordner. Ohne Ordner: Download-Ordner |
 | Zeiten, Zähler, Stimmen sichern | „Zeiten sichern“ (JSON) |
 
 Der Zustand bleibt beim Neuladen erhalten (Browser-Speicher). „Zurücksetzen“ löscht ihn.

@@ -33,8 +33,11 @@ APP = WURZEL / "app"
 STANDARD_SERVER = "https://unterrichtstool.s-schaffenroth.workers.dev"
 JS_REIHENFOLGE = [
     "lib/qrcode.js",
+    "lib/html-to-image.js",
     "kern/zustand.js",
     "kern/server.js",
+    "kern/fenster.js",
+    "kern/sicherung.js",
     "bausteine/einfach.js",
     "bausteine/auftrag.js",
     "bausteine/code.js",

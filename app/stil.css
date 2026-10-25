@@ -282,3 +282,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .raum-chip { padding: 4px 10px; border-radius: 20px; background: var(--gruen-hell); color: var(--gruen); font-weight: 600; }
 .raum-chip.fehler { background: var(--rot-hell); color: var(--rot); }
 .online-zahl { color: var(--blau); font-weight: 600; }
+
+/* Fenster und Monitore */
+.fenster-zeile { display: grid; grid-template-columns: 18px minmax(70px, auto) minmax(0, 1fr) auto auto auto; gap: 6px; align-items: center; margin-bottom: 6px; }
+.fenster-zeile select { min-width: 0; width: 100%; }
+.fenster-status { color: var(--grau-hell); font-size: 16px; }
+.fenster-status.offen { color: var(--gruen); }
+.fenster-name { font-weight: 600; }

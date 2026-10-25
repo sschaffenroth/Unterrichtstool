@@ -4,7 +4,7 @@
 "use strict";
 
 function ansichtVon(name, s = schritt()) {
-  return Z.ansicht[name] || (s.zeige && s.zeige[name]) || (STUNDE.anzeigen && STUNDE.anzeigen[name]) || "geteilt";
+  return Z.ansicht[name] || (s.zeige && s.zeige[name]) || (STUNDE.anzeigen && STUNDE.anzeigen[name]) || zusatzAnsicht(name) || "geteilt";
 }
 
 function stundenkarte(s) {
@@ -100,6 +100,7 @@ function anzeigeStarten(name) {
     el("button", { title: "Zurück (←)", onclick: () => tun("zurueck") }, "‹"),
     el("button", { title: "Weiter (→)", onclick: () => tun("weiter") }, "›"),
     el("button", { title: "Vollbild (F)", onclick: vollbild }, "⛶"),
+    el("button", { title: "Diese Ansicht als PNG sichern (S)", onclick: () => ansichtSichern(name) }, "📷"),
     el("button", { title: "Regie (R)", onclick: () => regieSchublade(name) }, "☰"));
 
   function zeichnen(erzwingen) {
@@ -131,8 +132,9 @@ function tastenBelegen(name) {
     const k = e.key;
     if (["ArrowRight", "PageDown", " "].includes(k)) { e.preventDefault(); tun("weiter"); }
     else if (["ArrowLeft", "PageUp"].includes(k)) { e.preventDefault(); tun("zurueck"); }
-    else if (k === "b" || k === "B" || k === ".") tun("ansicht", { anzeige: name || ANZEIGEN[0], wert: ansichtVon(name || ANZEIGEN[0]) === "schwarz" ? null : "schwarz" });
+    else if (k === "b" || k === "B" || k === ".") tun("ansicht", { anzeige: name || alleAnzeigen()[0], wert: ansichtVon(name || alleAnzeigen()[0]) === "schwarz" ? null : "schwarz" });
     else if (k === "f" || k === "F") vollbild();
+    else if (k === "s" || k === "S") ansichtSichern(name || alleAnzeigen()[0]);
     else if ((k === "r" || k === "R") && name) regieSchublade(name);
     else if (k === "Escape") { const s = document.querySelector(".schublade"); if (s) s.remove(); }
   });
