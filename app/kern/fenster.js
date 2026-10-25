@@ -311,6 +311,7 @@ function fensterKarte() {
       el("label", { class: "naechster", style: "display:inline-flex;gap:4px;align-items:center" },
         el("input", { type: "checkbox", checked: g.autoStart !== false, onchange: (e) => geraetAendern((gg) => { gg.autoStart = e.target.checked; }) }),
         "beim Stundenstart öffnen")),
+    location.protocol === "file:" ? el("p", { class: "hinweis-kasten" }, el("b", null, "Monitore zuordnen und Vollbild auf der Tafel "), "gehen in Edge nicht, wenn die Datei direkt geöffnet ist. Bitte über „Tafel starten“ im Fachordner öffnen (Adresse beginnt dann mit http://localhost).") : null,
     bildschirmHinweis ? el("p", { class: "naechster", style: "margin:6px 0 0" }, bildschirmHinweis) : null,
     el("p", { class: "naechster", style: "margin:6px 0 0" }, "Die Zuordnung gilt auf diesem Laptop für alle Stunden."));
 }

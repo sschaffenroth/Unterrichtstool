@@ -21,7 +21,8 @@ Prüft die Datei und schreibt `Tafel.html` daneben. Nur prüfen: `--nur-pruefen`
 
 | Was | Wie |
 |---|---|
-| Regie | `Tafel.html` in Chrome oder Edge öffnen |
+| Starten | `start/Tafel starten.bat` und `start/tafel_server.ps1` einmal in den Fachordner kopieren. Doppelklick auf „Tafel starten“: lokaler Server auf `http://localhost:8765`, Edge zeigt die Stundenauswahl. Nötig, damit Edge „Fensterverwaltung“ erlaubt (bei `file://` gibt es keine Berechtigungen) |
+| Regie | Stunde in der Auswahl anklicken (oder `Tafel.html` direkt öffnen, dann ohne Monitor-Zuordnung) |
 | Fenster öffnen | „Fenster öffnen“ (oder automatisch bei „Stunde starten“). Ist dem Board ein anderer Monitor zugeordnet, geht dieses Fenster dort ins Vollbild und die Regie öffnet sich als eigenes Fenster auf dem Laptop |
 | Board beenden, verschieben | in „Fenster und Monitore“: „Beenden“ (Hauptfenster wird wieder Regie), Monitor wechseln, „Vollbild“ |
 | Überwachen | Karte „Überwachen“: Alle, je Anzeige, Handys (was die Schüler sehen, mit Anmelde-QR) |

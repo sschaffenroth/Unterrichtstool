@@ -316,3 +316,4 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .handy-anmeldung .qr { width: 130px; height: 130px; }
 .handy-anmeldung .qr svg { width: 100%; height: 100%; display: block; }
 .handy-anmeldung a { color: var(--blau); font-size: 13px; }
+.hinweis-kasten { margin: 8px 0 0; padding: 8px 10px; background: #fff6d6; border-radius: 8px; font-size: 13px; line-height: 1.4; }
