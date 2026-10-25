@@ -64,14 +64,112 @@ Nachverfolgen von Code, bevor sie verlässlich selbst schreiben. Die Bausteine g
 Die Stundenschemata von GP und ET1 folgen schon diesem Bogen. Vorschlag: PRIMM in der Steckbrief-Vorlage als
 Muster anbieten, damit die Fach-Chats die Bausteine danach anordnen.
 
-## 5. Vorschlag für die Reihenfolge
+## 5. Vorgemerkt (Entscheidung Lehrkraft, 25.10.2026)
 
-1. **Fortschritt melden** und **Hilfe-Ampel**: helfen in jeder Praxisphase, liefern Zahlen für Befund und Notausstieg.
-2. **Peer Instruction** mit **Sicherheit**: kleine Erweiterung von `abstimmung`/`vorhersage`, große Wirkung.
-3. **Exit-Ticket mit Muddiest Point**.
-4. **Codezeilen ordnen** am Handy, zusammen mit `codestreifen` an der Tafel.
-5. **Hotspot** auf Bildern, zuerst für SYS.
-6. **SQL live** für DB.
+| Nr | Idee | für | ID |
+|---|---|---|---|
+| 1 | Fortschritt melden und Hilfe-Ampel | alle Praxisphasen | I7, I8 |
+| 3 | Sicherheit zur Antwort | alle | I9 |
+| 4 | Exit-Ticket mit Muddiest Point | alle | I3 |
+| 5 | Rollenwechsel beim Pair Programming | GP, ET1, SYS | B22 |
+| SYS | Auf dem Bild tippen (Hotspot) | SYS, später ET1 | I10 |
+| GP, ET1 | Codezeilen ordnen am Handy (ohne Ablenkzeilen) | GP, ET1 | I11 |
+| DB | SQL live im Browser (sql.js) | DB | B12 |
+
+Peer Instruction (zweimal abstimmen) ist **nicht** vorgemerkt.
+
+## 6. Großer Katalog: Methoden und Werkzeuge, nach Phase
+
+Vorbilder: Mentimeter, Wooclap, Oncoo, Kahoot und Gimkit, Plickers, Classroomscreen, Nearpod und Pear Deck,
+Liberating Structures, klassische kooperative Methoden und Energizer. Spalte „im Tafelsystem“: was es dafür braucht.
+✓ = geht heute schon, **neu** = neuer Baustein oder neue Funktion.
+
+### Einstieg und Aktivierung
+
+| Methode | Vorbild | im Tafelsystem | Fächer | Aufwand |
+|---|---|---|---|---|
+| Wortwolke | Mentimeter, Wooclap | **neu** `wortwolke`: Handy schickt 1 bis 3 Wörter, Tafel zeigt sie groß nach Häufigkeit, Lehrkraft blendet einzelne aus | alle, Einstieg KIG, Deutsch | M |
+| Verdeckte Schätzung | Mentimeter „Who will win?“ | `vorhersage` mit verdeckten Balken, Enthüllung per Regie (fast ✓) | SYS, DB, ET1 | S |
+| Stiller Bildimpuls | | `bild` mit Frage im Band ✓ | alle | ✓ |
+| Vier Ecken | analog | **neu** `ecken`: Tafel zeigt Aussage und vier Raumecken A bis D groß, Regie zählt Personen je Ecke | KIG, Deutsch | S |
+| Blitzlicht, Daumenprobe, fünf Finger | analog, Mentimeter Skala | **neu** `skala` am Handy, Tafel zeigt Verteilung | alle | S |
+| Rätsel, Mystery | Prototyp ES 06 | `einbetten` ✓, später eigener Baustein | KIG | M |
+
+### Erarbeitung und Kooperation
+
+| Methode | Vorbild | im Tafelsystem | Fächer | Aufwand |
+|---|---|---|---|---|
+| Think-Pair-Share, 1-2-4-All | Liberating Structures | **neu** `phasen` im `auftrag`: allein 1 min, zu zweit 2 min, zu viert 4 min, alle. Tafel wechselt Sozialform, Piktogramm und Countdown von selbst | alle | S |
+| Lerntempoduett, Bushaltestelle | Oncoo | Wer fertig ist, meldet am Handy (baut auf I7). Die Tafel bildet sofort Paare: „Platz 3 trifft Platz 7 an der Haltestelle“ | GP, ET1, DB, SYS | M |
+| Helfersystem | Oncoo | Handy: „kann helfen bei A1“ oder „brauche Hilfe bei A1“. Regie und Tafel bringen beide zusammen (baut auf I8) | Praxisphasen | M |
+| Placemat | Oncoo | **neu**: jedes Gruppenmitglied schreibt am Handy in sein Feld, die Gruppe einigt sich auf die Mitte, Tafel zeigt alle Mitten | KIG, Deutsch, SYS | L |
+| Gruppenpuzzle, Expertenrunde | analog | `partner` mit Stamm- und Expertengruppen, Tafel zeigt, wer wohin geht (Platznummern, keine Namen) | alle | S |
+| Kugellager, Speed-Dating | analog | **neu** `runden`: Tafel zeigt Frage der Runde und Countdown, Signal zum Weiterrücken | Deutsch, KIG, Wiederholung | S |
+| Gallery Walk, Markt der Möglichkeiten | analog | Plakate oder Code am Handy fotografieren und hochladen, Tafel zeigt Galerie, alle vergeben Sterne | alle | M |
+| 25/10 Crowd Sourcing, Lawinendiskussion | Liberating Structures | Ideen am Handy sammeln, danach jede Idee bewerten, Tafel zeigt die besten fünf | KIG, SYS | M |
+| Stille Diskussion | analog | Fragen-Wand mit Antworten (siehe Teil 2) | KIG, Deutsch | M |
+
+### Üben und Wiederholen
+
+| Methode | Vorbild | im Tafelsystem | Fächer | Aufwand |
+|---|---|---|---|---|
+| Quiz in Teams | Kahoot, Gimkit | **neu** `quiz`: Fragenfolge, Teams statt Einzelne, Punkte für richtig statt für schnell. Forschungsnah: Tempo-Punkte belohnen Raten | alle, vor Kurzarbeit und Schulaufgabe | M |
+| Tabu, Begriffe erklären | analog | **neu** `begriffe`: Tafel zeigt einen Fachbegriff und verbotene Wörter, Zufall aus `BEGRIFFE.md` des Stundenordners | DB, SYS, GP, alle | S |
+| Begriffe-Bingo | analog | Handy zeigt eigene Bingo-Karte aus `BEGRIFFE.md`, Lehrkraft erklärt, Schüler kreuzen an | DB, KIG | M |
+| Lückentext | Wooclap | **neu** `luecke` am Handy, Tafel zeigt häufigste Einträge je Lücke | DB (SQL), Deutsch | M |
+| Fehlerzeile antippen | Mentimeter „Pin on Image“ für Code | Handy zeigt Code, jeder tippt die Zeile mit dem Fehler, Tafel färbt die Zeilen nach Anzahl | GP, ET1, DB | M |
+| Zuordnen, Sortieren | Wooclap, Mentimeter Ranking | `zuordnen` (Prototyp ES 06), Sortieren siehe I11 | alle | M |
+| Escape Room | analog | Rätselkette: Teams geben Lösungscodes am Handy ein, Regie sieht, wer wo steht, Tafel zeigt Fortschritt ohne Namen | Wiederholung vor Prüfungen | L |
+
+### Sicherung, Feedback, Reflexion
+
+| Methode | Vorbild | im Tafelsystem | Fächer | Aufwand |
+|---|---|---|---|---|
+| Zielscheibe | Oncoo | **neu**: am Handy je Dimension ein Regler (z. B. Tempo, Verständnis, Spaß), Tafel zeigt Punkte auf der Zielscheibe | alle, Stundenende | M |
+| 2×2-Matrix | Mentimeter | **neu**: jedes Element auf zwei Achsen bewerten (Nutzen und Aufwand, Risiko und Wahrscheinlichkeit) | KIG, SYS | M |
+| 100 Punkte verteilen | Mentimeter, Wooclap | **neu**: Prioritäten setzen, Tafel zeigt Balken | KIG, SYS | S |
+| What? So what? Now what? | Liberating Structures | `folie` mit `aufdecken` ✓, oder drei Handy-Fragen nacheinander | alle | S |
+| Exit-Ticket, Muddiest Point | | vorgemerkt (I3) | alle | M |
+
+### Ohne Handys
+
+| Methode | Vorbild | im Tafelsystem | Aufwand |
+|---|---|---|---|
+| Handzeichen zählen | | Regie ✓ | ✓ |
+| Gedruckte Antwortkarten | Plickers: jede Person hält eine Karte hoch, die Drehung ist die Antwort, das Lehrkräfte-Handy scannt die Klasse | Webcam am Board-PC oder Laptop erkennt die Karten (frei verfügbare Markererkennung im Browser), Ergebnis wie eine Abstimmung. Gut, wenn Handys tabu sind | L |
+| Schul-PC als Schülergerät | | Schüler-Seite läuft im Browser ✓ | ✓ |
+
+### Energizer (1 bis 3 Minuten)
+
+Vorschlag: ein Knopf **„Energizer“** in der Regie. Er schiebt einen kurzen Schritt ein (zählt nicht gegen den
+Plan) und zeigt an der Tafel Anleitung und Countdown. Eine kleine Sammlung, passend für Erwachsene an der
+Technikerschule:
+
+| Energizer | Ablauf |
+|---|---|
+| Steh auf, wenn … | Fachaussage an der Tafel, wer zustimmt, steht auf. Gleich danach die Auflösung |
+| Zählen bis 20 | die Klasse zählt reihum ohne Absprache, sprechen zwei gleichzeitig, beginnt sie von vorn |
+| Wer bin ich? | Fachbegriff aus `BEGRIFFE.md` auf der Tafel, eine Person mit dem Rücken zur Tafel fragt mit Ja/Nein-Fragen |
+| Schnick-Schnack-Schnuck-Turnier | Verlierer feuert den Sieger an, am Ende stehen zwei Fanblöcke |
+| Strecken mit Countdown | 60 Sekunden Bewegung, Tafel zählt runter |
+| Code-Golf | kürzestes Programm für eine Mini-Aufgabe, 3 Minuten |
+
+Aufwand für Knopf und Sammlung: S.
+
+### Verlinken statt nachbauen
+
+Für Dinge, die woanders schon gut gehen, reicht ein QR-Code oder ein Link im `auftrag`:
+ByCS Board, Drive und Kurzlinks (Bayern), TaskCards (Pinnwand), ZUMPad (gemeinsames Schreiben), LearningApps,
+eigene H5P-Aufgaben (auch per `einbetten`).
+
+### Nächste Kandidaten nach den vorgemerkten
+
+1. **Think-Pair-Share als `phasen`** im Auftrag: klein, in jeder Stunde nutzbar.
+2. **Energizer-Knopf** mit Sammlung.
+3. **Tabu und Wer bin ich** aus `BEGRIFFE.md`: das Material gibt es in jedem Stundenordner schon.
+4. **Wortwolke**.
+5. **Lerntempoduett** und **Helfersystem**, sobald Fortschritt und Hilfe-Ampel (I7, I8) stehen.
+6. **Fehlerzeile antippen** für GP und ET1.
 
 ## Quellen
 
@@ -84,4 +182,12 @@ Muster anbieten, damit die Fach-Chats die Bausteine danach anordnen.
 - Oncoo (Kartenabfrage, Placemat, Zielscheibe): [TUM Toolbox Oncoo](https://www.edu.sot.tum.de/fileadmin/w00bed/td/Toolbox/16_Oncoo.pdf)
 - Classroomscreen (Timer, Lautstärke, Symbole, Zufall): [TUM Toolbox Classroomscreen](https://www.edu.sot.tum.de/fileadmin/w00bed/td/Toolbox/18_Classroomscreen.pdf)
 - Anonyme Fragen: [frag.jetzt an der Universität Innsbruck](https://www.uibk.ac.at/en/ecampus/werkzeuge/frag)
+- Mentimeter-Fragetypen: [UTS, Question types in Mentimeter](https://educationexpress.uts.edu.au/collections/engaging-your-audience-with-mentimeter-polls/resources/question-types-in-mentimeter/)
+- Oncoo-Methoden: [Oncoo bei tutory](https://www.tutory.de/entdecken/dokument/oncoo.pdf?t=8327), Lerntempoduett: [Lehrerfortbildung BW, Methodenblatt](https://www.lehrerfortbildung-bw.de/st_if/bs/if/unterrichtsgestaltung/methodenblaetter/lerntempoduett.pdf)
+- Liberating Structures: [Menü der Liberating Structures](https://www.ismanet.org/pdf/onesource/Liberating_Structures_Menu_Mosley.pdf)
+- Präsenzmethoden digital (Fishbowl, Kugellager, Lawinendiskussion, World Café): [FernUni Hagen](https://www.fernuni-hagen.de/zli/blog/aktivierende-praesenzmethoden-ins-digitale-uebersetzt/)
+- Gallery Walk: [LMU, Methodenmuster Gallery Walk](https://www.bne-box.lehrerbildung-at-lmu.mzl.lmu.de/wp-content/uploads/2023/12/Methodenmuster-Classroom-Gallery-Walk.pdf)
+- Plickers: [outilstice, Plickers](https://outilstice.com/en/plickers-sondez-vos-apprenants-sans-ordinateur/)
+- Kahoot und Gimkit: [Gimkit vs Kahoot](https://nibble-app.com/blog/gimkit-vs-kahoot)
+- Bewegungspausen: [Betzold, Bewegungspause](https://www.betzold.de/blog/bewegungspause)
 - ByCS-Dienste: [Kultusministerium Bayern, BayernCloud Schule](https://www.km.bayern.de/schule-digital/software-und-hardware-ausstattung/bycs.html)
