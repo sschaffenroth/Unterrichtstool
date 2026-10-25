@@ -1,0 +1,6 @@
+{
+  // Name muss dem Worker-Namen in Cloudflare entsprechen.
+  "name": "unterrichtstool",
+  "compatibility_date": "2026-10-01",
+  "assets": { "directory": "./public" }
+}
