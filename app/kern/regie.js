@@ -122,7 +122,7 @@ function vorschau(name) {
   return rahmen;
 }
 
-/* Was die Schüler am Handy sehen, nachgebaut aus dem Zustand */
+/* Was die Schüler am Handy sehen, nachgebaut aus dem Zustand (wie public/schueler.html) */
 function handyVorschau(gross) {
   const s = Z.freigabe ? schrittNachId(Z.freigabe) : null;
   const sch = s && s.schueler;
@@ -131,16 +131,31 @@ function handyVorschau(gross) {
   let bildschirm;
   if (!Z.raum) {
     bildschirm = el("div", { class: "handy-warten" }, "Noch kein Raum. „Handys verbinden“ oder „Stunde starten“ legt ihn an.");
-  } else if (sch) {
-    bildschirm = el("div", null,
+  } else {
+    const frage = sch ? el("div", { class: "handy-frage-karte" },
       el("div", { class: "handy-frage" }, sch.frage || s.titel),
       sch.kennung === "team" ? el("div", { class: "handy-klein" }, "Eure Teamnummer: [  ]") : null,
       sch.mehrfach ? el("div", { class: "handy-klein" }, "Mehrere Antworten möglich.") : null,
       (sch.optionen || []).map((o) => el("div", { class: "handy-option" }, el("span", { class: "handy-kreis" + (sch.mehrfach ? " eckig" : "") }), el("span", null, o), el("b", { class: "handy-zahl" }, online[o] || ""))),
       el("div", { class: "handy-knopf" }, "Senden"),
-      el("div", { class: "handy-klein", style: "margin-top:8px;color:#2f8f4e;font-weight:600" }, antworten + (sch.kennung === "team" ? " Teams" : " Handys") + " haben geantwortet"));
-  } else {
-    bildschirm = el("div", { class: "handy-warten" }, el("div", { class: "handy-punkte" }, "● ● ●"), "Angemeldet. Warte auf die nächste Frage …");
+      el("div", { class: "handy-klein", style: "margin-top:6px;color:#2f8f4e;font-weight:600" }, antworten + (sch.kennung === "team" ? " Teams" : " Handys") + " haben geantwortet")) : null;
+    const st = begleitStatus();
+    const a = st.auftrag;
+    const FORM = { EA: "Einzelarbeit", PA: "Partnerarbeit", GA: "Gruppenarbeit", Plenum: "Plenum" };
+    const begleitung = el("div", { class: "handy-begleitung" },
+      st.abschnitt ? el("div", { class: "handy-abschnitt" }, st.abschnitt) : null,
+      el("div", { class: "handy-schritt" }, st.titel),
+      a ? el("div", { class: "handy-auftrag" },
+        el("div", { class: "handy-auftrag-kopf" }, el("b", null, FORM[a.sozialform] || a.sozialform || "Auftrag"),
+          Z.countdown ? el("b", { class: "handy-uhr", "data-countdown": schritt().id }, "") : null),
+        el("div", { class: "handy-satz" }, a.text),
+        a.abgabe ? el("div", { class: "handy-klein" }, el("b", null, "Abgabe: "), a.abgabe) : null)
+        : el("div", { class: "handy-klein" }, st.extern ? "Gerade läuft ein Vortrag." : "Schaut nach vorn an die Tafel."),
+      st.material.map((m) => el("div", { class: "handy-material" + (m.url ? "" : " ohne-link") },
+        el("div", { style: "font-weight:600" }, m.text, m.url ? el("span", { style: "color:var(--orange)" }, " ↗") : null),
+        m.ort ? el("div", { class: "handy-klein" }, "Ort: " + m.ort) : null,
+        m.datei ? el("code", null, m.datei) : null)));
+    bildschirm = el("div", null, frage, begleitung);
   }
   const handy = el("div", { class: "handy" + (gross ? " gross" : "") },
     el("div", { class: "handy-kopf" }, el("span", null, el("b", null, "Mitmachen"), " · ohne Namen"), el("span", null, Z.raum ? "Raum " + Z.raum.code : "")),
