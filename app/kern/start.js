@@ -32,6 +32,8 @@
     if (location.hash) history.replaceState(null, "", location.pathname);
     regieStarten("fenster");
     abholenStarten();
-    bildschirmeLaden(false);
+    bildschirmeLaden(false).then(() => {
+      if (!BILDSCHIRME && Object.keys(geraet().monitor || {}).length) bildschirmeLaden(true);
+    });
   }
 })();

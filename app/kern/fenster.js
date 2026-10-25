@@ -15,6 +15,17 @@ let REGIE_MODUS = "fenster";   // "fenster" (Hauptfenster) oder "popup" (Regie n
 let REGIE_FENSTER = null;      // im Vollbild-Board: das Regie-Fenster
 const ANZEIGE_STATUS = {};     // Name → { haupt, vollbild } (in der Regie)
 
+/* Protokoll der letzten Fenster-Schritte (für die Diagnose), im Browser-Speicher geteilt */
+function prot(text) {
+  const z = new Date().toTimeString().slice(0, 8) + " " + (ROLLE || "?") + ": " + text;
+  try {
+    const l = JSON.parse(localStorage.getItem("tafelsystem:protokoll") || "[]");
+    l.push(z);
+    localStorage.setItem("tafelsystem:protokoll", JSON.stringify(l.slice(-40)));
+  } catch (e) { /* ohne Speicher */ }
+}
+function protokoll() { try { return JSON.parse(localStorage.getItem("tafelsystem:protokoll") || "[]"); } catch (e) { return []; } }
+
 function geraet() { try { return JSON.parse(localStorage.getItem(GERAET_SCHLUESSEL)) || {}; } catch (e) { return {}; } }
 function geraetAendern(fn) { const g = geraet(); fn(g); try { localStorage.setItem(GERAET_SCHLUESSEL, JSON.stringify(g)); } catch (e) { /* ohne Speicher */ } }
 
@@ -50,13 +61,16 @@ async function bildschirmeLaden(fragen) {
       for (const n of ["window-management", "window-placement"]) {
         try { zustand = (await navigator.permissions.query({ name: n })).state; break; } catch (e) { /* anderer Name */ }
       }
+      prot("Erlaubnis Fensterverwaltung beim Laden: " + zustand);
       if (zustand !== "granted") { bildschirmHinweis = zustand === "denied" ? "„Fensterverwaltung“ ist für diese Datei blockiert (Schloss links in der Adresszeile)." : null; return; }
     }
     const d = await window.getScreenDetails();
     BILDSCHIRME = d.screens;
     bildschirmHinweis = null;
+    prot("Monitore: " + d.screens.map((x, i) => bildschirmName(x, i) + " @" + x.left + "," + x.top).join(" | ") + " · dieses Fenster auf: " + (d.currentScreen && d.currentScreen.label));
     d.addEventListener("screenschange", () => { BILDSCHIRME = d.screens; neuZeichnen(); });
   } catch (e) {
+    prot("getScreenDetails Fehler: " + e.name + " " + e.message);
     bildschirmHinweis = "Ohne die Erlaubnis „Fensterverwaltung“ kann ich keine Monitore zuordnen.";
   }
   neuZeichnen();
@@ -88,14 +102,25 @@ function anzeigeImVollbildStarten(name) {
   const platz = rm ? { left: rm.availLeft, top: rm.availTop, width: rm.availWidth, height: rm.availHeight }
     : rp ? { left: rp.x, top: rp.y, width: rp.w, height: rp.h }
     : { left: screenX, top: screenY, width: outerWidth, height: outerHeight };
+  prot("Vollbild-Start " + name + " auf " + (ziel.label || "?") + " @" + ziel.left + "," + ziel.top + " · Klick noch gültig: " + (navigator.userActivation ? navigator.userActivation.isActive : "?"));
+  // Reihenfolge ist wichtig: erst Vollbild auf dem anderen Monitor anfordern, dann das Regie-Fenster öffnen (ein Klick reicht für beides)
   const fs = document.documentElement.requestFullscreen({ screen: ziel });
   const w = window.open(location.href.split("#")[0] + "#regie", "tafel-regie",
     `popup,left=${platz.left},top=${platz.top},width=${platz.width},height=${platz.height}`);
-  fs.catch(() => vollbildHinweis(name));
+  prot("Regie-Fenster: " + (w ? "offen" : "blockiert"));
   if (w) { REGIE_FENSTER = w; partnerVerbinden(w); }
-  FUEHREND = !w;            // die Regie holt die Handy-Antworten
-  anzeigeStarten(name);
-  hauptMelden(name);
+  // Dieses Fenster wird erst Board, wenn das Vollbild auf dem Tafel-Monitor wirklich geklappt hat
+  fs.then(() => {
+    prot("Vollbild angenommen, Fenster jetzt bei " + screenX + "," + screenY + " " + innerWidth + "×" + innerHeight);
+    FUEHREND = !w;            // die Regie im eigenen Fenster holt die Handy-Antworten
+    anzeigeStarten(name);
+    hauptMelden(name);
+  }).catch((e) => {
+    prot("Vollbild abgelehnt: " + e.name + " " + e.message);
+    if (w && !w.closed) w.close();
+    REGIE_FENSTER = null;
+    alert("Das Board konnte nicht im Vollbild auf „" + (ziel.label || "dem Tafel-Monitor") + "“ starten.\n(" + e.message + ")\n\nBitte noch einmal auf „Fenster öffnen“ klicken. Hilft das nicht: „Diagnose“ öffnen und mir den Text schicken.");
+  });
   return true;
 }
 /* Hauptfenster als Board: der Regie melden, dass es da ist und ob es im Vollbild ist */
@@ -159,7 +184,15 @@ async function monitoreSicherstellen() {
 }
 
 async function fensterOeffnen(name) {
-  await monitoreSicherstellen();
+  if (!BILDSCHIRME && (geraet().monitor || {})[name] && "getScreenDetails" in window) {
+    await bildschirmeLaden(true);
+    if (BILDSCHIRME && name === alleAnzeigen()[0] && vollbildMoeglich(name) && !(navigator.userActivation && navigator.userActivation.isActive)) {
+      prot("Monitore erst jetzt geladen, Klick verbraucht: um zweiten Klick bitten");
+      alert("Monitore erkannt. Bitte jetzt noch einmal auf „Fenster öffnen“ klicken.");
+      return true;
+    }
+  }
+  prot("Öffnen " + name + ": Monitore " + (BILDSCHIRME ? BILDSCHIRME.length : "unbekannt") + ", zugeordnet " + JSON.stringify((geraet().monitor || {})[name] || null) + ", gefunden " + !!bildschirmFinden((geraet().monitor || {})[name]) + ", Vollbild-Weg " + vollbildMoeglich(name));
   if (ANZEIGE_STATUS[name] && ANZEIGE_STATUS[name].haupt && fensterOffen(name)) { anHauptfenster(name, "vollbild"); return true; }
   if (fensterOffen(name)) { fensterPlatzieren(name); FENSTER[name].focus(); return true; }
   if (name === alleAnzeigen()[0] && vollbildMoeglich(name)) return anzeigeImVollbildStarten(name);
@@ -194,7 +227,6 @@ function fensterSchliessen(name) {
   setTimeout(neuZeichnen, 200);
 }
 async function alleFensterOeffnen() {
-  await monitoreSicherstellen();
   let blockiert = 0;
   const namen = alleAnzeigen();
   // zuerst die weiteren Fenster (solange dieses Fenster noch die Regie ist), das Board zuletzt im Vollbild
@@ -263,6 +295,7 @@ function fensterKarte() {
       BILDSCHIRME ? el("span", { class: "naechster" }, BILDSCHIRME.length + " Monitore erkannt")
         : el("button", { class: "knopf klein", onclick: () => bildschirmeLaden(true) }, "Monitore erkennen"),
       el("button", { class: "knopf klein", onclick: zusatzFensterAnlegen }, "+ Fenster"),
+      el("button", { class: "knopf klein", onclick: diagnoseZeigen }, "Diagnose"),
       el("label", { class: "naechster", style: "display:inline-flex;gap:4px;align-items:center" },
         el("input", { type: "checkbox", checked: g.autoStart !== false, onchange: (e) => geraetAendern((gg) => { gg.autoStart = e.target.checked; }) }),
         "beim Stundenstart öffnen")),
@@ -276,4 +309,33 @@ function zusatzFensterAnlegen() {
   const ansicht = (prompt("Was soll es zeigen? tafel, auftrag, geteilt oder schwarz", "auftrag") || "auftrag").trim();
   geraetAendern((g) => { (g.zusatz = g.zusatz || []).push({ name, ansicht: ["tafel", "auftrag", "geteilt", "schwarz"].includes(ansicht) ? ansicht : "auftrag" }); });
   neuZeichnen();
+}
+
+/* Diagnose: alles, was zum Fehlersuchen nötig ist, zum Kopieren */
+async function diagnoseZeigen() {
+  let erlaubnis = "?";
+  for (const n of ["window-management", "window-placement"]) { try { erlaubnis = (await navigator.permissions.query({ name: n })).state; break; } catch (e) { /* anderer Name */ } }
+  const text = [
+    "Browser: " + navigator.userAgent,
+    "Adresse: " + location.protocol + " · Rolle: " + ROLLE + " / " + REGIE_MODUS,
+    "Fensterverwaltung: " + ("getScreenDetails" in window ? "vorhanden" : "fehlt") + " · Erlaubnis: " + erlaubnis,
+    "Bildschirm dieses Fensters: " + screen.width + "×" + screen.height + " · Fenster bei " + screenX + "," + screenY,
+    "Monitore: " + (BILDSCHIRME ? BILDSCHIRME.map((x, i) => bildschirmName(x, i) + " @" + x.left + "," + x.top).join(" | ") : "nicht geladen"),
+    "Zuordnung: " + JSON.stringify(geraet().monitor || {}) + " · Regie: " + JSON.stringify(geraet().regieMonitor || null),
+    "Board-Weg: " + (vollbildMoeglich(alleAnzeigen()[0]) ? "Vollbild im Hauptfenster" : "eigenes Fenster"),
+    "Fenster: " + JSON.stringify(Object.fromEntries(alleAnzeigen().map((n) => [n, { offen: fensterOffen(n), ...(ANZEIGE_STATUS[n] || {}) }]))),
+    "",
+    "Protokoll:",
+    ...protokoll(),
+  ].join("\n");
+  const feld = el("textarea", { readonly: true, style: "width:100%;height:340px;font:12px Consolas,monospace" });
+  feld.value = text;
+  const box = el("div", { class: "schublade", onclick: (e) => { if (e.target === box) box.remove(); } },
+    el("div", { class: "regie-huelle", style: "padding:16px;height:auto;max-height:100%" },
+      el("h2", { style: "margin-top:0" }, "Diagnose Fenster und Monitore"),
+      feld,
+      el("div", { class: "zeile", style: "margin-top:8px" },
+        el("button", { class: "knopf haupt", onclick: () => { feld.select(); try { navigator.clipboard.writeText(text); } catch (e) { document.execCommand("copy"); } } }, "Kopieren"),
+        el("button", { class: "knopf", onclick: () => box.remove() }, "Schließen"))));
+  document.body.append(box);
 }

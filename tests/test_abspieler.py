@@ -189,9 +189,36 @@ def test_board_im_hauptfenster(tmp_path: Path) -> None:
     assert not fehler, fehler
 
 
+def test_vollbild_abgelehnt_bleibt_regie(tmp_path: Path) -> None:
+    """Lehnt der Browser das Vollbild ab, bleibt das Hauptfenster die Regie (kein Board im selben Tab)."""
+    datei = tmp_path / "Tafel.html"
+    bauen_beispiel(datei)
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        haupt = browser.new_page(viewport={"width": 1400, "height": 900})
+        meldungen: list[str] = []
+        haupt.on("dialog", lambda d: (meldungen.append(d.message), d.dismiss()))
+        haupt.goto(datei.as_uri())
+        haupt.evaluate("""() => {
+            BILDSCHIRME = [
+              { label: 'Laptop', left: 0, top: 0, width: 1400, height: 900, availLeft: 0, availTop: 0, availWidth: 1400, availHeight: 860, isPrimary: true },
+              { label: 'Tafel', left: 1400, top: 0, width: 1920, height: 1080, availLeft: 1400, availTop: 0, availWidth: 1920, availHeight: 1080, isPrimary: false }];
+            geraetAendern(g => { g.monitor = { Board: fingerabdruck(BILDSCHIRME[1]) }; });
+            document.documentElement.requestFullscreen = () => Promise.reject(new TypeError('Permissions check failed'));
+            neuZeichnen();
+        }""")
+        haupt.get_by_role("button", name="Fenster öffnen").click()
+        haupt.wait_for_timeout(800)
+        assert haupt.evaluate("ROLLE") == "regie"
+        assert meldungen and "nicht im Vollbild" in meldungen[0], meldungen
+        assert any("Vollbild abgelehnt" in z for z in haupt.evaluate("protokoll()"))
+        browser.close()
+
+
 if __name__ == "__main__":
     with tempfile.TemporaryDirectory() as t:
         test_pruefung_findet_fehler(Path(t))
         test_abspieler(Path(t))
         test_board_im_hauptfenster(Path(t))
+        test_vollbild_abgelehnt_bleibt_regie(Path(t))
     print("alle Tests bestanden")
